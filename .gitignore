@@ -1,0 +1,23 @@
+# Node
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+.env
+.venv/
+
+# Data files — snapshots and working xlsx are local only
+data/snapshots/*.xlsx
+data/latest.xlsx
+data/manual/*.xlsx
+
+# Internal instructions folder — never push to GitHub
+instructions/
+
+# macOS
+.DS_Store
+
+# NOTE: public/data.json is intentionally NOT listed here.
+# It must be committed so Azure Static Web Apps can serve it.
