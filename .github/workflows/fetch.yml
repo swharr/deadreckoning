@@ -27,10 +27,22 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Scrape LG site (manual file wins automatically if present)
-        run: python scripts/scraper.py
+        id: scrape
+        run: |
+          python scripts/scraper.py
+          echo "changed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
+      - name: Mark unchanged if scraper exited cleanly with no new file
+        if: steps.scrape.outcome == 'success'
+        run: |
+          # If latest.xlsx doesn't exist, scraper must have found nothing new
+          if [ ! -f data/latest.xlsx ]; then
+            echo "No xlsx available — skipping process.py"
+          fi
+
       - name: Process data
+        if: steps.scrape.outcome == 'success' && steps.scrape.outputs.changed == 'true'
         run: |
           if [ -f data/latest.xlsx ]; then
             python scripts/process.py

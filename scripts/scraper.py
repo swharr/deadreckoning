@@ -9,6 +9,7 @@ Exits with code 1 on any failure.
 """
 
 import argparse
+import hashlib
 import os
 import shutil
 import sys
@@ -29,6 +30,15 @@ DATA_DIR = REPO_ROOT / "data"
 SNAPSHOTS_DIR = DATA_DIR / "snapshots"
 MANUAL_DIR = DATA_DIR / "manual"
 LATEST_PATH = DATA_DIR / "latest.xlsx"
+
+
+def file_sha256(path: Path) -> str:
+    """Return SHA-256 hex digest of a file."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def count_rows(path: Path) -> int:
@@ -131,6 +141,11 @@ def main():
     manual_path = find_manual_file()
     if manual_path and manual_is_newer(manual_path):
         print(f"Manual file found: {manual_path.name} — using instead of scraping.")
+        new_hash = file_sha256(manual_path)
+        if LATEST_PATH.exists() and file_sha256(LATEST_PATH) == new_hash:
+            print(f"Manual file is identical to latest (SHA-256: {new_hash[:12]}…) — skipping.")
+            manual_path.unlink()
+            sys.exit(0)
         dest_snapshot = SNAPSHOTS_DIR / manual_path.name
         shutil.move(str(manual_path), str(dest_snapshot))
         shutil.copy2(str(dest_snapshot), str(LATEST_PATH))
@@ -146,10 +161,25 @@ def main():
     xlsx_url = scrape_xlsx_url(debug=False)
     print(f"Found xlsx URL: {xlsx_url}")
 
-    print(f"Downloading to {snapshot_path} ...")
-    download_file(xlsx_url, snapshot_path)
+    # Download to a temp file first so we can hash-check before committing
+    tmp_path = SNAPSHOTS_DIR / f"{today_str}.tmp.xlsx"
+    print(f"Downloading to {tmp_path} ...")
+    download_file(xlsx_url, tmp_path)
 
-    # Copy to latest.xlsx
+    # Compare hash against latest.xlsx to detect unchanged files
+    new_hash = file_sha256(tmp_path)
+    if LATEST_PATH.exists():
+        old_hash = file_sha256(LATEST_PATH)
+        if new_hash == old_hash:
+            print(f"File unchanged (SHA-256: {new_hash[:12]}…) — skipping update.")
+            tmp_path.unlink()  # discard duplicate
+            sys.exit(0)
+        print(f"New file detected (old: {old_hash[:12]}… → new: {new_hash[:12]}…)")
+    else:
+        print(f"First download (SHA-256: {new_hash[:12]}…)")
+
+    # Rename temp → dated snapshot, copy to latest
+    tmp_path.rename(snapshot_path)
     shutil.copy2(str(snapshot_path), str(LATEST_PATH))
 
     rows = count_rows(LATEST_PATH)
