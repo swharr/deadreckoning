@@ -7,6 +7,7 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -23,6 +24,7 @@ DATA_DIR = REPO_ROOT / "data"
 PUBLIC_DIR = REPO_ROOT / "public"
 LATEST_PATH = DATA_DIR / "latest.xlsx"
 DATA_JSON_PATH = PUBLIC_DIR / "data.json"
+LOOKUP_INDEX_PATH = PUBLIC_DIR / "lookup.json"
 
 THRESHOLDS = {
     1: 5238, 2: 4687, 3: 4737, 4: 5099, 5: 4115, 6: 4745, 7: 5294,
@@ -44,6 +46,51 @@ ELECTION_DATE = "2026-11-03"
 
 # Number of weekly buckets to track
 WEEKLY_BUCKETS = 10
+
+
+# ---------------------------------------------------------------------------
+# Name lookup helpers
+# ---------------------------------------------------------------------------
+
+def normalize_name(raw: str) -> str:
+    """
+    Normalize a name from the xlsx for hashing.
+    Input format: "Lastname, Firstname Middlename" or "Lastname, Firstname"
+    Output: "LASTNAME,FIRSTNAME" (uppercase, no middle name, no spaces)
+    """
+    raw = str(raw).strip().upper()
+    if ',' in raw:
+        parts = raw.split(',', 1)
+        last = parts[0].strip()
+        first_parts = parts[1].strip().split()
+        first = first_parts[0] if first_parts else ''
+    else:
+        # fallback: treat whole thing as lastname
+        last = raw
+        first = ''
+    return f"{last},{first}"
+
+
+def name_hash(normalized: str) -> str:
+    """First 20 hex chars of SHA-256 (10 bytes = 80 bits — collision-safe for <1M entries)."""
+    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()[:20]
+
+
+def build_lookup_index(names: list[str]) -> dict:
+    """
+    Build a lookup index: set of SHA-256 hashes of normalized names.
+    Also stores first-6-char prefixes for partial matching UX.
+    Returns a dict ready to JSON-serialize.
+    """
+    hashes = set()
+    for raw in names:
+        norm = normalize_name(raw)
+        if norm and norm != ',':
+            hashes.add(name_hash(norm))
+    return {
+        "count": len(hashes),
+        "hashes": sorted(hashes),  # sorted for stable diffs in git
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -164,12 +211,13 @@ def classify_tier(prob: float) -> str:
 # xlsx parsing
 # ---------------------------------------------------------------------------
 
-def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]]]:
+def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], list[str]]:
     """
     Read xlsx, return:
       - district_counts: {district_num: verified_count}
       - district_dates:  {district_num: [datetime, ...]}  (Entry Date per row)
-    Uses only columns A (Voter ID), B (Entry Date), D (Senate District).
+      - all_names:       [raw name string, ...]  for lookup index
+    Uses only columns A (Voter ID), B (Entry Date), C (Name), D (Senate District).
     """
     print(f"Reading {path} ...")
     wb = load_workbook(path, read_only=True, data_only=True)
@@ -177,6 +225,7 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]]]:
 
     district_counts: dict[int, int] = defaultdict(int)
     district_dates: dict[int, list[datetime]] = defaultdict(list)
+    all_names: list[str] = []
     skipped = 0
     total = 0
 
@@ -188,7 +237,7 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]]]:
 
         _voter_id = row[0]
         entry_date_raw = row[1]
-        _name = row[2]
+        name_raw = row[2]
         district_raw = row[3]
 
         # Parse district
@@ -216,11 +265,13 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]]]:
         district_counts[district] += 1
         if entry_dt:
             district_dates[district].append(entry_dt)
+        if name_raw:
+            all_names.append(str(name_raw))
         total += 1
 
     wb.close()
     print(f"Parsed {total} rows ({skipped} skipped).")
-    return dict(district_counts), dict(district_dates)
+    return dict(district_counts), dict(district_dates), all_names
 
 
 # ---------------------------------------------------------------------------
@@ -286,7 +337,7 @@ def main():
     prev_p_qualify = prev_overall.get("pQualify", 0.0)
 
     # --- Parse xlsx ---
-    district_counts, district_dates = parse_xlsx(xlsx_path)
+    district_counts, district_dates, all_names = parse_xlsx(xlsx_path)
 
     total_verified = sum(district_counts.values())
 
@@ -411,6 +462,12 @@ def main():
     with open(DATA_JSON_PATH, "w") as f:
         json.dump(output, f, indent=2)
     print(f"Wrote {DATA_JSON_PATH}")
+
+    # --- Write public/lookup.json (hashed name index for signature lookup) ---
+    lookup = build_lookup_index(all_names)
+    with open(LOOKUP_INDEX_PATH, "w") as f:
+        json.dump(lookup, f, separators=(',', ':'))  # compact — no whitespace
+    print(f"Wrote {LOOKUP_INDEX_PATH} ({lookup['count']:,} name hashes)")
 
     # --- Summary ---
     confirmed = sum(1 for d in districts_out if d["verified"] >= d["threshold"])

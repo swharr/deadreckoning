@@ -3,6 +3,8 @@ import SnapshotBoxes from './components/SnapshotBoxes.jsx'
 import StatCards from './components/StatCards.jsx'
 import DistributionChart from './components/DistributionChart.jsx'
 import DistrictTable from './components/DistrictTable.jsx'
+import SignatureLookup from './components/SignatureLookup.jsx'
+import DistrictMap from './components/DistrictMap.jsx'
 
 const STYLES = {
   app: {
@@ -16,30 +18,43 @@ const STYLES = {
   header: {
     background: 'linear-gradient(180deg, #0d1530 0%, #0a0f1e 100%)',
     borderBottom: '1px solid #1e2a4a',
-    padding: '24px 32px 20px',
+    padding: '36px 32px 32px',
   },
   headerInner: {
     maxWidth: 1100,
     margin: '0 auto',
   },
-  siteTag: {
-    fontSize: 12,
+  eyebrow: {
+    fontSize: 11,
     color: '#4a9eff',
-    letterSpacing: '0.12em',
+    letterSpacing: '0.18em',
     textTransform: 'uppercase',
-    marginBottom: 6,
+    marginBottom: 14,
+    fontFamily: 'Georgia, serif',
   },
-  title: {
-    fontSize: 28,
+  titleWhite: {
+    fontSize: 42,
     fontWeight: 'bold',
     color: '#ffffff',
-    margin: '0 0 6px',
-    lineHeight: 1.2,
+    margin: 0,
+    lineHeight: 1.15,
+    fontFamily: 'Georgia, serif',
+  },
+  titleBlue: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    color: '#4a9eff',
+    margin: '0 0 16px',
+    lineHeight: 1.15,
+    fontFamily: 'Georgia, serif',
   },
   subtitle: {
     fontSize: 14,
     color: '#8899bb',
     margin: 0,
+    maxWidth: 540,
+    lineHeight: 1.6,
   },
   main: {
     maxWidth: 1100,
@@ -131,15 +146,27 @@ export default function App() {
     <div style={STYLES.app}>
       <header style={STYLES.header}>
         <div style={STYLES.headerInner}>
-          <div style={STYLES.siteTag}>t8rsk8s.io</div>
-          <h1 style={STYLES.title}>Utah Prop 4 Petition Tracker</h1>
+          <div style={STYLES.eyebrow}>
+            Utah Proposition 4 Repeal Initiative
+            &nbsp;·&nbsp; District Probability Analysis
+            {data && <span>&nbsp;·&nbsp; {data.meta?.lastUpdated}</span>}
+          </div>
+          <h1 style={{ margin: 0 }}>
+            <div style={STYLES.titleWhite}>What are the odds this reaches</div>
+            <div style={STYLES.titleBlue}>the November ballot?</div>
+          </h1>
           <p style={STYLES.subtitle}>
-            Repeal of the Independent Redistricting Commission — real-time signature analysis
-            {data && (
-              <span style={{ marginLeft: 12, color: '#556688' }}>
-                · Updated {data.meta?.lastUpdated}
-              </span>
-            )}
+            Probability distribution across all 29 Senate districts.
+            Requires 26 of 29 to meet the 8% signature threshold.
+          </p>
+          <p style={{ ...STYLES.subtitle, marginTop: 10, maxWidth: 680 }}>
+            To qualify, the petition needs{' '}
+            <span style={{ color: '#e8eaf0', fontWeight: 'bold' }}>140,748 verified signatures statewide</span>
+            {' '}and must clear the 8% threshold in at least{' '}
+            <span style={{ color: '#e8eaf0', fontWeight: 'bold' }}>26 of Utah's 29 Senate districts</span>.
+            Falling short in even one of those 26 disqualifies the entire effort.
+            County clerks verify signatures through{' '}
+            <span style={{ color: '#4a9eff' }}>March 7, 2026</span>.
           </p>
         </div>
       </header>
@@ -166,7 +193,15 @@ export default function App() {
             </div>
 
             <div style={STYLES.section}>
+              <SignatureLookup districts={data.districts} />
+            </div>
+
+            <div style={STYLES.section}>
               <StatCards overall={data.overall} meta={data.meta} districts={data.districts} />
+            </div>
+
+            <div style={STYLES.section}>
+              <DistrictMap districts={data.districts} />
             </div>
 
             <div style={STYLES.section}>
