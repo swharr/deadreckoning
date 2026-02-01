@@ -151,6 +151,40 @@ export default function App() {
             &nbsp;·&nbsp; District Probability Analysis
             {data && <span>&nbsp;·&nbsp; {data.meta?.lastUpdated}</span>}
           </div>
+          {data && (
+            <div style={{
+              fontSize: 11,
+              color: '#334466',
+              marginBottom: 14,
+              lineHeight: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}>
+              <span>
+                Data reflects signatures verified by county clerks and posted by the Lt. Governor's office.
+                Updates each business day — weekend and holiday submissions typically appear the following business day.
+              </span>
+              {data.meta?.modelMode && (
+                <span style={{
+                  display: 'inline-block',
+                  background: data.meta.modelMode === 'survival' ? '#1a0800' : '#001a10',
+                  border: `1px solid ${data.meta.modelMode === 'survival' ? '#b45309' : '#2d6a4f'}`,
+                  borderRadius: 4,
+                  padding: '2px 8px',
+                  fontSize: 10,
+                  fontWeight: 'bold',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: data.meta.modelMode === 'survival' ? '#fbbf24' : '#4caf50',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {data.meta.modelMode === 'survival' ? '⚖️ Survival Model' : '📈 Growth Model'}
+                </span>
+              )}
+            </div>
+          )}
           <h1 style={{ margin: 0 }}>
             <div style={STYLES.titleWhite}>What are the odds this reaches</div>
             <div style={STYLES.titleBlue}>the November ballot?</div>
@@ -201,15 +235,15 @@ export default function App() {
             </div>
 
             <div style={STYLES.section}>
-              <DistrictMap districts={data.districts} />
-            </div>
-
-            <div style={STYLES.section}>
               <DistributionChart overall={data.overall} />
             </div>
 
             <div style={STYLES.section}>
               <DistrictTable districts={data.districts} />
+            </div>
+
+            <div style={{ ...STYLES.section, maxWidth: 700, margin: '0 auto 36px' }}>
+              <DistrictMap districts={data.districts} />
             </div>
           </>
         )}
@@ -230,8 +264,11 @@ export default function App() {
           Election date (if qualifies): <strong style={{ color: '#8899bb' }}>November 3, 2026</strong>.
         </p>
         <p style={{ margin: 0 }}>
-          Probability model uses exact dynamic programming across 29 independent district outcomes.
-          This is an independent tracker — not affiliated with any campaign or government entity.
+          {data?.meta?.modelMode === 'survival'
+            ? 'Probability model is in survival mode: submission deadline has passed, projections reflect expected clerk-review removals through March 7.'
+            : 'Probability model uses exact dynamic programming across 29 independent district outcomes, with history-weighted linear trajectory projection.'
+          }
+          {' '}This is an independent tracker — not affiliated with any campaign or government entity.
         </p>
       </footer>
     </div>
