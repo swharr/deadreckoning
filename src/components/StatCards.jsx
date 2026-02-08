@@ -63,9 +63,16 @@ const subStyle = {
   marginTop: 2,
 }
 
-export default function StatCards({ overall, meta, districts }) {
-  const pQualify = overall?.pQualify ?? 0
-  const expectedDist = overall?.expectedDistricts ?? 0
+export default function StatCards({ overall, meta, districts, modelView }) {
+  const isGrowthView = modelView === 'growth'
+
+  // Switch between survival (primary) and growth shadow numbers
+  const pQualify = isGrowthView
+    ? (overall?.pQualifyGrowth ?? overall?.pQualify ?? 0)
+    : (overall?.pQualify ?? 0)
+  const expectedDist = isGrowthView
+    ? (overall?.expectedDistrictsGrowth ?? overall?.expectedDistricts ?? 0)
+    : (overall?.expectedDistricts ?? 0)
   const totalVerified = meta?.totalVerified ?? 0
 
   const confirmedCount = (districts || []).filter(d => {
@@ -92,7 +99,10 @@ export default function StatCards({ overall, meta, districts }) {
       <div style={{ ...cardStyle, borderTop: `3px solid ${probColor}` }}>
         <div style={labelStyle}>Ballot Probability</div>
         <div style={bigNum(probColor)}>{animatedPct}%</div>
-        <div style={subStyle}>P(≥26 districts qualify)</div>
+        <div style={subStyle}>
+          P(≥26 districts qualify)
+          {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
+        </div>
       </div>
 
       {/* Card 2: Expected Districts */}
@@ -101,7 +111,10 @@ export default function StatCards({ overall, meta, districts }) {
         <div style={bigNum('#4a9eff')}>
           {(animatedExpected10 / 10).toFixed(1)}
         </div>
-        <div style={subStyle}>of 29 required districts</div>
+        <div style={subStyle}>
+          of 29 required districts
+          {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
+        </div>
       </div>
 
       {/* Card 3: Verified Signatures */}

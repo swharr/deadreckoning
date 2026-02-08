@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { THRESHOLDS } from '../lib/probability.js'
 
 const card = {
@@ -163,6 +163,41 @@ function LossesCard({ losses, districts }) {
 }
 
 // ---------------------------------------------------------------------------
+// Inline tooltip for scenario range labels
+// ---------------------------------------------------------------------------
+function ScenarioTooltip({ label, value, valueColor, tip }) {
+  const [visible, setVisible] = useState(false)
+  return (
+    <div style={{ marginBottom: 4 }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', cursor: 'help' }}
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+      >
+        <span style={{ borderBottom: '1px dotted #445577' }}>{label}</span>
+        <span style={{ color: valueColor }}>{value}</span>
+      </div>
+      {visible && (
+        <div style={{
+          marginTop: 4,
+          width: '100%',
+          background: '#0d1530',
+          border: '1px solid #2a3a60',
+          borderRadius: 7,
+          padding: '9px 12px',
+          fontSize: 11,
+          color: '#8899bb',
+          lineHeight: 1.6,
+          boxShadow: '0 4px 18px rgba(0,0,0,0.6)',
+        }}>
+          {tip}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Change from Base Prediction card
 // ---------------------------------------------------------------------------
 function PredictionCard({ snapshot, meta, districts }) {
@@ -205,14 +240,18 @@ function PredictionCard({ snapshot, meta, districts }) {
           </p>
           <div style={callout}>
             <span style={calloutTitle}>Scenario ranges:</span>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span>Proportional surge</span>
-              <span style={{ color: '#4caf50' }}>~35–45%</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>Heavy fraud rejection</span>
-              <span style={{ color: '#ff7043' }}>~12–18%</span>
-            </div>
+            <ScenarioTooltip
+              label="Proportional surge"
+              value="~35–45%"
+              valueColor="#4caf50"
+              tip="If late-submitted signatures validate at a rate proportional to the campaign's peak velocity — evenly distributed across all 29 districts — qualification probability lands in the 35–45% range. Assumes minimal clerk rejections."
+            />
+            <ScenarioTooltip
+              label="Heavy fraud rejection"
+              value="~12–18%"
+              valueColor="#ff7043"
+              tip="If county clerks reject entire signature packets for suspected fraud (as reported in Salt Lake County), and removals disproportionately hit districts near the threshold, overall qualification probability falls to 12–18%. Consistent with the 1,300+ removal requests on file."
+            />
           </div>
         </>
       ) : (
@@ -303,9 +342,111 @@ function AnomalyBanner({ anomalies }) {
 }
 
 // ---------------------------------------------------------------------------
+// "How we calculate this" methodology panel
+// ---------------------------------------------------------------------------
+function MethodologyPanel({ meta }) {
+  const [open, setOpen] = useState(false)
+  const isSurvival = meta?.modelMode === 'survival'
+
+  return (
+    <div style={{ marginTop: 14 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#445577',
+          fontSize: 12,
+          cursor: 'pointer',
+          padding: 0,
+          fontFamily: 'Georgia, serif',
+          textDecoration: 'underline',
+          letterSpacing: '0.02em',
+        }}
+      >
+        {open ? '▾' : '▸'} How we calculate this
+      </button>
+
+      {open && (
+        <div style={{
+          marginTop: 10,
+          background: '#080d1c',
+          border: '1px solid #1e2a4a',
+          borderRadius: 8,
+          padding: '16px 20px',
+          fontSize: 12,
+          color: '#667799',
+          lineHeight: 1.8,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '16px 28px',
+        }}>
+          <div>
+            <div style={{ color: '#4a9eff', fontWeight: 'bold', marginBottom: 6, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {isSurvival ? '⚖️ Survival Model (active)' : '📈 Growth Model (active)'}
+            </div>
+            {isSurvival ? (
+              <p style={{ margin: 0 }}>
+                The submission deadline has passed (Feb 15). No new signatures can be added.
+                Each district's probability reflects how likely the current verified count will
+                survive clerk review through March 7 — accounting for expected removal rates
+                based on observed post-deadline drops across all 29 districts.
+              </p>
+            ) : (
+              <p style={{ margin: 0 }}>
+                Signatures are still being submitted and validated. Each district's probability
+                is driven by its current verified count relative to threshold, its recent
+                collection velocity, and a weighted linear projection to the submission deadline (Feb 15).
+                Recent snapshots are weighted 4× more than older ones.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <div style={{ color: '#4a9eff', fontWeight: 'bold', marginBottom: 6, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Overall Ballot Probability
+            </div>
+            <p style={{ margin: 0 }}>
+              We run an exact dynamic programming calculation across all 29 independent district
+              outcomes — each with its own probability — to compute the precise probability that
+              at least 26 of 29 reach their threshold. This accounts for every combination of
+              which districts qualify, not just an average.
+            </p>
+          </div>
+
+          <div>
+            <div style={{ color: '#4a9eff', fontWeight: 'bold', marginBottom: 6, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Data Source
+            </div>
+            <p style={{ margin: 0 }}>
+              All counts come directly from the Lt. Governor's office published xlsx file
+              at vote.utah.gov — updated each business day. We do not use campaign-reported
+              numbers or media estimates. Signatures are only counted after county clerk
+              verification and LG posting.
+            </p>
+          </div>
+
+          <div>
+            <div style={{ color: '#4a9eff', fontWeight: 'bold', marginBottom: 6, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Rejection & Removal Rates
+            </div>
+            <p style={{ margin: 0 }}>
+              Removal rates are computed from historical snapshots — the ratio of signatures
+              that disappeared between updates vs. the district peak. Post-deadline rates
+              isolate clerk-review removals only. Anomalous single-interval drops (≥2%)
+              are flagged separately as potential packet-level fraud rejections.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
-export default function SnapshotBoxes({ snapshot, meta, districts }) {
+export default function SnapshotBoxes({ snapshot, meta, districts, modelView }) {
   const anomalies = snapshot?.anomalies || []
 
   return (
@@ -330,6 +471,7 @@ export default function SnapshotBoxes({ snapshot, meta, districts }) {
           districts={districts}
         />
       </div>
+      <MethodologyPanel meta={meta} />
     </div>
   )
 }

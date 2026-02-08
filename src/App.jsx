@@ -117,6 +117,7 @@ export default function App() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [modelView, setModelView] = useState('primary') // 'primary' | 'growth'
 
   useEffect(() => {
     // Inject global styles once
@@ -183,8 +184,78 @@ export default function App() {
                   {data.meta.modelMode === 'survival' ? '⚖️ Survival Model' : '📈 Growth Model'}
                 </span>
               )}
+              {data.meta?.modelMode === 'survival' && (
+                <button
+                  onClick={() => setModelView(v => v === 'primary' ? 'growth' : 'primary')}
+                  title={modelView === 'growth'
+                    ? 'Switch back to Survival Model — reflects clerk-review removals through March 7'
+                    : 'Switch to Growth Model — hypothetical view of where trajectory was heading before the Feb 15 deadline'}
+                  style={{
+                    background: modelView === 'growth' ? '#0d2a1a' : '#0d1530',
+                    border: `1px solid ${modelView === 'growth' ? '#2d6a4f' : '#2a3a60'}`,
+                    borderRadius: 4,
+                    padding: '3px 10px',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: modelView === 'growth' ? '#4caf50' : '#4a9eff',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    fontFamily: 'Georgia, serif',
+                  }}
+                >
+                  {modelView === 'growth' ? '📈 Growth View' : 'Switch to Growth View'}
+                </button>
+              )}
             </div>
           )}
+          {data && data.meta?.modelMode === 'survival' && modelView === 'growth' && (
+            <div style={{
+              background: '#0a1f0f',
+              border: '1px solid #2d6a4f',
+              borderRadius: 6,
+              padding: '10px 16px',
+              marginBottom: 16,
+              fontSize: 12,
+              color: '#4caf50',
+              lineHeight: 1.7,
+              maxWidth: 680,
+            }}>
+              <strong>📈 Growth View — hypothetical</strong>
+              {' '}The submission deadline passed on Feb 15. This view shows what the
+              growth model <em>would have</em> predicted based on pre-deadline trajectory and
+              velocity — useful for context, but not the operative model.
+              {' '}<span style={{ color: '#2d6a4f' }}>Switch back to Survival View for the current, operative probability.</span>
+            </div>
+          )}
+          {data && data.meta?.modelMode === 'survival' && modelView === 'primary' && (
+            <div style={{
+              background: '#0d0a00',
+              border: '1px solid #3a2500',
+              borderRadius: 6,
+              padding: '10px 16px',
+              marginBottom: 16,
+              fontSize: 12,
+              color: '#92680a',
+              lineHeight: 1.7,
+              maxWidth: 680,
+            }}>
+              <strong style={{ color: '#fbbf24' }}>⚖️ Survival Model active</strong>
+              {' '}The Feb 15 submission deadline has passed. No new signatures can be added.
+              Probabilities now reflect whether current verified counts will survive county
+              clerk review through <strong style={{ color: '#fbbf24' }}>March 7</strong>.
+              {' '}
+              <button
+                onClick={() => setModelView('growth')}
+                style={{ background: 'none', border: 'none', color: '#4a9eff', cursor: 'pointer', padding: 0, fontSize: 12, fontFamily: 'Georgia, serif', textDecoration: 'underline' }}
+              >
+                See growth view
+              </button>
+              {' '}for pre-deadline trajectory context.
+            </div>
+          )}
+
           <h1 style={{ margin: 0 }}>
             <div style={STYLES.titleWhite}>What are the odds this reaches</div>
             <div style={STYLES.titleBlue}>the November ballot?</div>
@@ -223,7 +294,7 @@ export default function App() {
         {data && (
           <>
             <div style={STYLES.section}>
-              <SnapshotBoxes snapshot={data.snapshot} meta={data.meta} districts={data.districts} />
+              <SnapshotBoxes snapshot={data.snapshot} meta={data.meta} districts={data.districts} modelView={modelView} />
             </div>
 
             <div style={STYLES.section}>
@@ -231,7 +302,7 @@ export default function App() {
             </div>
 
             <div style={STYLES.section}>
-              <StatCards overall={data.overall} meta={data.meta} districts={data.districts} />
+              <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} />
             </div>
 
             <div style={STYLES.section}>

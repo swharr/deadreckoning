@@ -81,15 +81,66 @@ def name_hash(normalized: str) -> str:
     return hashlib.sha256(normalized.encode('utf-8')).hexdigest()[:20]
 
 
-def build_lookup_index(names: list[str]) -> dict:
-    hashes = set()
-    for raw in names:
-        norm = normalize_name(raw)
-        if norm and norm != ',':
-            hashes.add(name_hash(norm))
+def bloom_hash_positions(key: str, m: int, k: int) -> list[int]:
+    """
+    Generate k bit positions for a key in a bloom filter of m bits.
+    Uses double hashing: h_i(x) = (h1(x) + i*h2(x)) mod m
+    where h1 = SHA-256 first 8 bytes, h2 = SHA-256 bytes 8-16.
+    This matches the JS implementation exactly.
+    """
+    digest = hashlib.sha256(key.encode('utf-8')).digest()
+    h1 = int.from_bytes(digest[0:8], 'big')
+    h2 = int.from_bytes(digest[8:16], 'big') | 1  # ensure odd for full coverage
+    return [(h1 + i * h2) % m for i in range(k)]
+
+
+def build_bloom_filter(keys: list[str], m: int = 65536, k: int = 7) -> dict:
+    """
+    Build a bloom filter for a set of keys.
+    m: number of bits (65536 = 8KB per district)
+    k: number of hash functions (7 is optimal for ~3000-8000 entries at 8KB)
+    Returns a base64-encoded bit array.
+    """
+    import base64
+    bits = bytearray(m // 8)
+    for key in keys:
+        for pos in bloom_hash_positions(key, m, k):
+            bits[pos >> 3] |= (1 << (pos & 7))
     return {
-        "count": len(hashes),
-        "hashes": sorted(hashes),
+        "m": m,
+        "k": k,
+        "bits": base64.b64encode(bytes(bits)).decode('ascii'),
+    }
+
+
+def build_lookup_index(district_names: dict[int, list[str]]) -> dict:
+    """
+    Build per-district bloom filters. Key = "LASTNAME,FIRSTNAME,D{n}".
+    This scopes lookups to district so cross-district false positives are eliminated.
+    """
+    import base64
+    M = 65536  # 8KB per district (64K bits)
+    K = 7      # 7 hash functions → ~0.3% FP rate at 8K entries
+
+    districts_bloom = {}
+    total_names = 0
+    for d_num, names in district_names.items():
+        keys = []
+        for raw in names:
+            norm = normalize_name(raw)
+            if norm and norm != ',':
+                # District-scoped key: eliminates cross-district false positives
+                keys.append(f"{norm},D{d_num}")
+        bf = build_bloom_filter(keys, M, K)
+        districts_bloom[str(d_num)] = bf
+        total_names += len(keys)
+
+    return {
+        "version": 2,
+        "m": M,
+        "k": K,
+        "count": total_names,
+        "districts": districts_bloom,
     }
 
 
@@ -123,10 +174,23 @@ def compute_district_prob(
 ) -> float:
     """
     Compute P(district meets threshold) using history-informed inputs where available.
-    Returns a value in [0.01, 1.00].
+    Returns a value in [0.00, 1.00].
     """
     if verified >= threshold:
         return 1.0
+
+    # Structural feasibility gate: if the projection can't get close to threshold,
+    # the district has very low odds regardless of trend noise.
+    proj_pct = projected_adj / threshold if threshold > 0 else 0.0
+    if proj_pct < 0.65:
+        # Very far off — scale from 0 to 0.02
+        return round(proj_pct * 0.031, 4)  # max 0.02 at 0.65
+    if proj_pct < 0.80:
+        # Hard climb zone: 0.02 → 0.08
+        return round(0.02 + (proj_pct - 0.65) * 0.40, 4)
+    if proj_pct < 0.90:
+        # Getting realistic: 0.08 → 0.18
+        return round(0.08 + (proj_pct - 0.80) * 1.00, 4)
 
     # Base: raw fraction already verified
     base_score = verified / threshold
@@ -134,15 +198,11 @@ def compute_district_prob(
     # Trend multiplier
     trend_mult = {"ACCEL": 1.08, "STABLE": 1.0, "DECEL": 0.90}.get(trend, 1.0)
 
-    # Projection factor: how far the rejection-adjusted projection overshoots threshold
-    proj_pct = projected_adj / threshold if threshold > 0 else 0.0
-    proj_factor = min(proj_pct, 2.5)
-
     # Rejection penalty: high removal rate districts get a downward nudge
     rejection_penalty = rejection_rate * 0.5  # 10% removal rate → -0.05 penalty
 
     # Weighted combination
-    raw = 0.45 * base_score + 0.35 * proj_factor + 0.20 * (base_score * trend_mult)
+    raw = 0.45 * base_score + 0.35 * proj_pct + 0.20 * (base_score * trend_mult)
     raw -= rejection_penalty
 
     # Sigmoid-style squeeze
@@ -159,7 +219,7 @@ def compute_district_prob(
     elif final_week_sigs > 200:
         raw += 0.01
 
-    return max(0.01, min(0.99, raw))
+    return max(0.00, min(0.99, raw))
 
 
 def compute_district_prob_survival(
@@ -195,33 +255,27 @@ def compute_district_prob_survival(
         removal_risk = min(post_deadline_removal_rate * 3, 0.15)
         return max(0.90, 1.0 - removal_risk)
 
-    # Below threshold — project forward: how much will be removed before deadline?
-    # Use post-deadline rate if available, else fall back to background rate
-    effective_rate = post_deadline_removal_rate if post_deadline_removal_rate > 0 else observed_removal_rate
+    # Below threshold — in survival mode, the verified count is the LG-posted count.
+    # Due to LG posting lag, effective_verified passed in may already be blended
+    # with the growth projection to reflect pending-but-unposted signatures.
+    # The gap below threshold tells us how likely late postings can close it.
+    current_pct = verified / threshold if threshold > 0 else 0.0
+    gap_pct = 1.0 - current_pct  # how far below threshold (using raw verified, not blended)
 
-    # Remaining removal pressure: rate * days_fraction_left
-    # We don't know the pace of removals, so use a conservative uniform model:
-    # assume remaining_removal_rate is proportional to days left / total clerk window (20 days)
-    clerk_window_days = 20
-    days_fraction = min(days_remaining / clerk_window_days, 1.0)
-    expected_additional_removals = peak_verified * effective_rate * days_fraction
-
-    projected_final = verified - expected_additional_removals
-    survival_pct = projected_final / threshold if threshold > 0 else 0.0
-
-    # Sigmoid squeeze
-    if survival_pct >= 1.0:
-        return min(0.95, 0.80 + (survival_pct - 1.0) * 0.10)
-    elif survival_pct >= 0.95:
-        return 0.65
-    elif survival_pct >= 0.90:
-        return 0.45
-    elif survival_pct >= 0.85:
-        return 0.28
-    elif survival_pct >= 0.80:
-        return 0.15
+    if gap_pct <= 0.02:
+        # Within 2% — small chance LG posting lag resolves in their favor
+        return 0.20
+    elif gap_pct <= 0.05:
+        return 0.12
+    elif gap_pct <= 0.10:
+        return 0.06
+    elif gap_pct <= 0.15:
+        return 0.03
+    elif gap_pct <= 0.25:
+        return 0.01
     else:
-        return max(0.01, survival_pct * 0.10)
+        # Structurally impossible — too far below threshold
+        return 0.00
 
 
 def compute_distribution(probs: list[float]) -> list[float]:
@@ -325,12 +379,12 @@ def classify_tier(prob: float) -> str:
 # xlsx parsing
 # ---------------------------------------------------------------------------
 
-def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], list[str]]:
+def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], dict[int, list[str]]]:
     """
     Read xlsx, return:
       - district_counts: {district_num: verified_count}
       - district_dates:  {district_num: [datetime, ...]}
-      - all_names:       [raw name string, ...]
+      - district_names:  {district_num: [raw name string, ...]}
     """
     print(f"Reading {path} ...")
     wb = load_workbook(path, read_only=True, data_only=True)
@@ -338,7 +392,7 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], l
 
     district_counts: dict[int, int] = defaultdict(int)
     district_dates: dict[int, list[datetime]] = defaultdict(list)
-    all_names: list[str] = []
+    district_names: dict[int, list[str]] = defaultdict(list)
     skipped = 0
     total = 0
 
@@ -375,12 +429,12 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], l
         if entry_dt:
             district_dates[district].append(entry_dt)
         if name_raw:
-            all_names.append(str(name_raw))
+            district_names[district].append(str(name_raw))
         total += 1
 
     wb.close()
     print(f"Parsed {total:,} rows ({skipped} skipped).")
-    return dict(district_counts), dict(district_dates), all_names
+    return dict(district_counts), dict(district_dates), dict(district_names)
 
 
 # ---------------------------------------------------------------------------
@@ -468,7 +522,7 @@ def main():
     prev_p_qualify = prev_overall.get("pQualify", 0.0)
 
     # --- Parse xlsx ---
-    district_counts, district_dates, all_names = parse_xlsx(xlsx_path)
+    district_counts, district_dates, district_names = parse_xlsx(xlsx_path)
     total_verified = sum(district_counts.values())
 
     # --- Determine model mode ---
@@ -503,6 +557,7 @@ def main():
     # --- Build per-district records ---
     districts_out = []
     all_probs = []
+    all_growth_probs = []
 
     for d_num in sorted(THRESHOLDS.keys()):
         threshold = THRESHOLDS[d_num]
@@ -533,23 +588,67 @@ def main():
 
         # --- Probability (mode-dependent) ---
         if post_deadline:
-            # SURVIVAL MODE: no new sigs, only removals possible
-            prob = compute_district_prob_survival(
-                verified=verified,
+            # SURVIVAL MODE: submission deadline passed.
+            #
+            # Key nuance: the LG office posts validations with a 1-2 business day lag.
+            # Signatures submitted right before the Feb 15 deadline may not yet appear
+            # in the LG count. The growth projection from history gives an upper bound
+            # on what those late-posted signatures might add.
+            #
+            # We blend: early post-deadline → lean on growth projection as "pending"
+            #           later → trust only the actual LG count
+            #
+            # LG_LAG_DAYS: how many business days we expect lag to persist
+            LG_LAG_DAYS = 7  # full business week for LG to post all pre-deadline submissions
+            days_elapsed = max(0, (date.today() - SUBMISSION_DEADLINE).days)
+            # lag_weight decays from 1.0 on day 0 to 0.0 after LG_LAG_DAYS
+            lag_weight = max(0.0, 1.0 - days_elapsed / LG_LAG_DAYS)
+
+            # Growth projection upper bound from history
+            growth_proj_raw = None
+            if history and str(d_num) in projections:
+                growth_proj_raw = projections[str(d_num)]["raw"]
+
+            # Effective verified count: blend current count with growth projection
+            # to account for signatures submitted pre-deadline but not yet posted
+            if growth_proj_raw and lag_weight > 0:
+                effective_verified = verified + lag_weight * max(0, growth_proj_raw - verified)
+            else:
+                effective_verified = float(verified)
+
+            # Pure survival prob from the current (possibly lag-blended) count
+            survival_prob = compute_district_prob_survival(
+                verified=effective_verified,
                 threshold=threshold,
                 peak_verified=peak_verified,
                 post_deadline_removal_rate=post_deadline_rate,
                 observed_removal_rate=rejection_rate,
                 days_remaining=days_to_deadline,
             )
+
+            # Growth prob: what would the growth model say about this district?
+            # Used to blend during the lag window — if trajectory was strong, honor it.
+            growth_prob_for_blend = compute_district_prob(
+                verified=verified,
+                threshold=threshold,
+                trend=trend,
+                final_week_sigs=final_week_sigs,
+                projected_adj=growth_proj_raw if growth_proj_raw else float(verified),
+                rejection_rate=rejection_rate,
+            )
+
+            # Blend: early post-deadline leans on growth signal;
+            # as lag expires, survival signal takes over entirely.
+            prob = lag_weight * growth_prob_for_blend + (1.0 - lag_weight) * survival_prob
+
+            # Also compute a pure growth prob shadow (ignores survival mode, for toggle)
             # Projection: expected final count after remaining removals
-            # Use post-deadline rate if available, else background rate
             effective_rate = post_deadline_rate if post_deadline_rate > 0 else rejection_rate
             clerk_window_days = 20
             days_fraction = min(days_to_deadline / clerk_window_days, 1.0)
-            projected_total = verified - (peak_verified * effective_rate * days_fraction)
+            projected_total = effective_verified - (peak_verified * effective_rate * days_fraction)
             projected_total = max(projected_total, float(verified))  # can't add, only remove
-            projected_raw = projected_total
+            projected_raw = growth_proj_raw if growth_proj_raw else projected_total
             projected_pct = projected_total / threshold if threshold > 0 else 0.0
         else:
             # GROWTH MODE: sigs still coming in
@@ -578,6 +677,18 @@ def main():
         tier = classify_tier(prob)
         all_probs.append(prob)
 
+        # --- Growth-model shadow probability (always computed for toggle) ---
+        if post_deadline:
+            # What would the growth model say if we hadn't hit the deadline?
+            growth_prob = compute_district_prob(
+                verified, threshold, trend, final_week_sigs,
+                projected_raw, rejection_rate
+            )
+        else:
+            growth_prob = prob  # Already in growth mode
+
+        all_growth_probs.append(growth_prob)
+
         districts_out.append({
             "d": d_num,
             "threshold": threshold,
@@ -592,6 +703,7 @@ def main():
             "rejectionRate": round(rejection_rate, 4),
             "postDeadlineRate": round(post_deadline_rate, 4),
             "prob": round(prob, 4),
+            "growthProb": round(growth_prob, 4),
             "prevProb": round(prev_prob, 4),
             "probDelta": round(prob_delta, 4),
             "tier": tier,
@@ -599,11 +711,16 @@ def main():
             "weeklySignatures": weekly,
         })
 
-    # --- DP distribution ---
+    # --- DP distribution (primary model) ---
     dp = compute_distribution(all_probs)
     p_qual = p_qualify(dp)
     exp_districts = expected_districts(all_probs)
     p_exact = [round(dp[k], 6) for k in range(TOTAL_DISTRICTS + 1)]
+
+    # --- DP distribution (growth-model shadow, for toggle) ---
+    dp_growth = compute_distribution(all_growth_probs)
+    p_qual_growth = p_qualify(dp_growth)
+    exp_districts_growth = expected_districts(all_growth_probs)
 
     # --- Snapshot deltas ---
     gains = [d for d in districts_out if d["delta"] > 0]
@@ -659,6 +776,8 @@ def main():
             "pExact": p_exact,
             "projectedStatewideRaw": round(statewide_proj_raw, 0),
             "projectedStatewideAdjusted": round(statewide_proj_adj, 0),
+            "pQualifyGrowth": round(p_qual_growth, 4),
+            "expectedDistrictsGrowth": round(exp_districts_growth, 2),
         },
         "districts": districts_out,
         "snapshot": {
@@ -678,7 +797,7 @@ def main():
         json.dump(output, f, indent=2)
     print(f"Wrote {DATA_JSON_PATH}")
 
-    lookup = build_lookup_index(all_names)
+    lookup = build_lookup_index(district_names)
     with open(LOOKUP_INDEX_PATH, "w") as f:
         json.dump(lookup, f, separators=(',', ':'))
     print(f"Wrote {LOOKUP_INDEX_PATH} ({lookup['count']:,} name hashes)")

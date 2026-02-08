@@ -1,17 +1,52 @@
 import React, { useState, useRef } from 'react'
 
-// Must match the Python name_hash() function exactly:
-// normalize to "LASTNAME,FIRSTNAME", SHA-256, first 20 hex chars
-async function hashName(lastName, firstName) {
-  const normalized = `${lastName.trim().toUpperCase()},${firstName.trim().toUpperCase()}`
-  const buf = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(normalized)
-  )
-  const hex = Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-  return hex.slice(0, 20)
+// ---------------------------------------------------------------------------
+// Bloom filter helpers — must match Python build_bloom_filter() exactly
+// ---------------------------------------------------------------------------
+
+// Double hashing: h_i(x) = (h1 + i*h2) mod m
+// h1 = first 8 bytes of SHA-256 as BigInt, h2 = bytes 8-16 (forced odd)
+async function bloomPositions(key, m, k) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key))
+  const bytes = new Uint8Array(buf)
+  // Read as 64-bit big-endian BigInts
+  let h1 = 0n
+  let h2 = 0n
+  for (let i = 0; i < 8; i++) h1 = (h1 << 8n) | BigInt(bytes[i])
+  for (let i = 8; i < 16; i++) h2 = (h2 << 8n) | BigInt(bytes[i])
+  h2 = h2 | 1n  // force odd
+  const M = BigInt(m)
+  const positions = []
+  for (let i = 0n; i < BigInt(k); i++) {
+    positions.push(Number((h1 + i * h2) % M))
+  }
+  return positions
+}
+
+function bloomCheck(bits64, m, k, positions) {
+  // bits64 is a Uint8Array decoded from base64
+  for (const pos of positions) {
+    const byteIdx = pos >> 3
+    const bitIdx = pos & 7
+    if (!(bits64[byteIdx] & (1 << bitIdx))) return false
+  }
+  return true
+}
+
+function base64ToUint8Array(b64) {
+  const bin = atob(b64)
+  const arr = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i)
+  return arr
+}
+
+// District-scoped bloom lookup: key = "LASTNAME,FIRSTNAME,D{n}"
+async function bloomLookup(districtBloom, lastName, firstName, districtNum) {
+  const { m, k, bits } = districtBloom
+  const key = `${lastName.trim().toUpperCase()},${firstName.trim().toUpperCase()},D${districtNum}`
+  const positions = await bloomPositions(key, m, k)
+  const bitsArr = base64ToUint8Array(bits)
+  return bloomCheck(bitsArr, m, k, positions)
 }
 
 const RESULT = {
@@ -42,19 +77,36 @@ export default function SignatureLookup({ districts = [] }) {
     const resp = await fetch('/lookup.json')
     if (!resp.ok) throw new Error(`Failed to load lookup index (HTTP ${resp.status})`)
     const data = await resp.json()
-    hashSetRef.current = new Set(data.hashes)
+    hashSetRef.current = data  // store full bloom filter object
     return hashSetRef.current
   }
 
   async function handleLookup(e) {
     e.preventDefault()
-    if (!firstName.trim() || !lastName.trim()) return
+    if (!firstName.trim() || !lastName.trim() || !senateDistrict) return
 
     setResult(RESULT.LOADING)
     try {
       const index = await loadIndex()
-      const h = await hashName(lastName, firstName)
-      setResult(index.has(h) ? RESULT.FOUND : RESULT.NOT_FOUND)
+
+      if (index.version === 2) {
+        // Bloom filter lookup — district-scoped
+        const districtBloom = index.districts[String(senateDistrict)]
+        if (!districtBloom) {
+          setResult(RESULT.NOT_FOUND)
+          return
+        }
+        const found = await bloomLookup(districtBloom, lastName, firstName, senateDistrict)
+        setResult(found ? RESULT.FOUND : RESULT.NOT_FOUND)
+      } else {
+        // Legacy v1 hash set fallback
+        const hashSet = new Set(index.hashes)
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(
+          `${lastName.trim().toUpperCase()},${firstName.trim().toUpperCase()}`
+        ))
+        const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+        setResult(hashSet.has(hex.slice(0, 20)) ? RESULT.FOUND : RESULT.NOT_FOUND)
+      }
     } catch (err) {
       console.error(err)
       setResult(RESULT.ERROR)
@@ -138,10 +190,12 @@ export default function SignatureLookup({ districts = [] }) {
             How it works
           </div>
           <div style={{ fontSize: 12, color: '#556688', lineHeight: 1.7 }}>
-            Your name is normalized (uppercase, last name first) and run through
-            SHA-256, producing a short fingerprint. That fingerprint is compared
-            against a pre-built index of hashed signer names downloaded once to
-            your browser — no name or search query ever leaves your device.
+            Your name and Senate district are combined and run through SHA-256,
+            producing a fingerprint scoped to your district. That fingerprint is
+            checked against a compact bloom filter downloaded once to your browser
+            — no name, district, or query ever leaves your device. District is
+            required to prevent false matches from people with the same name in
+            other districts.
           </div>
         </div>
         <div>
@@ -184,7 +238,7 @@ export default function SignatureLookup({ districts = [] }) {
         {districtOptions.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 180px' }}>
             <label style={{ fontSize: 11, color: '#445577', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-              Senate District <span style={{ color: '#334466', fontWeight: 'normal' }}>(optional)</span>
+              Senate District <span style={{ color: '#f44336', fontWeight: 'normal' }}>*</span>
             </label>
             <select
               style={selectStyle}
@@ -202,7 +256,7 @@ export default function SignatureLookup({ districts = [] }) {
         )}
         <button
           type="submit"
-          disabled={result === RESULT.LOADING || !firstName.trim() || !lastName.trim()}
+          disabled={result === RESULT.LOADING || !firstName.trim() || !lastName.trim() || !senateDistrict}
           style={{
             background: '#4a9eff',
             border: 'none',
@@ -213,7 +267,7 @@ export default function SignatureLookup({ districts = [] }) {
             fontSize: 14,
             fontWeight: 'bold',
             padding: '10px 22px',
-            opacity: (!firstName.trim() || !lastName.trim()) ? 0.4 : 1,
+            opacity: (!firstName.trim() || !lastName.trim() || !senateDistrict) ? 0.4 : 1,
             transition: 'opacity 0.15s',
             alignSelf: 'flex-end',
           }}
