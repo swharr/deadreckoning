@@ -359,7 +359,7 @@ def compute_trend_from_history(district_snapshots: list[dict]) -> str:
 # Tier classification
 # ---------------------------------------------------------------------------
 
-def classify_tier(prob: float) -> str:
+def classify_tier(prob: float, pct_verified: float = 0.0) -> str:
     if prob >= 1.0:
         return "CONFIRMED"
     if prob >= 0.90:
@@ -369,6 +369,13 @@ def classify_tier(prob: float) -> str:
     if prob >= 0.50:
         return "LIKELY"
     if prob >= 0.25:
+        return "POSSIBLE"
+    # Floors based on how far along a district already is:
+    # ≥80% of threshold verified → at least LIKELY
+    if pct_verified >= 0.80:
+        return "LIKELY"
+    # ≥60% of threshold verified → at least POSSIBLE
+    if pct_verified >= 0.60:
         return "POSSIBLE"
     if prob >= 0.10:
         return "UNLIKELY"
@@ -674,7 +681,7 @@ def main():
 
         prev_prob = prev_rec.get("prob", prob)
         prob_delta = round(prob - prev_prob, 4)
-        tier = classify_tier(prob)
+        tier = classify_tier(prob, pct_verified)
         all_probs.append(prob)
 
         # --- Growth-model shadow probability (always computed for toggle) ---

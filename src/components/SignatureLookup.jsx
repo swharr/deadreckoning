@@ -52,6 +52,7 @@ async function bloomLookup(districtBloom, lastName, firstName, districtNum) {
 const RESULT = {
   FOUND: 'found',
   NOT_FOUND: 'not_found',
+  ALL_MATCHES: 'all_matches',
   IDLE: 'idle',
   LOADING: 'loading',
   ERROR: 'error',
@@ -62,13 +63,14 @@ export default function SignatureLookup({ districts = [] }) {
   const [lastName, setLastName] = useState('')
   const [senateDistrict, setSenateDistrict] = useState('')
   const [result, setResult] = useState(RESULT.IDLE)
+  const [matchedDistricts, setMatchedDistricts] = useState([])
   const hashSetRef = useRef(null)  // loaded once, cached in memory
 
   // Sorted district list for the dropdown
   const districtOptions = [...districts].sort((a, b) => a.d - b.d)
 
   // District data for the selected district (if any)
-  const selectedDistrict = senateDistrict
+  const selectedDistrict = senateDistrict && senateDistrict !== 'ALL'
     ? districtOptions.find(d => d.d === parseInt(senateDistrict, 10))
     : null
 
@@ -86,10 +88,27 @@ export default function SignatureLookup({ districts = [] }) {
     if (!firstName.trim() || !lastName.trim() || !senateDistrict) return
 
     setResult(RESULT.LOADING)
+    setMatchedDistricts([])
     try {
       const index = await loadIndex()
 
-      if (index.version === 2) {
+      if (senateDistrict === 'ALL') {
+        // Search all 29 district bloom filters in parallel
+        if (index.version !== 2) {
+          // Legacy v1 doesn't support district scoping — fallback
+          setResult(RESULT.ERROR)
+          return
+        }
+        const districtNums = Object.keys(index.districts).map(Number).sort((a, b) => a - b)
+        const checks = await Promise.all(
+          districtNums.map(n =>
+            bloomLookup(index.districts[String(n)], lastName, firstName, n)
+          )
+        )
+        const matched = districtNums.filter((_, i) => checks[i])
+        setMatchedDistricts(matched)
+        setResult(RESULT.ALL_MATCHES)
+      } else if (index.version === 2) {
         // Bloom filter lookup — district-scoped
         const districtBloom = index.districts[String(senateDistrict)]
         if (!districtBloom) {
@@ -118,6 +137,7 @@ export default function SignatureLookup({ districts = [] }) {
     setLastName('')
     setSenateDistrict('')
     setResult(RESULT.IDLE)
+    setMatchedDistricts([])
   }
 
   const inputStyle = {
@@ -246,6 +266,7 @@ export default function SignatureLookup({ districts = [] }) {
               onChange={e => setSenateDistrict(e.target.value)}
             >
               <option value="">— Select district —</option>
+              <option value="ALL">🔍 Search all districts</option>
               {districtOptions.map(d => (
                 <option key={d.d} value={d.d}>
                   District {d.d} — {Math.round(d.pctVerified * 100)}% verified
@@ -272,7 +293,9 @@ export default function SignatureLookup({ districts = [] }) {
             alignSelf: 'flex-end',
           }}
         >
-          {result === RESULT.LOADING ? 'Checking…' : 'Check'}
+          {result === RESULT.LOADING
+            ? (senateDistrict === 'ALL' ? 'Searching all…' : 'Checking…')
+            : (senateDistrict === 'ALL' ? 'Search all' : 'Check')}
         </button>
         {result !== RESULT.IDLE && result !== RESULT.LOADING && (
           <button
@@ -393,6 +416,93 @@ export default function SignatureLookup({ districts = [] }) {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {result === RESULT.ALL_MATCHES && (
+        <div style={{
+          marginTop: 18,
+          background: matchedDistricts.length > 0 ? '#001a10' : '#1a0a00',
+          border: `1px solid ${matchedDistricts.length > 0 ? '#2d6a4f' : '#7f3d00'}`,
+          borderRadius: 8,
+          padding: '14px 18px',
+        }}>
+          {matchedDistricts.length > 0 ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+                <span style={{ fontSize: 22 }}>✅</span>
+                <div>
+                  <div style={{ color: '#4caf50', fontWeight: 'bold', fontSize: 15, marginBottom: 4 }}>
+                    {firstName} {lastName} found in {matchedDistricts.length} district{matchedDistricts.length !== 1 ? 's' : ''}
+                  </div>
+                  <div style={{ color: '#556688', fontSize: 13, lineHeight: 1.6 }}>
+                    Your name appears as a verified signer in the following Senate districts.
+                    County clerks may still remove signatures through March 7, 2026.
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {matchedDistricts.map(n => {
+                  const d = districtOptions.find(x => x.d === n)
+                  const color = tierColor[d?.tier] || '#8899bb'
+                  return (
+                    <div key={n} style={{
+                      background: '#0a1520',
+                      border: '1px solid #1e2a4a',
+                      borderRadius: 6,
+                      padding: '8px 14px',
+                      minWidth: 130,
+                    }}>
+                      <div style={{ fontSize: 13, fontWeight: 'bold', color: '#e8eaf0', marginBottom: 2 }}>
+                        District {n}
+                      </div>
+                      {d && (
+                        <>
+                          <div style={{ fontSize: 11, color, fontWeight: 'bold', marginBottom: 1 }}>{d.tier}</div>
+                          <div style={{ fontSize: 11, color: '#445577' }}>{Math.round(d.prob * 100)}% odds · {Math.round(d.pctVerified * 100)}% verified</div>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{
+                borderTop: '1px solid #1d4a35',
+                paddingTop: 12,
+                marginTop: 14,
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 'bold', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#4a9eff', marginBottom: 8 }}>
+                  How to remove your signature
+                </div>
+                <div style={{ fontSize: 12, color: '#556688', lineHeight: 1.8 }}>
+                  <div style={{ marginBottom: 6 }}>
+                    <span style={{ color: '#8899bb', fontWeight: 'bold' }}>Contact your county clerk directly.</span>{' '}
+                    Visit{' '}
+                    <a href="https://elections.utah.gov/county-clerk-contact" target="_blank" rel="noopener noreferrer" style={{ color: '#4a9eff' }}>
+                      elections.utah.gov/county-clerk-contact
+                    </a>{' '}
+                    to find your county clerk. The deadline is <strong style={{ color: '#8899bb' }}>March 7, 2026</strong>.
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <span style={{ fontSize: 22 }}>❌</span>
+              <div>
+                <div style={{ color: '#ff7043', fontWeight: 'bold', fontSize: 15, marginBottom: 4 }}>
+                  {firstName} {lastName} was not found in any district
+                </div>
+                <div style={{ color: '#556688', fontSize: 13, lineHeight: 1.6 }}>
+                  Your name does not appear in the current verified signature list for any of the 29 Senate districts.
+                  If you believe you signed the petition, try a different spelling or contact{' '}
+                  <a href="https://vote.utah.gov" target="_blank" rel="noopener noreferrer" style={{ color: '#4a9eff' }}>
+                    vote.utah.gov
+                  </a>.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

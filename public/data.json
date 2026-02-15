@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastUpdated": "2026-02-18",
-    "lastUpdatedISO": "2026-02-18T05:44:31Z",
+    "lastUpdatedISO": "2026-02-18T06:04:35Z",
     "sourceFile": "latest.xlsx",
     "totalVerified": 94180,
     "daysToDeadline": 19,
@@ -107,7 +107,7 @@
       "growthProb": 0.1106,
       "prevProb": 0.0819,
       "probDelta": -0.0,
-      "tier": "NO CHANCE",
+      "tier": "POSSIBLE",
       "trend": "ACCEL",
       "weeklySignatures": [
         0,
@@ -427,7 +427,7 @@
       "growthProb": 0.1351,
       "prevProb": 0.0994,
       "probDelta": -0.0,
-      "tier": "NO CHANCE",
+      "tier": "POSSIBLE",
       "trend": "ACCEL",
       "weeklySignatures": [
         0,
@@ -715,7 +715,7 @@
       "growthProb": 0.106,
       "prevProb": 0.0786,
       "probDelta": -0.0,
-      "tier": "NO CHANCE",
+      "tier": "POSSIBLE",
       "trend": "ACCEL",
       "weeklySignatures": [
         0,
@@ -779,7 +779,7 @@
       "growthProb": 0.1401,
       "prevProb": 0.1029,
       "probDelta": 0.0,
-      "tier": "UNLIKELY",
+      "tier": "POSSIBLE",
       "trend": "ACCEL",
       "weeklySignatures": [
         0,
@@ -811,7 +811,7 @@
       "growthProb": 0.1419,
       "prevProb": 0.1042,
       "probDelta": 0.0,
-      "tier": "UNLIKELY",
+      "tier": "POSSIBLE",
       "trend": "ACCEL",
       "weeklySignatures": [
         0,

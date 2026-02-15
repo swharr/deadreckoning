@@ -250,7 +250,7 @@ function PredictionCard({ snapshot, meta, districts }) {
               label="Heavy fraud rejection"
               value="~12–18%"
               valueColor="#ff7043"
-              tip="If county clerks reject entire signature packets for suspected fraud (as reported in Salt Lake County), and removals disproportionately hit districts near the threshold, overall qualification probability falls to 12–18%. Consistent with the 1,300+ removal requests on file."
+              tip={<>If county clerks reject signature packets for suspected fraud — as reported in Salt Lake and Utah Counties — and removals disproportionately hit near-threshold districts, qualification probability falls to 12–18%. Utah County is actively investigating ~300 potentially fraudulent signatures from nine gatherers. <a href="https://www.ksl.com/article/51444163/utah-county-investigating-potential-signature-fraud-as-prop-4-repeal-deadline-looms" target="_blank" rel="noopener noreferrer" style={{color:'#4a9eff'}}>KSL News ↗</a></>}
             />
           </div>
         </>
@@ -435,6 +435,34 @@ function MethodologyPanel({ meta }) {
               that disappeared between updates vs. the district peak. Post-deadline rates
               isolate clerk-review removals only. Anomalous single-interval drops (≥2%)
               are flagged separately as potential packet-level fraud rejections.
+            </p>
+          </div>
+
+          <div style={{
+            gridColumn: '1 / -1',
+            borderTop: '1px solid #1e2a4a',
+            paddingTop: 14,
+            marginTop: 2,
+          }}>
+            <div style={{ color: '#fbbf24', fontWeight: 'bold', marginBottom: 6, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              ⚠️ Why probabilities change between updates
+            </div>
+            <p style={{ margin: 0, color: '#556688', lineHeight: 1.8 }}>
+              Probabilities are recalculated automatically each time the Lt. Governor posts new data —
+              typically once per business day. They will shift as verified signature counts change,
+              as clerk removals are recorded, and as the lag between submission and LG posting resolves.
+              <strong style={{ color: '#8899bb' }}> This is the model updating to new evidence, not editorial adjustment.</strong>
+              {' '}No numbers are manually changed. The source code for the probability model is
+              available on{' '}
+              <a
+                href="https://github.com/swharr/deadreckoning"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#4a9eff' }}
+              >
+                GitHub
+              </a>
+              {' '}for independent review.
             </p>
           </div>
         </div>
