@@ -63,6 +63,35 @@ export default function SignatureLookup({ districts = [] }) {
   const [senateDistrict, setSenateDistrict] = useState('')
   const [result, setResult] = useState(RESULT.IDLE)
   const hashSetRef = useRef(null)  // loaded once, cached in memory
+  const [zipCode, setZipCode] = useState('')
+  const [zipResult, setZipResult] = useState(null)
+  const zipMapRef = useRef(null)
+
+  async function loadZipMap() {
+    if (zipMapRef.current) return zipMapRef.current
+    const resp = await fetch('/districts-by-zip.json')
+    if (!resp.ok) return null
+    const data = await resp.json()
+    zipMapRef.current = data
+    return data
+  }
+
+  async function handleZipLookup(zip) {
+    setZipCode(zip)
+    setZipResult(null)
+    if (zip.length !== 5) return
+    const map = await loadZipMap()
+    if (!map) return
+    const matched = map[zip]
+    if (matched && matched.length > 0) {
+      setZipResult(matched)
+      if (matched.length === 1) {
+        setSenateDistrict(String(matched[0]))
+      }
+    } else {
+      setZipResult([])
+    }
+  }
 
   // Sorted district list for the dropdown
   const districtOptions = [...districts].sort((a, b) => a.d - b.d)
@@ -117,6 +146,8 @@ export default function SignatureLookup({ districts = [] }) {
     setFirstName('')
     setLastName('')
     setSenateDistrict('')
+    setZipCode('')
+    setZipResult(null)
     setResult(RESULT.IDLE)
   }
 
@@ -246,23 +277,89 @@ export default function SignatureLookup({ districts = [] }) {
             autoComplete="family-name"
           />
         </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 120px', maxWidth: 140 }}>
+          <label style={{ fontSize: 11, color: '#445577', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+            ZIP Code
+          </label>
+          <input
+            style={{ ...inputStyle, flex: 'none' }}
+            value={zipCode}
+            onChange={e => handleZipLookup(e.target.value.replace(/\D/g, '').slice(0, 5))}
+            placeholder="e.g. 84101"
+            inputMode="numeric"
+            maxLength={5}
+          />
+        </div>
         {districtOptions.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 180px' }}>
             <label style={{ fontSize: 11, color: '#445577', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
               Senate District <span style={{ color: '#f44336', fontWeight: 'normal' }}>*</span>
             </label>
-            <select
-              style={selectStyle}
-              value={senateDistrict}
-              onChange={e => setSenateDistrict(e.target.value)}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
+              <select
+                style={{ ...selectStyle, flex: 1 }}
+                value={senateDistrict}
+                onChange={e => setSenateDistrict(e.target.value)}
+              >
+                <option value="">— Select district —</option>
+                {districtOptions.map(d => (
+                  <option key={d.d} value={d.d}>
+                    District {d.d} — {Math.round(d.pctVerified * 100)}% verified
+                  </option>
+                ))}
+              </select>
+              <a
+                href="https://le.utah.gov/GIS/findDistrict.jsp"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Look up your Senate district on the official Utah Legislature site"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#0d1530',
+                  border: '1px solid #1e2a4a',
+                  borderRadius: 6,
+                  padding: '0 10px',
+                  color: '#4a9eff',
+                  fontSize: 11,
+                  fontFamily: 'Georgia, serif',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.15s',
+                  flexShrink: 0,
+                }}
+              >
+                Find my district
+              </a>
+            </div>
+          </div>
+        )}
+        {zipResult && zipResult.length > 1 && (
+          <div style={{ width: '100%', fontSize: 12, color: '#8899bb', marginTop: -4 }}>
+            This ZIP spans multiple districts ({zipResult.map(d => `D${d}`).join(', ')}). Please select yours above or{' '}
+            <a
+              href="https://le.utah.gov/GIS/findDistrict.jsp"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#4a9eff' }}
             >
-              <option value="">— Select district —</option>
-              {districtOptions.map(d => (
-                <option key={d.d} value={d.d}>
-                  District {d.d} — {Math.round(d.pctVerified * 100)}% verified
-                </option>
-              ))}
-            </select>
+              look up your exact district
+            </a>.
+          </div>
+        )}
+        {zipResult && zipResult.length === 0 && zipCode.length === 5 && (
+          <div style={{ width: '100%', fontSize: 12, color: '#ff7043', marginTop: -4 }}>
+            ZIP not found in our lookup table.{' '}
+            <a
+              href="https://le.utah.gov/GIS/findDistrict.jsp"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#4a9eff' }}
+            >
+              Use the official lookup instead
+            </a>.
           </div>
         )}
         <button
