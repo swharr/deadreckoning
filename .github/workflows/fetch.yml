@@ -53,7 +53,7 @@ jobs:
 
       - name: Commit updated data.json and trigger deploy
         run: |
-          git config user.name  "t8rsk8s-bot"
+          git config user.name  "t8rsk8s Data Robot"
           git config user.email "bot@t8rsk8s.io"
           git add public/data.json public/lookup.json
           git diff --staged --quiet || git commit -m "data: update $(date -u +%Y-%m-%d)"

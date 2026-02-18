@@ -12,6 +12,7 @@ __pycache__/
 data/snapshots/*.xlsx
 data/latest.xlsx
 data/manual/*.xlsx
+data/history.json
 
 # Internal instructions folder — never push to GitHub
 instructions/

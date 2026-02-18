@@ -532,6 +532,14 @@ def main():
     district_counts, district_dates, district_names = parse_xlsx(xlsx_path)
     total_verified = sum(district_counts.values())
 
+    # --- Detect reprocessing (same data as prev_data) ---
+    # When CI re-runs on the same xlsx, verified counts match prev_data exactly.
+    # In that case, carry forward the previous prevVerified/delta instead of zeroing.
+    prev_total = prev_data.get("meta", {}).get("totalVerified", None)
+    is_reprocessing = (prev_total is not None and prev_total == total_verified)
+    if is_reprocessing:
+        print(f"Reprocessing detected (total={total_verified} unchanged) — carrying forward previous deltas")
+
     # --- Determine model mode ---
     today = date.today()
     post_deadline = today > SUBMISSION_DEADLINE
@@ -572,8 +580,13 @@ def main():
         dates = district_dates.get(d_num, [])
 
         prev_rec = prev_district_map.get(d_num, {})
-        prev_verified = prev_rec.get("verified", verified)
-        delta = verified - prev_verified
+        if is_reprocessing:
+            # Same data — carry forward previous deltas instead of zeroing
+            prev_verified = prev_rec.get("prevVerified", verified)
+            delta = prev_rec.get("delta", 0)
+        else:
+            prev_verified = prev_rec.get("verified", verified)
+            delta = verified - prev_verified
 
         pct_verified = verified / threshold if threshold > 0 else 0.0
 
@@ -679,8 +692,12 @@ def main():
                 projected_total, rejection_rate
             )
 
-        prev_prob = prev_rec.get("prob", prob)
-        prob_delta = round(prob - prev_prob, 4)
+        if is_reprocessing:
+            prev_prob = prev_rec.get("prevProb", prob)
+            prob_delta = prev_rec.get("probDelta", 0.0)
+        else:
+            prev_prob = prev_rec.get("prob", prob)
+            prob_delta = round(prob - prev_prob, 4)
         tier = classify_tier(prob, pct_verified)
         all_probs.append(prob)
 
@@ -747,7 +764,10 @@ def main():
                  if d["verified"] >= d["threshold"] and d["prevVerified"] < d["threshold"]]
     newly_failed = [d["d"] for d in districts_out
                     if d["verified"] < d["threshold"] and d["prevVerified"] >= d["threshold"]]
-    overall_prob_delta = round(p_qual - prev_p_qualify, 4)
+    if is_reprocessing:
+        overall_prob_delta = prev_data.get("snapshot", {}).get("overallProbDelta", 0.0)
+    else:
+        overall_prob_delta = round(p_qual - prev_p_qualify, 4)
 
     # --- Anomalies from history ---
     anomalies = history.get("anomalies", []) if history else []
