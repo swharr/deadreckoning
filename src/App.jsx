@@ -213,7 +213,7 @@ export default function App() {
             <span style={{ color: '#334466' }}>&bull;</span>
             <span>
               Clerk verification ends{' '}
-              <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>March 7, 2026</span>
+              <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>March 9, 2026</span>
             </span>
           </div>
         </div>
