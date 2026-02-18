@@ -728,6 +728,7 @@ def main():
     dp_growth = compute_distribution(all_growth_probs)
     p_qual_growth = p_qualify(dp_growth)
     exp_districts_growth = expected_districts(all_growth_probs)
+    p_exact_growth = [round(dp_growth[k], 6) for k in range(TOTAL_DISTRICTS + 1)]
 
     # --- Snapshot deltas ---
     gains = [d for d in districts_out if d["delta"] > 0]
@@ -785,6 +786,7 @@ def main():
             "projectedStatewideAdjusted": round(statewide_proj_adj, 0),
             "pQualifyGrowth": round(p_qual_growth, 4),
             "expectedDistrictsGrowth": round(exp_districts_growth, 2),
+            "pExactGrowth": p_exact_growth,
         },
         "districts": districts_out,
         "snapshot": {

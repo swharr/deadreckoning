@@ -306,7 +306,7 @@ export default function App() {
             </div>
 
             <div style={STYLES.section}>
-              <DistributionChart overall={data.overall} />
+              <DistributionChart overall={data.overall} modelView={modelView} />
             </div>
 
             <div style={STYLES.section}>
@@ -340,6 +340,15 @@ export default function App() {
             : 'Probability model uses exact dynamic programming across 29 independent district outcomes, with history-weighted linear trajectory projection.'
           }
           {' '}This is an independent tracker — not affiliated with any campaign or government entity.
+          {' '}Source code released under the{' '}
+          <a
+            href="https://github.com/swharr/deadreckoning/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={STYLES.footerLink}
+          >
+            MIT License
+          </a>.
         </p>
       </footer>
     </div>

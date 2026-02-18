@@ -455,7 +455,7 @@ function MethodologyPanel({ meta }) {
               {' '}No numbers are manually changed. The source code for the probability model is
               available on{' '}
               <a
-                href="https://github.com/swharr/deadreckoning"
+                href="https://github.com/swharr/deadreckoning/blob/main/MODEL-DESCRIPTION.md"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#4a9eff' }}

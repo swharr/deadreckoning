@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastUpdated": "2026-02-18",
-    "lastUpdatedISO": "2026-02-18T06:04:35Z",
+    "lastUpdatedISO": "2026-02-18T06:08:38Z",
     "sourceFile": "latest.xlsx",
     "totalVerified": 94180,
     "daysToDeadline": 19,
@@ -55,7 +55,39 @@
     "projectedStatewideRaw": 124043.0,
     "projectedStatewideAdjusted": 115457.0,
     "pQualifyGrowth": 0.0,
-    "expectedDistrictsGrowth": 9.36
+    "expectedDistrictsGrowth": 9.36,
+    "pExactGrowth": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1e-06,
+      0.000184,
+      0.006031,
+      0.054774,
+      0.192698,
+      0.312475,
+      0.255474,
+      0.125532,
+      0.041242,
+      0.009661,
+      0.001681,
+      0.000223,
+      2.3e-05,
+      2e-06,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
   },
   "districts": [
     {

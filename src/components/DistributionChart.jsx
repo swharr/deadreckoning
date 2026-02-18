@@ -2,10 +2,13 @@ import React, { useState } from 'react'
 
 const QUALIFY_MIN = 26  // need at least 26 districts
 
-export default function DistributionChart({ overall }) {
+export default function DistributionChart({ overall, modelView }) {
   const [hoveredK, setHoveredK] = useState(null)
 
-  const pExact = overall?.pExact ?? []
+  const isGrowthView = modelView === 'growth'
+  const pExact = isGrowthView
+    ? (overall?.pExactGrowth ?? overall?.pExact ?? [])
+    : (overall?.pExact ?? [])
 
   // Show k = 18..29
   const kMin = 18
@@ -36,8 +39,16 @@ export default function DistributionChart({ overall }) {
         textTransform: 'uppercase',
         color: '#8899bb',
         marginBottom: 20,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
       }}>
         Qualification Probability Distribution
+        {isGrowthView && (
+          <span style={{ fontSize: 11, color: '#4caf50', fontWeight: 'bold', letterSpacing: '0.06em' }}>
+            · growth view
+          </span>
+        )}
       </div>
 
       {/* Bar chart */}
