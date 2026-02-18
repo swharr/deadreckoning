@@ -5,6 +5,7 @@ import DistributionChart from './components/DistributionChart.jsx'
 import DistrictTable from './components/DistrictTable.jsx'
 import SignatureLookup from './components/SignatureLookup.jsx'
 import DistrictMap from './components/DistrictMap.jsx'
+import { THRESHOLDS } from './lib/probability.js'
 
 const STYLES = {
   app: {
@@ -111,6 +112,16 @@ const globalStyle = `
   body { margin: 0; padding: 0; background: #0a0f1e; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes countUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .pill-tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #0d1530; border: 1px solid #2a3a60; border-radius: 7px; padding: 9px 12px; font-size: 11px; color: #8899bb; line-height: 1.6; width: 260px; box-shadow: 0 4px 18px rgba(0,0,0,0.6); z-index: 20; pointer-events: none; }
+  .pill-btn:hover .pill-tooltip { display: block; }
+  @media (max-width: 768px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: block !important; }
+  }
+  @media (min-width: 769px) {
+    .desktop-only { display: block !important; }
+    .mobile-only { display: none !important; }
+  }
 `
 
 export default function App() {
@@ -118,6 +129,14 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [modelView, setModelView] = useState('primary') // 'primary' | 'growth'
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     // Inject global styles once
@@ -143,8 +162,63 @@ export default function App() {
       })
   }, [])
 
+  const confirmedDistricts = data ? (data.districts || []).filter(d => {
+    const threshold = THRESHOLDS[d.d] || d.threshold
+    return d.verified >= threshold
+  }).length : 0
+
+  const progressPct = data ? Math.min((data.meta?.totalVerified || 0) / (data.meta?.qualificationThreshold || 140748) * 100, 100) : 0
+
   return (
     <div style={STYLES.app}>
+      {data && (
+        <div style={{
+          background: '#0d1530',
+          borderBottom: '1px solid #1e2a4a',
+          padding: '8px 16px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${progressPct}%`,
+            background: 'linear-gradient(90deg, rgba(74,158,255,0.08) 0%, rgba(74,158,255,0.15) 100%)',
+            transition: 'width 1s ease',
+          }} />
+          <div style={{
+            position: 'relative',
+            maxWidth: 1100,
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            flexWrap: 'wrap',
+            fontSize: 12,
+            color: '#8899bb',
+            fontFamily: 'Georgia, serif',
+            letterSpacing: '0.02em',
+          }}>
+            <span style={{ color: '#e8eaf0', fontWeight: 'bold' }}>
+              {(data.meta?.qualificationThreshold || 140748).toLocaleString()} needed
+            </span>
+            <span style={{ color: '#334466' }}>&bull;</span>
+            <span>
+              <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>{confirmedDistricts}</span> of{' '}
+              <span style={{ fontWeight: 'bold' }}>{data.meta?.totalDistricts || 29}</span> districts
+            </span>
+            <span style={{ color: '#334466' }}>&bull;</span>
+            <span>
+              Clerk verification ends{' '}
+              <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>March 7, 2026</span>
+            </span>
+          </div>
+        </div>
+      )}
+
       <header style={STYLES.header}>
         <div style={STYLES.headerInner}>
           <div style={STYLES.eyebrow}>
@@ -167,46 +241,63 @@ export default function App() {
                 Data reflects signatures verified by county clerks and posted by the Lt. Governor's office.
                 Updates each business day — weekend and holiday submissions typically appear the following business day.
               </span>
-              {data.meta?.modelMode && (
-                <span style={{
-                  display: 'inline-block',
-                  background: data.meta.modelMode === 'survival' ? '#1a0800' : '#001a10',
-                  border: `1px solid ${data.meta.modelMode === 'survival' ? '#b45309' : '#2d6a4f'}`,
-                  borderRadius: 4,
-                  padding: '2px 8px',
-                  fontSize: 10,
-                  fontWeight: 'bold',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: data.meta.modelMode === 'survival' ? '#fbbf24' : '#4caf50',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {data.meta.modelMode === 'survival' ? '⚖️ Survival Model' : '📈 Growth Model'}
-                </span>
-              )}
               {data.meta?.modelMode === 'survival' && (
-                <button
-                  onClick={() => setModelView(v => v === 'primary' ? 'growth' : 'primary')}
-                  title={modelView === 'growth'
-                    ? 'Switch back to Survival Model — reflects clerk-review removals through March 9'
-                    : 'Switch to Growth Model — hypothetical view of where trajectory was heading before the Feb 15 deadline'}
-                  style={{
-                    background: modelView === 'growth' ? '#0d2a1a' : '#0d1530',
-                    border: `1px solid ${modelView === 'growth' ? '#2d6a4f' : '#2a3a60'}`,
-                    borderRadius: 4,
-                    padding: '3px 10px',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: modelView === 'growth' ? '#4caf50' : '#4a9eff',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    fontFamily: 'Georgia, serif',
-                  }}
-                >
-                  {modelView === 'growth' ? '📈 Growth View' : 'Switch to Growth View'}
-                </button>
+                <div style={{
+                  display: 'inline-flex',
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  border: '1px solid #2a3a60',
+                }}>
+                  <div className="pill-btn" style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => setModelView('primary')}
+                      style={{
+                        background: modelView === 'primary' ? '#1a0800' : 'transparent',
+                        border: 'none',
+                        borderRight: '1px solid #2a3a60',
+                        padding: '5px 14px',
+                        fontSize: 10,
+                        fontWeight: 'bold',
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
+                        color: modelView === 'primary' ? '#fbbf24' : '#556688',
+                        cursor: 'pointer',
+                        fontFamily: 'Georgia, serif',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      Survival
+                    </button>
+                    <div className="pill-tooltip">
+                      Reflects clerk-review removals through March 9. The submission deadline has passed — no new signatures can be added. This is the operative model.
+                    </div>
+                  </div>
+                  <div className="pill-btn" style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => setModelView('growth')}
+                      style={{
+                        background: modelView === 'growth' ? '#0d2a1a' : 'transparent',
+                        border: 'none',
+                        padding: '5px 14px',
+                        fontSize: 10,
+                        fontWeight: 'bold',
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
+                        color: modelView === 'growth' ? '#4caf50' : '#556688',
+                        cursor: 'pointer',
+                        fontFamily: 'Georgia, serif',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      Growth
+                    </button>
+                    <div className="pill-tooltip">
+                      Hypothetical view of where trajectory was heading before the Feb 15 deadline. Useful for context, but not the operative model.
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -293,13 +384,49 @@ export default function App() {
 
         {data && (
           <>
+            {isMobile && (
+              <div style={STYLES.section}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #0d1530 0%, #111d40 100%)',
+                  border: '1px solid #2a3a60',
+                  borderRadius: 12,
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                  marginBottom: 8,
+                }}>
+                  <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
+                  <div style={{
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    color: '#e8eaf0',
+                    marginBottom: 6,
+                    lineHeight: 1.3,
+                    fontFamily: 'Georgia, serif',
+                  }}>
+                    Did you sign?
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    color: '#4a9eff',
+                    marginBottom: 16,
+                    fontFamily: 'Georgia, serif',
+                  }}>
+                    Check in 15 seconds
+                  </div>
+                </div>
+                <SignatureLookup districts={data.districts} />
+              </div>
+            )}
+
             <div style={STYLES.section}>
               <SnapshotBoxes snapshot={data.snapshot} meta={data.meta} districts={data.districts} modelView={modelView} />
             </div>
 
-            <div style={STYLES.section}>
-              <SignatureLookup districts={data.districts} />
-            </div>
+            {!isMobile && (
+              <div style={STYLES.section}>
+                <SignatureLookup districts={data.districts} />
+              </div>
+            )}
 
             <div style={STYLES.section}>
               <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} />
