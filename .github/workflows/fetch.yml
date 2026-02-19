@@ -69,7 +69,7 @@ jobs:
           BRANCH="data/update-$(date -u +%Y-%m-%d-%H%M%S)"
           git checkout -b "$BRANCH"
           git fetch origin main
-          git rebase origin/main
+          git rebase origin/main -X theirs
           git push origin "$BRANCH"
           gh pr create \
             --title "data: update $(date -u +%Y-%m-%d)" \
