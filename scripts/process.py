@@ -775,6 +775,33 @@ def main():
     # --- Anomalies from history ---
     anomalies = history.get("anomalies", []) if history else []
 
+    # --- Signature flow from history (net new / removals) ---
+    if history and "snapshots" in history:
+        snaps = history["snapshots"]
+        last_snap = snaps[-1] if snaps else {}
+        # Last interval
+        interval_net = last_snap.get("totalDelta", 0)
+        interval_removals = last_snap.get("totalRemovals", 0)
+        # All-time totals
+        alltime_added = sum(s.get("totalDelta", 0) for s in snaps if s.get("totalDelta", 0) > 0)
+        alltime_removals = sum(s.get("totalRemovals", 0) for s in snaps)
+        # Per-district removals this interval
+        interval_district_removals = []
+        if interval_removals > 0:
+            for d_str, count in last_snap.get("removals", {}).items():
+                if count > 0:
+                    interval_district_removals.append({
+                        "d": int(d_str),
+                        "removed": count,
+                    })
+            interval_district_removals.sort(key=lambda x: x["removed"], reverse=True)
+    else:
+        interval_net = sum(d["delta"] for d in districts_out)
+        interval_removals = 0
+        alltime_added = interval_net
+        alltime_removals = 0
+        interval_district_removals = []
+
     # --- Statewide trajectory ---
     statewide_proj_raw = sum(d["projectedRaw"] for d in districts_out)
     statewide_proj_adj = sum(d["projectedTotal"] for d in districts_out)
@@ -819,6 +846,14 @@ def main():
             "newlyFailed": newly_failed,
             "overallProbDelta": overall_prob_delta,
             "expectedDistrictsDelta": expected_districts_delta,
+            "signatureFlow": {
+                "intervalNet": interval_net,
+                "intervalRemovals": interval_removals,
+                "intervalGross": interval_net + interval_removals,
+                "alltimeAdded": alltime_added,
+                "alltimeRemovals": alltime_removals,
+                "districtRemovals": interval_district_removals[:5],
+            },
             "anomalies": anomalies,
         },
     }

@@ -111,53 +111,99 @@ function GainsCard({ gains, districts }) {
 }
 
 // ---------------------------------------------------------------------------
-// Biggest Losses card
+// Signature Flow card — net new vs removals
 // ---------------------------------------------------------------------------
-function LossesCard({ losses, districts }) {
-  const hasLosses = losses && losses.length > 0
+function SignatureFlowCard({ snapshot }) {
+  const flow = snapshot?.signatureFlow || {}
+  const intervalNet = flow.intervalNet ?? 0
+  const intervalRemovals = flow.intervalRemovals ?? 0
+  const intervalGross = flow.intervalGross ?? intervalNet
+  const alltimeAdded = flow.alltimeAdded ?? 0
+  const alltimeRemovals = flow.alltimeRemovals ?? 0
+  const districtRemovals = flow.districtRemovals || []
 
-  if (hasLosses) {
-    return (
-      <div style={card}>
-        <div style={cardTitle}>📉 Biggest Losses</div>
-        {losses.map(g => (
-          <div key={g.d} style={row}>
-            <span style={{ color: '#c8d8f0' }}>District {g.d}</span>
-            <span style={{ color: '#f44336', fontWeight: 'bold' }}>{g.delta.toLocaleString()}</span>
-          </div>
-        ))}
-      </div>
-    )
+  const flowRow = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '7px 0',
+    borderBottom: '1px solid #131c33',
   }
-
-  // No losses — show removal campaign warning
-  const highRisk = [14, 9, 7]
-  const riskDistricts = (districts || []).filter(d => highRisk.includes(d.d))
 
   return (
     <div style={card}>
-      <div style={cardTitle}>📉 Biggest Losses</div>
-      <p style={emptyNote}>
-        No signature removals recorded yet. However, a coordinated removal
-        campaign has filed <strong style={{ color: '#ff7043' }}>1,300+ removal requests</strong>{' '}
-        in Salt Lake County — clerks are processing these through March 9.
-      </p>
-      <div style={callout}>
-        <span style={calloutTitle}>Highest-risk districts for removals:</span>
-        {riskDistricts.map(d => {
-          const threshold = THRESHOLDS[d.d] || d.threshold
-          const pct = threshold > 0 ? ((d.verified / threshold) * 100).toFixed(1) : '—'
-          return (
-            <div key={d.d} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span>District {d.d}</span>
-              <span style={{ color: '#ff7043' }}>{pct}% verified</span>
-            </div>
-          )
-        })}
-        {riskDistricts.length === 0 && (
-          <div style={{ color: '#556688' }}>D14, D9, D7 — data pending</div>
+      <div style={cardTitle}>🔄 Signature Flow</div>
+
+      {/* Last interval */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
+          Last update
+        </div>
+        <div style={flowRow}>
+          <span style={{ color: '#8899bb', fontSize: 13 }}>Net new</span>
+          <span style={{ color: intervalNet > 0 ? '#4caf50' : intervalNet < 0 ? '#f44336' : '#556688', fontWeight: 'bold', fontSize: 15 }}>
+            {intervalNet > 0 ? '+' : ''}{intervalNet.toLocaleString()}
+          </span>
+        </div>
+        {intervalRemovals > 0 && (
+          <div style={flowRow}>
+            <span style={{ color: '#8899bb', fontSize: 13 }}>Removed</span>
+            <span style={{ color: '#f44336', fontWeight: 'bold', fontSize: 15 }}>
+              -{intervalRemovals.toLocaleString()}
+            </span>
+          </div>
+        )}
+        {intervalGross !== intervalNet && intervalGross > 0 && (
+          <div style={flowRow}>
+            <span style={{ color: '#8899bb', fontSize: 13 }}>Gross added</span>
+            <span style={{ color: '#4a9eff', fontWeight: 'bold', fontSize: 15 }}>
+              +{intervalGross.toLocaleString()}
+            </span>
+          </div>
         )}
       </div>
+
+      {/* All-time totals */}
+      <div style={{ marginBottom: intervalRemovals > 0 ? 14 : 0 }}>
+        <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
+          All time
+        </div>
+        <div style={flowRow}>
+          <span style={{ color: '#8899bb', fontSize: 13 }}>Total added</span>
+          <span style={{ color: '#4caf50', fontWeight: 'bold', fontSize: 15 }}>
+            +{alltimeAdded.toLocaleString()}
+          </span>
+        </div>
+        <div style={flowRow}>
+          <span style={{ color: '#8899bb', fontSize: 13 }}>Total removed</span>
+          <span style={{ color: alltimeRemovals > 0 ? '#f44336' : '#556688', fontWeight: 'bold', fontSize: 15 }}>
+            {alltimeRemovals > 0 ? `-${alltimeRemovals.toLocaleString()}` : '0'}
+          </span>
+        </div>
+        {alltimeRemovals > 0 && alltimeAdded > 0 && (
+          <div style={{ ...flowRow, borderBottom: 'none' }}>
+            <span style={{ color: '#8899bb', fontSize: 13 }}>Removal rate</span>
+            <span style={{ color: '#ff7043', fontWeight: 'bold', fontSize: 15 }}>
+              {((alltimeRemovals / alltimeAdded) * 100).toFixed(2)}%
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Per-district removals if any this interval */}
+      {districtRemovals.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
+            Removals by district
+          </div>
+          {districtRemovals.map(dr => (
+            <div key={dr.d} style={flowRow}>
+              <span style={{ color: '#c8d8f0' }}>District {dr.d}</span>
+              <span style={{ color: '#f44336', fontWeight: 'bold' }}>-{dr.removed.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -510,9 +556,8 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
           gains={snapshot?.biggestGains}
           districts={districts}
         />
-        <LossesCard
-          losses={snapshot?.biggestLosses}
-          districts={districts}
+        <SignatureFlowCard
+          snapshot={snapshot}
         />
         <PredictionCard
           snapshot={snapshot}
