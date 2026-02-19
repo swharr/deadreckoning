@@ -198,81 +198,102 @@ function ScenarioTooltip({ label, value, valueColor, tip }) {
 }
 
 // ---------------------------------------------------------------------------
-// Change from Base Prediction card
+// Prediction Outlook card
 // ---------------------------------------------------------------------------
-function PredictionCard({ snapshot, meta, districts }) {
-  const prevProb = snapshot?.overallProbDelta !== undefined
-    ? null  // We'll reconstruct from districts
-    : null
-
-  // Get current overall prob from districts (reconstruct)
+function PredictionCard({ snapshot, meta, districts, overall, modelView }) {
   const districtList = districts || []
+  const isGrowthView = modelView === 'growth'
 
-  // Derive prevProb from snapshot.overallProbDelta and current pQualify
-  // The snapshot holds overallProbDelta = newProb - prevProb
-  // We need to get pQualify from the parent. We'll read from districts' probDelta.
-  // Best approach: get the snapshot values via meta or reconstruct.
-  // Since we don't have overall directly here, we'll show what we can.
+  // Switch expected districts based on model view
+  const expectedDists = isGrowthView
+    ? (overall?.expectedDistrictsGrowth ?? overall?.expectedDistricts ?? 0)
+    : (overall?.expectedDistricts ?? 0)
+  const distsDelta = snapshot?.expectedDistrictsDelta ?? 0
 
-  const probDelta = snapshot?.overallProbDelta ?? 0
-  const unchanged = probDelta === 0
+  // Prob getter respects model view toggle
+  const getProb = (d) => isGrowthView ? (d.growthProb ?? d.prob) : d.prob
 
-  // Find districts with highest final-week velocity for "what to watch"
-  const byVelocity = [...districtList]
-    .sort((a, b) => {
-      const aLast = a.weeklySignatures?.[a.weeklySignatures.length - 1] || 0
-      const bLast = b.weeklySignatures?.[b.weeklySignatures.length - 1] || 0
-      return bLast - aLast
-    })
-    .slice(0, 3)
+  // Top movers: districts with biggest probability delta (positive or negative)
+  // Exclude districts with prevProb=0 (initial load, not a real change)
+  const topMovers = [...districtList]
+    .filter(d => d.probDelta !== 0 && d.prevProb > 0)
+    .sort((a, b) => Math.abs(b.probDelta) - Math.abs(a.probDelta))
+    .slice(0, 5)
+
+  // Count districts by tier using model-appropriate probability
+  const notMet = districtList.filter(d => d.verified < d.threshold)
+  const metCount = districtList.filter(d => d.verified >= d.threshold).length
+  const certainCount = notMet.filter(d => getProb(d) >= 0.9).length
+  const likelyCount = notMet.filter(d => getProb(d) >= 0.5 && getProb(d) < 0.9).length
+  const longShotCount = notMet.filter(d => getProb(d) > 0 && getProb(d) < 0.5).length
+
+  const hasNewData = distsDelta !== 0 || topMovers.length > 0
 
   return (
     <div style={card}>
-      <div style={cardTitle}>🎯 Change from Base Prediction</div>
+      <div style={cardTitle}>🎯 Prediction Outlook</div>
 
-      {unchanged ? (
-        <>
-          <p style={{ ...emptyNote, marginBottom: 14 }}>
-            <strong style={{ color: '#e8eaf0' }}>Prediction unchanged — data pending.</strong>
-            <br />
-            No new verified signatures have been recorded since the last update.
-            Waiting for clerk verification results (due March 9).
-          </p>
-          <div style={callout}>
-            <span style={calloutTitle}>Scenario ranges:</span>
-            <ScenarioTooltip
-              label="Proportional surge"
-              value="~35–45%"
-              valueColor="#4caf50"
-              tip="If late-submitted signatures validate at a rate proportional to the campaign's peak velocity — evenly distributed across all 29 districts — qualification probability lands in the 35–45% range. Assumes minimal clerk rejections."
-            />
-            <ScenarioTooltip
-              label="Heavy fraud rejection"
-              value="~12–18%"
-              valueColor="#ff7043"
-              tip={<>If county clerks reject signature packets for suspected fraud — as reported in Salt Lake and Utah Counties — and removals disproportionately hit near-threshold districts, qualification probability falls to 12–18%. Utah County is actively investigating ~300 potentially fraudulent signatures from nine gatherers. <a href="https://www.ksl.com/article/51444163/utah-county-investigating-potential-signature-fraud-as-prop-4-repeal-deadline-looms" target="_blank" rel="noopener noreferrer" style={{color:'#4a9eff'}}>KSL News ↗</a></>}
-            />
+      {/* Expected qualifying districts — primary metric */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 28, fontWeight: 'bold', color: '#e8eaf0', lineHeight: 1.2 }}>
+          {expectedDists.toFixed(1)}
+          <span style={{ fontSize: 14, color: '#556688', fontWeight: 'normal' }}> / 26 needed</span>
+        </div>
+        <div style={{ fontSize: 13, color: '#667799', marginTop: 4 }}>
+          expected districts meeting threshold
+        </div>
+        {distsDelta !== 0 && (
+          <div style={{ fontSize: 13, marginTop: 4 }}>
+            <span style={{ color: distsDelta > 0 ? '#4caf50' : '#f44336', fontWeight: 'bold' }}>
+              {distsDelta > 0 ? '▲ +' : '▼ '}{distsDelta.toFixed(2)}
+            </span>
+            <span style={{ color: '#556688' }}> since last update</span>
           </div>
-        </>
+        )}
+      </div>
+
+      {/* District breakdown bar */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#8899bb', marginBottom: 6, flexWrap: 'wrap' }}>
+          <span><span style={{ color: '#4caf50', fontWeight: 'bold' }}>{metCount}</span> met</span>
+          <span><span style={{ color: '#66bb6a', fontWeight: 'bold' }}>{certainCount}</span> nearly certain</span>
+          <span><span style={{ color: '#ffc107', fontWeight: 'bold' }}>{likelyCount}</span> likely</span>
+          <span><span style={{ color: '#ff7043', fontWeight: 'bold' }}>{longShotCount}</span> possible</span>
+        </div>
+        <div style={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', background: '#1a2040' }}>
+          {metCount > 0 && <div style={{ flex: metCount, background: '#4caf50' }} />}
+          {certainCount > 0 && <div style={{ flex: certainCount, background: '#66bb6a' }} />}
+          {likelyCount > 0 && <div style={{ flex: likelyCount, background: '#ffc107' }} />}
+          {longShotCount > 0 && <div style={{ flex: longShotCount, background: '#ff7043' }} />}
+          <div style={{ flex: 29 - metCount - certainCount - likelyCount - longShotCount, background: '#1a2040' }} />
+        </div>
+      </div>
+
+      {/* Top movers or waiting message */}
+      {hasNewData && topMovers.length > 0 ? (
+        <div>
+          <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6, fontWeight: 'bold' }}>
+            Top movers
+          </div>
+          {topMovers.map(d => {
+            const delta = d.probDelta
+            const color = delta > 0 ? '#4caf50' : '#f44336'
+            return (
+              <div key={d.d} style={{ ...row, borderBottom: '1px solid #131c33' }}>
+                <span style={{ color: '#8899bb' }}>District {d.d}</span>
+                <span style={{ color, fontWeight: 'bold', fontSize: 13 }}>
+                  {delta > 0 ? '+' : ''}{(delta * 100).toFixed(1)} pp
+                </span>
+              </div>
+            )
+          })}
+        </div>
       ) : (
-        <div style={{ marginBottom: 14 }}>
-          <div style={{
-            fontSize: 18,
-            color: '#e8eaf0',
-            fontWeight: 'bold',
-            marginBottom: 8,
-          }}>
-            <span style={{ color: '#8899bb' }}>prev</span>
-            {' '}→{' '}
-            <span style={{ color: probDelta > 0 ? '#4caf50' : '#f44336' }}>
-              {probDelta > 0 ? '▲' : '▼'}
-            </span>
-          </div>
-          <div style={{ fontSize: 14, color: '#8899bb' }}>
-            <span style={{ color: probDelta > 0 ? '#4caf50' : '#f44336', fontWeight: 'bold' }}>
-              {probDelta > 0 ? '+' : ''}{(probDelta * 100).toFixed(1)} pp
-            </span>
-            {' '}change in qualification probability
+        <div style={callout}>
+          <span style={calloutTitle}>Waiting for new data</span>
+          <div style={{ marginTop: 4, fontSize: 12, color: '#667799' }}>
+            No new verified signatures since last update.
+            Clerk verification results due by {meta?.clerkDeadline || 'March 7'}.
           </div>
         </div>
       )}
@@ -474,7 +495,7 @@ function MethodologyPanel({ meta }) {
 // ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
-export default function SnapshotBoxes({ snapshot, meta, districts, modelView }) {
+export default function SnapshotBoxes({ snapshot, meta, districts, overall, modelView }) {
   const anomalies = snapshot?.anomalies || []
 
   return (
@@ -497,6 +518,8 @@ export default function SnapshotBoxes({ snapshot, meta, districts, modelView }) 
           snapshot={snapshot}
           meta={meta}
           districts={districts}
+          overall={overall}
+          modelView={modelView}
         />
       </div>
       <MethodologyPanel meta={meta} />

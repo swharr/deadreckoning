@@ -527,6 +527,7 @@ def main():
             prev_district_map[d["d"]] = d
     prev_overall = prev_data.get("overall", {})
     prev_p_qualify = prev_overall.get("pQualify", 0.0)
+    prev_expected_districts = prev_overall.get("expectedDistricts", 0.0)
 
     # --- Parse xlsx ---
     district_counts, district_dates, district_names = parse_xlsx(xlsx_path)
@@ -766,8 +767,10 @@ def main():
                     if d["verified"] < d["threshold"] and d["prevVerified"] >= d["threshold"]]
     if is_reprocessing:
         overall_prob_delta = prev_data.get("snapshot", {}).get("overallProbDelta", 0.0)
+        expected_districts_delta = prev_data.get("snapshot", {}).get("expectedDistrictsDelta", 0.0)
     else:
         overall_prob_delta = round(p_qual - prev_p_qualify, 4)
+        expected_districts_delta = round(exp_districts - prev_expected_districts, 2)
 
     # --- Anomalies from history ---
     anomalies = history.get("anomalies", []) if history else []
@@ -815,6 +818,7 @@ def main():
             "newlyMet": newly_met,
             "newlyFailed": newly_failed,
             "overallProbDelta": overall_prob_delta,
+            "expectedDistrictsDelta": expected_districts_delta,
             "anomalies": anomalies,
         },
     }

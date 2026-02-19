@@ -419,7 +419,7 @@ export default function App() {
             )}
 
             <div style={STYLES.section}>
-              <SnapshotBoxes snapshot={data.snapshot} meta={data.meta} districts={data.districts} modelView={modelView} />
+              <SnapshotBoxes snapshot={data.snapshot} meta={data.meta} districts={data.districts} overall={data.overall} modelView={modelView} />
             </div>
 
             {!isMobile && (
