@@ -12,7 +12,8 @@ __pycache__/
 data/snapshots/*.xlsx
 data/latest.xlsx
 data/manual/*.xlsx
-data/history.json
+# NOTE: data/history.json is intentionally NOT listed here.
+# It must be committed so CI can use historical data for projections.
 
 # Internal instructions folder — never push to GitHub
 instructions/
