@@ -72,7 +72,7 @@ jobs:
             --body "Automated data update from t8rsk8s Data Robot." \
             --base main \
             --head "$BRANCH"
-          gh pr merge "$BRANCH" --auto --squash
+          gh pr merge "$BRANCH" --squash --delete-branch
 
   build-and-deploy:
     needs: fetch-and-process
