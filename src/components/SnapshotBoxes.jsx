@@ -354,56 +354,41 @@ function PredictionCard({ snapshot, meta, districts, overall, modelView }) {
 }
 
 // ---------------------------------------------------------------------------
-// Anomaly alert banner
+// Biggest Drops by Day — compact inline list, only shows with 3+ anomalies
 // ---------------------------------------------------------------------------
 function AnomalyBanner({ anomalies }) {
-  if (!anomalies || anomalies.length === 0) return null
+  if (!anomalies || anomalies.length < 3) return null
 
   return (
     <div style={{
-      background: '#1a0800',
-      border: '1px solid #b45309',
-      borderRadius: 8,
-      padding: '12px 18px',
+      ...card,
+      borderColor: '#b4530933',
       marginBottom: 16,
-      display: 'flex',
-      gap: 12,
-      alignItems: 'flex-start',
     }}>
-      <span style={{ fontSize: 20, flexShrink: 0 }}>⚠️</span>
-      <div>
-        <div style={{
+      <div style={cardTitle}>📉 Biggest Drops by Day</div>
+      {anomalies.slice(0, 8).map((a, i) => (
+        <div key={i} style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '6px 0',
+          borderBottom: '1px solid #131c33',
           fontSize: 13,
-          fontWeight: 'bold',
-          color: '#fbbf24',
-          marginBottom: 6,
-          letterSpacing: '0.04em',
         }}>
-          Anomalous Signature Drops Detected
+          <span style={{ color: '#8899bb' }}>
+            D{a.district} <span style={{ color: '#445577', fontSize: 11 }}>· {a.date}</span>
+          </span>
+          <span style={{ color: '#f44336', fontWeight: 'bold' }}>
+            −{a.drop.toLocaleString()}
+            <span style={{ color: '#77444a', fontWeight: 'normal', fontSize: 11 }}> ({(a.dropPct * 100).toFixed(1)}%)</span>
+          </span>
         </div>
-        <div style={{ fontSize: 12, color: '#92680a', lineHeight: 1.7 }}>
-          The following districts recorded unusually large drops between snapshots,
-          consistent with packet-level fraud rejections by county clerks rather
-          than normal signature-by-signature corrections.
+      ))}
+      {anomalies.length > 8 && (
+        <div style={{ fontSize: 11, color: '#445577', marginTop: 6 }}>
+          +{anomalies.length - 8} more
         </div>
-        <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {anomalies.map((a, i) => (
-            <div key={i} style={{
-              background: '#2a1200',
-              border: '1px solid #7c3a00',
-              borderRadius: 6,
-              padding: '6px 12px',
-              fontSize: 12,
-              color: '#fbbf24',
-            }}>
-              <strong>D{a.district}</strong>
-              {' '}−{a.drop.toLocaleString()} sigs
-              {' '}<span style={{ color: '#92680a' }}>({(a.dropPct * 100).toFixed(1)}%)</span>
-              {' '}<span style={{ color: '#5a3a00' }}>on {a.date}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   )
 }
