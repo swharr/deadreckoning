@@ -83,10 +83,43 @@ const tdStyle = {
   verticalAlign: 'middle',
 }
 
+// Compute medal assignments — only for districts still collecting signatures
+function useMedals(districts) {
+  return useMemo(() => {
+    if (!districts || districts.length === 0) return {}
+    const medals = {}
+    const active = districts.filter(d => d.verified < d.threshold)
+    if (active.length === 0) return {}
+
+    // Most signatures: gold, silver, bronze
+    const byVerified = [...active].sort((a, b) => b.verified - a.verified)
+    if (byVerified[0]) medals[byVerified[0].d] = { ...(medals[byVerified[0].d] || {}), sigs: '🥇' }
+    if (byVerified[1]) medals[byVerified[1].d] = { ...(medals[byVerified[1].d] || {}), sigs: '🥈' }
+    if (byVerified[2]) medals[byVerified[2].d] = { ...(medals[byVerified[2].d] || {}), sigs: '🥉' }
+
+    // Fastest growth (highest last-interval delta)
+    const byGrowth = [...active].sort((a, b) => {
+      const aLast = (a.weeklySignatures || [0]).slice(-1)[0] || 0
+      const bLast = (b.weeklySignatures || [0]).slice(-1)[0] || 0
+      return bLast - aLast
+    })
+    if (byGrowth[0]) medals[byGrowth[0].d] = { ...(medals[byGrowth[0].d] || {}), growth: '🚀' }
+
+    // Slowest growth (turtle award)
+    if (byGrowth.length > 0) {
+      const slowest = byGrowth[byGrowth.length - 1]
+      medals[slowest.d] = { ...(medals[slowest.d] || {}), slow: '🐢' }
+    }
+
+    return medals
+  }, [districts])
+}
+
 export default function DistrictTable({ districts }) {
   const [sortKey, setSortKey] = useState('prob')
   const [sortDir, setSortDir] = useState('desc')
   const [tierFilter, setTierFilter] = useState('All')
+  const medals = useMedals(districts)
 
   const tiers = useMemo(() => {
     const present = new Set((districts || []).map(d => d.tier))
@@ -223,7 +256,17 @@ export default function DistrictTable({ districts }) {
                   onMouseLeave={e => e.currentTarget.style.background = ''}
                 >
                   <td style={{ ...tdStyle, fontWeight: 'bold', color: '#e8eaf0' }}>
-                    D{d.d}
+                    <span>D{d.d}</span>
+                    {medals[d.d]?.sigs && (
+                      <span title={medals[d.d].sigs === '🥇' ? 'Most signatures' : medals[d.d].sigs === '🥈' ? '2nd most signatures' : '3rd most signatures'}
+                        style={{ marginLeft: 4, fontSize: 14 }}>{medals[d.d].sigs}</span>
+                    )}
+                    {medals[d.d]?.growth && (
+                      <span title="Fastest growth" style={{ marginLeft: 3, fontSize: 13 }}>{medals[d.d].growth}</span>
+                    )}
+                    {medals[d.d]?.slow && (
+                      <span title="Slowest growth" style={{ marginLeft: 3, fontSize: 13 }}>{medals[d.d].slow}</span>
+                    )}
                     <div style={{ fontSize: 10, color: '#334466', marginTop: 1 }}>
                       {(d.threshold || THRESHOLDS[d.d]).toLocaleString()} needed
                     </div>
