@@ -43,13 +43,14 @@ jobs:
             echo "No xlsx available — skipping process.py"
           fi
 
-      - name: Process data
+      - name: Rebuild history and process data
         if: steps.scrape.outcome == 'success' && steps.scrape.outputs.changed == 'true'
         run: |
           if [ -f data/latest.xlsx ]; then
+            python scripts/replay.py
             python scripts/process.py
           else
-            echo "No xlsx available — skipping process.py, keeping existing data.json"
+            echo "No xlsx available — skipping replay/process, keeping existing data"
           fi
 
       - name: Create PR with updated data
@@ -58,7 +59,7 @@ jobs:
         run: |
           git config user.name  "t8rsk8s Data Robot"
           git config user.email "bot@t8rsk8s.io"
-          git add public/data.json public/lookup.json
+          git add data/snapshots/*.xlsx data/history.json public/data.json public/lookup.json
           if git diff --staged --quiet; then
             echo "No data changes — skipping PR"
             exit 0

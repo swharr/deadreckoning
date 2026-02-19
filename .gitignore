@@ -8,10 +8,11 @@ __pycache__/
 .env
 .venv/
 
-# Data files — snapshots and working xlsx are local only
-data/snapshots/*.xlsx
+# Data files — working xlsx are local only
 data/latest.xlsx
 data/manual/*.xlsx
+# NOTE: data/snapshots/*.xlsx are intentionally tracked.
+# replay.py needs all historical snapshots to rebuild history.json.
 # NOTE: data/history.json is intentionally NOT listed here.
 # It must be committed so CI can use historical data for projections.
 
