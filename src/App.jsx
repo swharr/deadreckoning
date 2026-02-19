@@ -440,7 +440,7 @@ export default function App() {
               <DistrictTable districts={data.districts} />
             </div>
 
-            <div style={{ ...STYLES.section, maxWidth: 700, margin: '0 auto 36px' }}>
+            <div style={STYLES.section}>
               <DistrictMap districts={data.districts} />
             </div>
           </>
