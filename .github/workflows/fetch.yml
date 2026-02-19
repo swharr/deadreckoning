@@ -64,7 +64,7 @@ jobs:
             echo "No data changes — skipping PR"
             exit 0
           fi
-          BRANCH="data/update-$(date -u +%Y-%m-%d-%H%M)"
+          BRANCH="data/update-$(date -u +%Y-%m-%d-%H%M%S)"
           git checkout -b "$BRANCH"
           git commit -m "data: update $(date -u +%Y-%m-%d)"
           git push origin "$BRANCH"
