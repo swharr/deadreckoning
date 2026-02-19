@@ -64,14 +64,12 @@ jobs:
             echo "No data changes — skipping PR"
             exit 0
           fi
-          # Stash staged changes, pull latest main, re-apply
-          git stash
-          git pull --rebase origin main
-          git stash pop
-          git add data/snapshots/*.xlsx data/history.json public/data.json public/lookup.json
+          # Commit on detached main, then branch and rebase onto latest
+          git commit -m "data: update $(date -u +%Y-%m-%d)"
           BRANCH="data/update-$(date -u +%Y-%m-%d-%H%M%S)"
           git checkout -b "$BRANCH"
-          git commit -m "data: update $(date -u +%Y-%m-%d)"
+          git fetch origin main
+          git rebase origin/main
           git push origin "$BRANCH"
           gh pr create \
             --title "data: update $(date -u +%Y-%m-%d)" \
