@@ -188,7 +188,7 @@ export default function App() {
                 <button
                   onClick={() => setModelView(v => v === 'primary' ? 'growth' : 'primary')}
                   title={modelView === 'growth'
-                    ? 'Switch back to Survival Model — reflects clerk-review removals through March 7'
+                    ? 'Switch back to Survival Model — reflects clerk-review removals through March 9'
                     : 'Switch to Growth Model — hypothetical view of where trajectory was heading before the Feb 15 deadline'}
                   style={{
                     background: modelView === 'growth' ? '#0d2a1a' : '#0d1530',
@@ -244,7 +244,7 @@ export default function App() {
               <strong style={{ color: '#fbbf24' }}>⚖️ Survival Model active</strong>
               {' '}The Feb 15 submission deadline has passed. No new signatures can be added.
               Probabilities now reflect whether current verified counts will survive county
-              clerk review through <strong style={{ color: '#fbbf24' }}>March 7</strong>.
+              clerk review through <strong style={{ color: '#fbbf24' }}>March 9</strong>.
               {' '}
               <button
                 onClick={() => setModelView('growth')}
@@ -271,7 +271,7 @@ export default function App() {
             <span style={{ color: '#e8eaf0', fontWeight: 'bold' }}>26 of Utah's 29 Senate districts</span>.
             Falling short in even one of those 26 disqualifies the entire effort.
             County clerks verify signatures through{' '}
-            <span style={{ color: '#4a9eff' }}>March 7, 2026</span>.
+            <span style={{ color: '#4a9eff' }}>March 9, 2026</span>.
           </p>
         </div>
       </header>
@@ -331,12 +331,12 @@ export default function App() {
           >
             vote.utah.gov
           </a>
-          . County clerk verification deadline: <strong style={{ color: '#8899bb' }}>March 7, 2026</strong>.
+          . County clerk verification deadline: <strong style={{ color: '#8899bb' }}>March 9, 2026</strong>.
           Election date (if qualifies): <strong style={{ color: '#8899bb' }}>November 3, 2026</strong>.
         </p>
         <p style={{ margin: 0 }}>
           {data?.meta?.modelMode === 'survival'
-            ? 'Probability model is in survival mode: submission deadline has passed, projections reflect expected clerk-review removals through March 7.'
+            ? 'Probability model is in survival mode: submission deadline has passed, projections reflect expected clerk-review removals through March 9.'
             : 'Probability model uses exact dynamic programming across 29 independent district outcomes, with history-weighted linear trajectory projection.'
           }
           {' '}This is an independent tracker — not affiliated with any campaign or government entity.

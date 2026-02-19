@@ -5,7 +5,7 @@ process.py — Parses petition xlsx, computes district stats, writes public/data
 If data/history.json exists (built by replay.py), uses it for:
   - Real inter-snapshot velocity
   - Per-district rejection/removal rates
-  - Linear trajectory projections to March 7
+  - Linear trajectory projections to March 9
 
 Usage:
     python scripts/process.py [--file path/to/file.xlsx]
@@ -45,8 +45,8 @@ ESTIMATED_VALID_UNVERIFIED = 0
 QUALIFICATION_THRESHOLD_STATEWIDE = 140748
 DISTRICTS_REQUIRED = 26
 TOTAL_DISTRICTS = 29
-CLERK_DEADLINE = date(2026, 3, 7)
-CLERK_DEADLINE_STR = "2026-03-07"
+CLERK_DEADLINE = date(2026, 3, 9)
+CLERK_DEADLINE_STR = "2026-03-09"
 SUBMISSION_DEADLINE = date(2026, 2, 15)  # last day petitioners could submit new sigs
 ELECTION_DATE = "2026-11-03"
 

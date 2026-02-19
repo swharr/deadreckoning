@@ -34,7 +34,7 @@ THRESHOLDS = {
     29: 5382,
 }
 
-CLERK_DEADLINE = date(2026, 3, 7)
+CLERK_DEADLINE = date(2026, 3, 9)
 SUBMISSION_DEADLINE = date(2026, 2, 15)  # last day petitioners could submit new sigs
 
 
@@ -301,8 +301,8 @@ def main():
         sum(rejection_rates.values()) / len(rejection_rates), 4
     ) if rejection_rates else 0.0
 
-    # Linear projections to March 7 for each district
-    print("Computing trajectory projections to March 7...")
+    # Linear projections to March 9 for each district
+    print("Computing trajectory projections to March 9...")
     projections = {}
     for d in sorted(THRESHOLDS.keys()):
         vals = history_by_district[d]

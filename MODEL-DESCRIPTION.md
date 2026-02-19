@@ -25,7 +25,7 @@ Per-district thresholds range from 2,975 (District 10) to 5,715 (District 19), d
 
 **Key dates:**
 - Signature submission deadline: February 15, 2026 (passed)
-- County clerk verification deadline: March 7, 2026
+- County clerk verification deadline: March 9, 2026
 - Election date (if qualified): November 3, 2026
 
 ---
@@ -66,7 +66,7 @@ Each district's probability was computed from:
 
 ### Survival Model (post-February 15, currently active)
 
-After the submission deadline, no new signatures can be added. The question becomes: *will the current verified count survive county clerk review through March 7?*
+After the submission deadline, no new signatures can be added. The question becomes: *will the current verified count survive county clerk review through March 9?*
 
 For districts **at or above threshold**, survival probability is near 1.0, reduced slightly if the buffer above threshold is thin (< 10%) and the post-deadline removal rate is elevated.
 

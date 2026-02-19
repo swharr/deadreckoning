@@ -80,7 +80,7 @@ Full Azure docs: https://learn.microsoft.com/en-us/azure/static-web-apps/get-sta
 The model lives in `scripts/process.py`, in the `compute_district_prob()` function.
 
 Key parameters to tune:
-- **`ESTIMATED_VALID_UNVERIFIED`** — currently `81620`. Update this once actual March 7 clerk counts land in the spreadsheet (set to `0` when actual numbers are in).
+- **`ESTIMATED_VALID_UNVERIFIED`** — currently `81620`. Update this once actual March 9 clerk counts land in the spreadsheet (set to `0` when actual numbers are in).
 - **Weighting factors** inside `compute_district_prob()` — base score 50%, projected 30%, trend-adjusted 20%. Adjust these if the model drifts from reality.
 - **`THRESHOLDS`** dict — update if the LG office revises district thresholds (D8 and D9 were revised Feb 5, 2026).
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { DISTRICT_PATHS } from '../lib/districtPaths.js'
+import { TIER_CONFIG } from '../lib/probability.js'
 
 // SVG viewBox from mapshaper Albers USA projection
 const VIEWBOX = '0 0 800 1001'
@@ -14,19 +15,15 @@ const INSET_Y = 144
 const INSET_W = 194
 const INSET_H = 247
 
-function probToColor(prob) {
-  if (prob >= 0.95) return '#1b5e20'   // dark green — nearly certain
-  if (prob >= 0.80) return '#388e3c'   // green — very likely
-  if (prob >= 0.65) return '#689f38'   // light green — likely
-  if (prob >= 0.50) return '#f9a825'   // amber — toss-up
-  if (prob >= 0.35) return '#e65100'   // orange — leaning against
-  return '#b71c1c'                      // deep red — unlikely
+function tierToFill(tier) {
+  const cfg = TIER_CONFIG[tier] || TIER_CONFIG['NO CHANCE']
+  return cfg.color
 }
 
-function probToStroke(prob) {
-  if (prob >= 0.65) return '#2e7d32'
-  if (prob >= 0.50) return '#e65100'
-  return '#7f1d1d'
+function tierToStroke(tier) {
+  const cfg = TIER_CONFIG[tier] || TIER_CONFIG['NO CHANCE']
+  // Darken the tier color slightly for the stroke
+  return cfg.color + 'aa'
 }
 
 export default function DistrictMap({ districts = [] }) {
@@ -99,9 +96,8 @@ export default function DistrictMap({ districts = [] }) {
           {Object.entries(DISTRICT_PATHS).map(([distStr, pathD]) => {
             const distNum = parseInt(distStr, 10)
             const data = byDistrict[distNum]
-            const prob = data ? data.prob : 0
-            const fill = data ? probToColor(prob) : '#1e2a4a'
-            const stroke = data ? probToStroke(prob) : '#0d1530'
+            const fill = data ? tierToFill(data.tier) : '#1e2a4a'
+            const stroke = data ? tierToStroke(data.tier) : '#0d1530'
             const isHovered = hovered === distNum
 
             return (
@@ -188,9 +184,8 @@ export default function DistrictMap({ districts = [] }) {
               const distNum = parseInt(distStr, 10)
               if (!INSET_DISTRICTS.includes(distNum)) return null
               const data = byDistrict[distNum]
-              const prob = data ? data.prob : 0
-              const fill = data ? probToColor(prob) : '#1e2a4a'
-              const stroke = data ? probToStroke(prob) : '#0d1530'
+              const fill = data ? tierToFill(data.tier) : '#1e2a4a'
+              const stroke = data ? tierToStroke(data.tier) : '#0d1530'
               const isHovered = hovered === distNum
 
               return (
@@ -270,13 +265,13 @@ export default function DistrictMap({ districts = [] }) {
               </div>
               <div>
                 <span style={{ color: '#445577' }}>Qualification odds: </span>
-                <span style={{ color: probToColor(hd.prob), fontWeight: 'bold' }}>
+                <span style={{ color: tierToFill(hd.tier), fontWeight: 'bold' }}>
                   {Math.round(hd.prob * 100)}%
                 </span>
               </div>
               <div>
                 <span style={{ color: '#445577' }}>Status: </span>
-                <span style={{ color: probToColor(hd.prob), fontWeight: 'bold' }}>{hd.tier}</span>
+                <span style={{ color: tierToFill(hd.tier), fontWeight: 'bold' }}>{hd.tier}</span>
               </div>
             </div>
           </div>

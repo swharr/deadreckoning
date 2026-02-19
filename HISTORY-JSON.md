@@ -79,7 +79,7 @@ Only snapshots after February 15, 2026 (the submission deadline) are used. These
 
 ### Weighted linear projection
 
-For each district, `replay.py` runs a weighted least-squares linear regression over all `(date, count)` pairs, projecting to the March 7 clerk deadline:
+For each district, `replay.py` runs a weighted least-squares linear regression over all `(date, count)` pairs, projecting to the March 9 clerk deadline:
 
 ```python
 # Exponential weights: most recent = 1.0, oldest = 0.75^(n-1)
@@ -120,7 +120,7 @@ These are stored in `anomalies[]` and surfaced in the UI as a warning banner. A 
   "snapshotCount": 34,                       // number of xlsx files processed
   "firstSnapshot": "2026-01-15",
   "lastSnapshot": "2026-02-18",
-  "daysToDeadline": 17,                      // days to March 7 clerk deadline
+  "daysToDeadline": 17,                      // days to March 9 clerk deadline
   "dailyVelocity": 1744.0,                  // sigs/day, last interval only
   "statewideRejectionRate": 0.0014,          // average removal rate across all districts
 

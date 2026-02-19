@@ -90,7 +90,7 @@ function GainsCard({ gains, districts }) {
       <p style={emptyNote}>
         No new signatures recorded in this update. We're currently in the county clerk
         verification window — signatures submitted before Feb 15 are being reviewed
-        through <strong style={{ color: '#8899bb' }}>March 7, 2026</strong>.
+        through <strong style={{ color: '#8899bb' }}>March 9, 2026</strong>.
       </p>
       {byVelocity.length > 0 && (
         <div style={callout}>
@@ -140,7 +140,7 @@ function LossesCard({ losses, districts }) {
       <p style={emptyNote}>
         No signature removals recorded yet. However, a coordinated removal
         campaign has filed <strong style={{ color: '#ff7043' }}>1,300+ removal requests</strong>{' '}
-        in Salt Lake County — clerks are processing these through March 7.
+        in Salt Lake County — clerks are processing these through March 9.
       </p>
       <div style={callout}>
         <span style={calloutTitle}>Highest-risk districts for removals:</span>
@@ -236,7 +236,7 @@ function PredictionCard({ snapshot, meta, districts }) {
             <strong style={{ color: '#e8eaf0' }}>Prediction unchanged — data pending.</strong>
             <br />
             No new verified signatures have been recorded since the last update.
-            Waiting for clerk verification results (due March 7).
+            Waiting for clerk verification results (due March 9).
           </p>
           <div style={callout}>
             <span style={calloutTitle}>Scenario ranges:</span>
@@ -389,7 +389,7 @@ function MethodologyPanel({ meta }) {
               <p style={{ margin: 0 }}>
                 The submission deadline has passed (Feb 15). No new signatures can be added.
                 Each district's probability reflects how likely the current verified count will
-                survive clerk review through March 7 — accounting for expected removal rates
+                survive clerk review through March 9 — accounting for expected removal rates
                 based on observed post-deadline drops across all 29 districts.
               </p>
             ) : (
