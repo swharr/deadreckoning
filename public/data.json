@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastUpdated": "2026-02-20",
-    "lastUpdatedISO": "2026-02-20T03:05:54Z",
+    "lastUpdatedISO": "2026-02-20T03:22:12Z",
     "sourceFile": "latest.xlsx",
     "totalVerified": 107793,
     "daysToDeadline": 17,
@@ -14,8 +14,8 @@
     "qualificationThreshold": 140748,
     "districtsRequired": 26,
     "totalDistricts": 29,
-    "snapshotCount": 12,
-    "historyRange": "2026-01-16 \u2192 2026-02-19",
+    "snapshotCount": 13,
+    "historyRange": "2026-01-16 \u2192 2026-02-20",
     "snapshotDates": [
       "2026-01-16",
       "2026-01-22",
@@ -28,7 +28,8 @@
       "2026-02-13",
       "2026-02-16",
       "2026-02-18",
-      "2026-02-19"
+      "2026-02-19",
+      "2026-02-20"
     ]
   },
   "overall": {
