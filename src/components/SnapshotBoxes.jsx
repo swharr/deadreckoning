@@ -524,9 +524,88 @@ function MethodologyPanel({ meta }) {
 }
 
 // ---------------------------------------------------------------------------
+// Velocity summary card — sits in the snapshot row
+// ---------------------------------------------------------------------------
+function VelocityCard({ meta, districts, onExpand }) {
+  const allDistricts = districts || []
+  const accel = allDistricts.filter(d => d.trend === 'ACCEL').length
+  const stable = allDistricts.filter(d => d.trend === 'STABLE').length
+  const decel = allDistricts.filter(d => d.trend === 'DECEL').length
+
+  const top3 = [...allDistricts]
+    .sort((a, b) => b.delta - a.delta)
+    .slice(0, 3)
+
+  const velocity = meta?.dailyVelocity
+
+  return (
+    <div style={card}>
+      <div style={cardTitle}>⚡ Velocity</div>
+
+      {/* Daily velocity */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 28, fontWeight: 'bold', color: '#4a9eff', lineHeight: 1.2 }}>
+          {velocity != null ? velocity.toLocaleString() : '—'}
+        </div>
+        <div style={{ fontSize: 12, color: '#556688', marginTop: 2 }}>sigs / day statewide</div>
+      </div>
+
+      {/* Trend breakdown */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 'bold', color: '#4caf50' }}>{accel}</div>
+          <div style={{ fontSize: 10, color: '#556688' }}>▲ accel</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 'bold', color: '#8899bb' }}>{stable}</div>
+          <div style={{ fontSize: 10, color: '#556688' }}>→ stable</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 'bold', color: '#ef5350' }}>{decel}</div>
+          <div style={{ fontSize: 10, color: '#556688' }}>▼ decel</div>
+        </div>
+      </div>
+
+      {/* Top 3 by delta */}
+      {top3.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
+            Top districts
+          </div>
+          {top3.map(d => (
+            <div key={d.d} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #131c33', fontSize: 13 }}>
+              <span style={{ color: '#c8d8f0' }}>District {d.d}</span>
+              <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{d.delta.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Expand link */}
+      <button
+        onClick={onExpand}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#4a9eff',
+          fontSize: 12,
+          cursor: 'pointer',
+          padding: 0,
+          fontFamily: 'Georgia, serif',
+          textDecoration: 'underline',
+          letterSpacing: '0.02em',
+        }}
+      >
+        ▸ Show full velocity tracker
+      </button>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
-export default function SnapshotBoxes({ snapshot, meta, districts, overall, modelView }) {
+export default function SnapshotBoxes({ snapshot, meta, districts, overall, modelView, onExpandVelocity }) {
   const anomalies = snapshot?.anomalies || []
 
   return (
@@ -550,6 +629,11 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
           districts={districts}
           overall={overall}
           modelView={modelView}
+        />
+        <VelocityCard
+          meta={meta}
+          districts={districts}
+          onExpand={onExpandVelocity}
         />
       </div>
       <MethodologyPanel meta={meta} />
