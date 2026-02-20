@@ -160,7 +160,7 @@ function aggregateSparkline(districts) {
 // ---------------------------------------------------------------------------
 
 function PaceBar({ pct, tier }) {
-  const cfg = TIER_CONFIG.find(t => t.key === tier) || TIER_CONFIG[TIER_CONFIG.length - 1]
+  const cfg = TIER_CONFIG[tier] || TIER_CONFIG['UNLIKELY']
   const barPct = Math.min(pct * 100, 120) // cap display at 120%
   const barColor = cfg?.color || '#4a9eff'
   return (
