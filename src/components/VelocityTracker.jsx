@@ -1,5 +1,23 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react'
+import React, { useState, useMemo, useRef, useCallback, Component } from 'react'
 import { TIER_CONFIG } from '../lib/probability.js'
+
+// ---------------------------------------------------------------------------
+// Error boundary — prevents VelocityTracker crash from taking down the page
+// ---------------------------------------------------------------------------
+class VelocityErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(e) { return { error: e } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ background: '#0d1530', border: '1px solid #1e2a4a', borderRadius: 10, padding: 24, color: '#8899bb', fontSize: 13 }}>
+          Velocity tracker unavailable: {this.state.error.message}
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -7,7 +25,6 @@ import { TIER_CONFIG } from '../lib/probability.js'
 
 const TREND_ARROWS = { ACCEL: '▲', STABLE: '→', DECEL: '▼' }
 const TREND_COLORS = { ACCEL: '#4caf50', STABLE: '#8899bb', DECEL: '#ef5350' }
-const TREND_LABELS = { ACCEL: 'Accelerating', STABLE: 'Stable', DECEL: 'Decelerating' }
 
 const CARD_STYLE = {
   background: '#0d1530',
@@ -24,9 +41,13 @@ function Sparkline({ values, trend, snapshotDates, width = 200, height = 40, int
   const [hoverIdx, setHoverIdx] = useState(null)
   const svgRef = useRef(null)
 
+  // Guard: need at least 2 points to draw a line
+  if (!values || values.length < 2) return null
+
   const max = Math.max(...values, 1)
+  const xStep = width / (values.length - 1)
   const pts = values.map((v, i) => ({
-    x: (i / (values.length - 1)) * width,
+    x: i * xStep,
     y: height - (v / max) * (height - 4) - 2,
     v,
   }))
@@ -312,7 +333,7 @@ const FILTER_OPTIONS = [
 
 const TREND_SORT_ORDER = { ACCEL: 0, STABLE: 1, DECEL: 2 }
 
-export default function VelocityTracker({ districts, meta }) {
+function VelocityTrackerInner({ districts, meta }) {
   const [sortKey, setSortKey] = useState('velocity')
   const [trendFilter, setTrendFilter] = useState('all')
   const [isMobile] = useState(() => window.innerWidth <= 768)
@@ -529,5 +550,13 @@ export default function VelocityTracker({ districts, meta }) {
         )}
       </div>
     </div>
+  )
+}
+
+export default function VelocityTracker(props) {
+  return (
+    <VelocityErrorBoundary>
+      <VelocityTrackerInner {...props} />
+    </VelocityErrorBoundary>
   )
 }
