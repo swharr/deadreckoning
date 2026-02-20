@@ -5,6 +5,7 @@ import DistributionChart from './components/DistributionChart.jsx'
 import DistrictTable from './components/DistrictTable.jsx'
 import SignatureLookup from './components/SignatureLookup.jsx'
 import DistrictMap from './components/DistrictMap.jsx'
+import VelocityTracker from './components/VelocityTracker.jsx'
 import { THRESHOLDS } from './lib/probability.js'
 
 const STYLES = {
@@ -430,6 +431,10 @@ export default function App() {
 
             <div style={STYLES.section}>
               <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} />
+            </div>
+
+            <div style={STYLES.section}>
+              <VelocityTracker districts={data.districts} meta={data.meta} />
             </div>
 
             <div style={STYLES.section}>
