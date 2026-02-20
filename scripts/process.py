@@ -827,6 +827,7 @@ def main():
             "totalDistricts": TOTAL_DISTRICTS,
             "snapshotCount": history["snapshotCount"] if history else 1,
             "historyRange": f"{history['firstSnapshot']} → {history['lastSnapshot']}" if history else "n/a",
+            "snapshotDates": [s["date"] for s in history["snapshots"]] if history else [],
         },
         "overall": {
             "pQualify": round(p_qual, 4),
