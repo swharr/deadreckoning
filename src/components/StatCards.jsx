@@ -63,8 +63,10 @@ const subStyle = {
   marginTop: 2,
 }
 
-export default function StatCards({ overall, meta, districts, modelView }) {
+export default function StatCards({ overall, meta, districts, modelView, snapshot }) {
   const isGrowthView = modelView === 'growth'
+  const newlyMet = snapshot?.newlyMet || []
+  const hasNewlyMet = newlyMet.length > 0
 
   // Switch between survival (primary) and growth shadow numbers
   const pQualify = isGrowthView
@@ -127,10 +129,32 @@ export default function StatCards({ overall, meta, districts, modelView }) {
       </div>
 
       {/* Card 4: Already Confirmed */}
-      <div style={{ ...cardStyle, borderTop: '3px solid #00c853' }}>
-        <div style={labelStyle}>Already Confirmed</div>
+      <div style={{
+        ...cardStyle,
+        borderTop: `3px solid ${hasNewlyMet ? '#4caf50' : '#00c853'}`,
+        background: hasNewlyMet ? 'linear-gradient(135deg, #0d1530 0%, #0d2a1a 100%)' : '#0d1530',
+      }}>
+        <div style={labelStyle}>Districts Confirmed</div>
         <div style={bigNum('#00c853')}>{animatedConfirmed}</div>
         <div style={subStyle}>districts at or above threshold</div>
+        {hasNewlyMet && (
+          <div style={{
+            marginTop: 6,
+            fontSize: 11,
+            color: '#4caf50',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+          }}>
+            🎉 +{newlyMet.length} new this update
+            {newlyMet.length <= 3 && (
+              <span style={{ color: '#2d6a4f', fontWeight: 'normal' }}>
+                (D{newlyMet.join(', D')})
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -442,7 +442,7 @@ export default function App() {
             )}
 
             <div style={STYLES.section}>
-              <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} />
+              <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} snapshot={data.snapshot} />
             </div>
 
             <div style={STYLES.section} ref={velocityRef}>
