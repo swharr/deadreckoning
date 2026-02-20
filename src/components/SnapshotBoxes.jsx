@@ -354,6 +354,113 @@ function PredictionCard({ snapshot, meta, districts, overall, modelView }) {
 }
 
 // ---------------------------------------------------------------------------
+// Newly Met Districts banner — shows when any district newly crossed threshold
+// ---------------------------------------------------------------------------
+function NewlyMetBanner({ newlyMet, newlyFailed, districts }) {
+  const hasMet = newlyMet && newlyMet.length > 0
+  const hasFailed = newlyFailed && newlyFailed.length > 0
+  if (!hasMet && !hasFailed) return null
+
+  const districtMap = {}
+  ;(districts || []).forEach(d => { districtMap[d.d] = d })
+
+  return (
+    <div style={{
+      background: hasMet ? 'linear-gradient(135deg, #0a1f0f 0%, #0d2a1a 100%)' : '#1a0a0a',
+      border: `1px solid ${hasMet ? '#2d6a4f' : '#7f1d1d'}`,
+      borderRadius: 10,
+      padding: '16px 20px',
+      marginBottom: 16,
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: 12,
+    }}>
+      <span style={{ fontSize: 24 }}>{hasMet ? '🎉' : '⚠️'}</span>
+      <div style={{ flex: 1, minWidth: 200 }}>
+        {hasMet && (
+          <div style={{ color: '#4caf50', fontWeight: 'bold', fontSize: 14, marginBottom: hasFailed ? 4 : 0 }}>
+            {newlyMet.length === 1
+              ? `District ${newlyMet[0]} just crossed its threshold!`
+              : `${newlyMet.length} districts just crossed their thresholds!`}
+          </div>
+        )}
+        {hasFailed && (
+          <div style={{ color: '#f44336', fontWeight: 'bold', fontSize: 14 }}>
+            {newlyFailed.length === 1
+              ? `District ${newlyFailed[0]} dropped back below threshold.`
+              : `${newlyFailed.length} districts dropped below threshold.`}
+          </div>
+        )}
+        {hasMet && newlyMet.map(dNum => {
+          const d = districtMap[dNum]
+          if (!d) return null
+          const pct = d.verified / d.threshold * 100
+          return (
+            <div key={dNum} style={{ fontSize: 12, color: '#667799', marginTop: 2 }}>
+              D{dNum}: {d.verified.toLocaleString()} verified / {d.threshold.toLocaleString()} needed ({pct.toFixed(1)}%)
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Confirmed Districts card — shows all districts that have met their threshold
+// ---------------------------------------------------------------------------
+function ConfirmedDistrictsCard({ districts, newlyMet }) {
+  const confirmed = (districts || []).filter(d => d.verified >= d.threshold)
+    .sort((a, b) => (b.verified / b.threshold) - (a.verified / a.threshold))
+  const newlyMetSet = new Set(newlyMet || [])
+
+  return (
+    <div style={card}>
+      <div style={cardTitle}>✅ Confirmed Districts</div>
+      {confirmed.length === 0 ? (
+        <p style={emptyNote}>No districts have met their threshold yet.</p>
+      ) : (
+        confirmed.map(d => {
+          const pct = (d.verified / d.threshold * 100).toFixed(1)
+          const isNew = newlyMetSet.has(d.d)
+          return (
+            <div key={d.d} style={{
+              ...row,
+              background: isNew ? 'rgba(76, 175, 80, 0.06)' : 'transparent',
+              borderRadius: isNew ? 4 : 0,
+              padding: '6px 4px',
+            }}>
+              <span style={{ color: '#c8d8f0' }}>
+                District {d.d}
+                {isNew && (
+                  <span style={{
+                    marginLeft: 6,
+                    fontSize: 10,
+                    background: '#1a3d2a',
+                    color: '#4caf50',
+                    border: '1px solid #2d6a4f',
+                    borderRadius: 4,
+                    padding: '1px 5px',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.05em',
+                    verticalAlign: 'middle',
+                  }}>NEW</span>
+                )}
+              </span>
+              <span style={{ color: '#4caf50', fontWeight: 'bold' }}>{pct}%</span>
+            </div>
+          )
+        })
+      )}
+      <div style={{ marginTop: 10, fontSize: 11, color: '#334466' }}>
+        {confirmed.length} of 26 required districts confirmed
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Biggest Drops by Day — compact inline list, only shows with 3+ anomalies
 // ---------------------------------------------------------------------------
 function AnomalyBanner({ anomalies }) {
@@ -528,9 +635,12 @@ function MethodologyPanel({ meta }) {
 // ---------------------------------------------------------------------------
 export default function SnapshotBoxes({ snapshot, meta, districts, overall, modelView }) {
   const anomalies = snapshot?.anomalies || []
+  const newlyMet = snapshot?.newlyMet || []
+  const newlyFailed = snapshot?.newlyFailed || []
 
   return (
     <div>
+      <NewlyMetBanner newlyMet={newlyMet} newlyFailed={newlyFailed} districts={districts} />
       <AnomalyBanner anomalies={anomalies} />
       <div style={{
         display: 'flex',
@@ -543,6 +653,10 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
         />
         <SignatureFlowCard
           snapshot={snapshot}
+        />
+        <ConfirmedDistrictsCard
+          districts={districts}
+          newlyMet={newlyMet}
         />
         <PredictionCard
           snapshot={snapshot}
