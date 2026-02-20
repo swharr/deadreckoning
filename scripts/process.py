@@ -807,6 +807,101 @@ def main():
     statewide_proj_adj = sum(d["projectedTotal"] for d in districts_out)
     statewide_rejection_rate = history.get("statewideRejectionRate", 0.0) if history else 0.0
 
+    # --- Statewide threshold projection ---
+    statewide_target = QUALIFICATION_THRESHOLD_STATEWIDE
+    statewide_remaining = max(0, statewide_target - total_verified)
+    statewide_pct_complete = total_verified / statewide_target if statewide_target > 0 else 0.0
+
+    # Compute weighted net daily velocity from recent snapshots
+    net_daily_velocity = 0.0
+    if history and "snapshots" in history and len(history["snapshots"]) >= 2:
+        snaps = history["snapshots"]
+        # Use last 5 intervals (6 snapshots), weighted: recent intervals count more
+        intervals = []
+        for i in range(max(1, len(snaps) - 5), len(snaps)):
+            prev_date = date.fromisoformat(snaps[i - 1]["date"])
+            cur_date = date.fromisoformat(snaps[i]["date"])
+            days = max((cur_date - prev_date).days, 1)
+            net = snaps[i]["total"] - snaps[i - 1]["total"]
+            intervals.append((net / days, days))
+
+        if intervals:
+            # Exponential weighting: most recent interval gets highest weight
+            weights = [2 ** i for i in range(len(intervals))]
+            total_weight = sum(w for w in weights)
+            net_daily_velocity = sum(r * w for (r, _), w in zip(intervals, weights)) / total_weight
+
+    # Projected crossing date
+    projected_crossing_date = None
+    days_to_crossing = None
+    if statewide_remaining > 0 and net_daily_velocity > 0:
+        days_to_crossing = math.ceil(statewide_remaining / net_daily_velocity)
+        crossing = today + __import__('datetime').timedelta(days=days_to_crossing)
+        if crossing <= CLERK_DEADLINE:
+            projected_crossing_date = crossing.isoformat()
+        else:
+            projected_crossing_date = None  # won't make it before deadline
+    elif statewide_remaining <= 0:
+        days_to_crossing = 0
+        projected_crossing_date = today.isoformat()
+
+    # P(reaching statewide target)
+    # Use projectedStatewideRaw and projectedStatewideAdjusted as upper/lower bounds
+    # for the expected final statewide count.
+    # Blend: 60% adjusted (conservative), 40% raw (optimistic)
+    projected_final = 0.6 * statewide_proj_adj + 0.4 * statewide_proj_raw
+    if total_verified >= statewide_target:
+        p_reach_target = 1.0
+    elif projected_final >= statewide_target * 1.05:
+        # Projected well above target — high confidence
+        margin = (projected_final - statewide_target) / statewide_target
+        p_reach_target = min(0.95, 0.90 + margin * 0.5)
+    elif projected_final >= statewide_target:
+        # Projected above but within 5% margin — moderate confidence
+        margin = (projected_final - statewide_target) / statewide_target
+        p_reach_target = 0.50 + (margin / 0.05) * 0.40  # 0.50 → 0.90
+    else:
+        # Projected below target — scale by shortfall
+        shortfall = (statewide_target - projected_final) / statewide_target
+        if shortfall <= 0.05:
+            p_reach_target = 0.30 + (1.0 - shortfall / 0.05) * 0.20  # 0.30 → 0.50
+        elif shortfall <= 0.15:
+            p_reach_target = 0.10 + (1.0 - (shortfall - 0.05) / 0.10) * 0.20  # 0.10 → 0.30
+        else:
+            p_reach_target = max(0.01, 0.10 * (1.0 - shortfall))
+
+    # Factor in velocity variance from recent snapshots for confidence band
+    if history and "snapshots" in history and len(history["snapshots"]) >= 4:
+        snaps = history["snapshots"]
+        recent_rates = []
+        for i in range(max(1, len(snaps) - 5), len(snaps)):
+            prev_date = date.fromisoformat(snaps[i - 1]["date"])
+            cur_date = date.fromisoformat(snaps[i]["date"])
+            days = max((cur_date - prev_date).days, 1)
+            net = snaps[i]["total"] - snaps[i - 1]["total"]
+            recent_rates.append(net / days)
+        if len(recent_rates) >= 2 and net_daily_velocity > 0:
+            rate_std = (sum((r - net_daily_velocity) ** 2 for r in recent_rates) / len(recent_rates)) ** 0.5
+            cv = rate_std / net_daily_velocity  # coefficient of variation
+            # High variance = less certainty in our projection
+            variance_penalty = min(cv * 0.15, 0.10)
+            p_reach_target = max(0.01, p_reach_target - variance_penalty)
+
+    on_track = projected_crossing_date is not None or total_verified >= statewide_target
+
+    statewide_projection = {
+        "target": statewide_target,
+        "current": total_verified,
+        "pctComplete": round(statewide_pct_complete, 4),
+        "remaining": statewide_remaining,
+        "netDailyVelocity": round(net_daily_velocity, 0),
+        "projectedFinalCount": round(projected_final, 0),
+        "projectedCrossingDate": projected_crossing_date,
+        "daysToProjectedCrossing": days_to_crossing,
+        "pReachTarget": round(min(1.0, max(0.0, p_reach_target)), 4),
+        "onTrack": on_track,
+    }
+
     # --- Build output ---
     now_utc = datetime.now(timezone.utc)
     output = {
@@ -838,6 +933,7 @@ def main():
             "pQualifyGrowth": round(p_qual_growth, 4),
             "expectedDistrictsGrowth": round(exp_districts_growth, 2),
             "pExactGrowth": p_exact_growth,
+            "statewideProjection": statewide_projection,
         },
         "districts": districts_out,
         "snapshot": {

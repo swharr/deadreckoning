@@ -631,6 +631,128 @@ function MethodologyPanel({ meta }) {
 }
 
 // ---------------------------------------------------------------------------
+// Statewide Threshold Projection card
+// ---------------------------------------------------------------------------
+function StatewideProjectionCard({ overall, meta }) {
+  const proj = overall?.statewideProjection
+  if (!proj) return null
+
+  const {
+    target, current, pctComplete, remaining,
+    netDailyVelocity, projectedFinalCount,
+    projectedCrossingDate, daysToProjectedCrossing,
+    pReachTarget, onTrack,
+  } = proj
+
+  const alreadyMet = current >= target
+  const pPct = Math.round(pReachTarget * 100)
+  const pColor = pPct >= 70 ? '#4caf50' : pPct >= 40 ? '#ffc107' : '#f44336'
+  const barPct = Math.min(pctComplete * 100, 100)
+  const daysToDeadline = meta?.daysToDeadline ?? 0
+  const clerkDeadline = meta?.clerkDeadline || '2026-03-09'
+
+  // Format crossing date nicely
+  let crossingLabel = null
+  if (projectedCrossingDate) {
+    const d = new Date(projectedCrossingDate + 'T00:00:00')
+    crossingLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  return (
+    <div style={card}>
+      <div style={cardTitle}>📊 Statewide Threshold</div>
+
+      {alreadyMet ? (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 28, fontWeight: 'bold', color: '#4caf50', lineHeight: 1.2 }}>
+            Target Reached!
+          </div>
+          <div style={{ fontSize: 13, color: '#667799', marginTop: 4 }}>
+            {current.toLocaleString()} verified of {target.toLocaleString()} needed
+          </div>
+          <div style={{ fontSize: 13, color: '#4caf50', marginTop: 4 }}>
+            +{(current - target).toLocaleString()} above threshold
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Percentage complete */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#e8eaf0', lineHeight: 1.2 }}>
+              {(pctComplete * 100).toFixed(1)}%
+            </div>
+            <div style={{ fontSize: 13, color: '#667799', marginTop: 2 }}>
+              of {target.toLocaleString()} target
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{
+            height: 8,
+            borderRadius: 4,
+            background: '#1a2040',
+            marginBottom: 8,
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${barPct}%`,
+              borderRadius: 4,
+              background: barPct >= 90 ? '#4caf50' : barPct >= 70 ? '#66bb6a' : '#4a9eff',
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+
+          <div style={{ fontSize: 13, color: '#8899bb', marginBottom: 16 }}>
+            {current.toLocaleString()} verified · {remaining.toLocaleString()} remaining
+          </div>
+
+          {/* P(reaching target) */}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
+              P(reaching {target.toLocaleString()})
+            </div>
+            <div style={{ fontSize: 36, fontWeight: 'bold', color: pColor, lineHeight: 1.1 }}>
+              {pPct}%
+            </div>
+          </div>
+
+          {/* Projected crossing or shortfall */}
+          <div style={{ fontSize: 13, color: '#8899bb', lineHeight: 1.8 }}>
+            {onTrack && crossingLabel ? (
+              <>
+                <div>
+                  Projected: <strong style={{ color: '#e8eaf0' }}>{crossingLabel}</strong>
+                  {daysToProjectedCrossing != null && (
+                    <span style={{ color: '#556688' }}> ({daysToProjectedCrossing} day{daysToProjectedCrossing !== 1 ? 's' : ''})</span>
+                  )}
+                </div>
+                <div style={{ color: '#556688' }}>
+                  At current pace ({netDailyVelocity.toLocaleString()} net/day)
+                </div>
+              </>
+            ) : (
+              <div style={{ color: '#ff7043' }}>
+                Not projected to reach target
+                {projectedFinalCount > 0 && (
+                  <div style={{ fontSize: 12, color: '#556688', marginTop: 2 }}>
+                    Projected final: ~{projectedFinalCount.toLocaleString()}
+                    {' '}(shortfall of {(target - projectedFinalCount).toLocaleString()})
+                  </div>
+                )}
+              </div>
+            )}
+            <div style={{ color: '#445577', marginTop: 4 }}>
+              Clerk deadline: {clerkDeadline} ({daysToDeadline} day{daysToDeadline !== 1 ? 's' : ''})
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Velocity summary card — sits in the snapshot row
 // ---------------------------------------------------------------------------
 function VelocityCard({ meta, districts, onExpand }) {
@@ -736,6 +858,10 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
         <ConfirmedDistrictsCard
           districts={districts}
           newlyMet={newlyMet}
+        />
+        <StatewideProjectionCard
+          overall={overall}
+          meta={meta}
         />
         <PredictionCard
           snapshot={snapshot}
