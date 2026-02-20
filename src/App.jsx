@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import SnapshotBoxes from './components/SnapshotBoxes.jsx'
 import StatCards from './components/StatCards.jsx'
 import DistributionChart from './components/DistributionChart.jsx'
@@ -131,6 +131,8 @@ export default function App() {
   const [error, setError] = useState(null)
   const [modelView, setModelView] = useState('primary') // 'primary' | 'growth'
   const [isMobile, setIsMobile] = useState(false)
+  const [velocityExpanded, setVelocityExpanded] = useState(false)
+  const velocityRef = useRef(null)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768)
@@ -420,7 +422,17 @@ export default function App() {
             )}
 
             <div style={STYLES.section}>
-              <SnapshotBoxes snapshot={data.snapshot} meta={data.meta} districts={data.districts} overall={data.overall} modelView={modelView} />
+              <SnapshotBoxes
+                snapshot={data.snapshot}
+                meta={data.meta}
+                districts={data.districts}
+                overall={data.overall}
+                modelView={modelView}
+                onExpandVelocity={() => {
+                  setVelocityExpanded(true)
+                  setTimeout(() => velocityRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+                }}
+              />
             </div>
 
             {!isMobile && (
@@ -433,8 +445,8 @@ export default function App() {
               <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} />
             </div>
 
-            <div style={STYLES.section}>
-              <VelocityTracker districts={data.districts} meta={data.meta} />
+            <div style={STYLES.section} ref={velocityRef}>
+              <VelocityTracker districts={data.districts} meta={data.meta} defaultExpanded={velocityExpanded} />
             </div>
 
             <div style={STYLES.section}>
