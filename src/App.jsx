@@ -7,6 +7,86 @@ import SignatureLookup from './components/SignatureLookup.jsx'
 import DistrictMap from './components/DistrictMap.jsx'
 import { THRESHOLDS } from './lib/probability.js'
 
+// Injected at build time by vite.config.js
+const BUILD_SHA = __BUILD_SHA__
+const BUILD_BRANCH = __BUILD_BRANCH__
+const BUILD_TIME = __BUILD_TIME__
+
+function formatUTCWithMT(isoString) {
+  if (!isoString) return null
+  const d = new Date(isoString)
+  if (isNaN(d)) return null
+  const utc = d.toLocaleString('en-US', {
+    timeZone: 'UTC',
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false,
+  })
+  // Mountain Time is UTC-7 (MDT) — fixed offset, no DST ambiguity needed here
+  const mt = d.toLocaleString('en-US', {
+    timeZone: 'America/Denver',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false,
+  })
+  const mtLabel = d.toLocaleString('en-US', { timeZone: 'America/Denver', timeZoneName: 'short' })
+    .split(' ').pop()
+  return `${utc} UTC (${mt} ${mtLabel})`
+}
+
+// Build ID: first 8 chars of sha256-style hash of buildTime + branch
+function buildId(time, branch) {
+  // Simple djb2-style hash — good enough for a display ID
+  const str = `${time}|${branch}`
+  let h = 5381
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) + h) ^ str.charCodeAt(i)
+    h = h >>> 0
+  }
+  return h.toString(16).padStart(8, '0')
+}
+
+function BuildInfo({ meta }) {
+  const buildIdStr = buildId(BUILD_TIME, BUILD_BRANCH)
+  const builtAt = formatUTCWithMT(BUILD_TIME)
+  const dataAt = formatUTCWithMT(meta?.lastUpdatedISO)
+
+  return (
+    <div style={{
+      marginTop: 12,
+      paddingTop: 10,
+      borderTop: '1px solid #0e1628',
+      fontSize: 10,
+      color: '#2a3a55',
+      lineHeight: 1.8,
+      fontFamily: 'monospace',
+      letterSpacing: '0.03em',
+    }}>
+      <span style={{ color: '#1e2e4a' }}>build</span>{' '}
+      <span style={{ color: '#334466' }}>{buildIdStr}</span>
+      {' · '}
+      <span style={{ color: '#1e2e4a' }}>ref</span>{' '}
+      <span style={{ color: '#334466' }}>{BUILD_SHA}</span>
+      {' · '}
+      <span style={{ color: '#1e2e4a' }}>branch</span>{' '}
+      <span style={{ color: '#334466' }}>{BUILD_BRANCH}</span>
+      {builtAt && (
+        <>
+          {' · '}
+          <span style={{ color: '#1e2e4a' }}>built</span>{' '}
+          <span style={{ color: '#334466' }}>{builtAt}</span>
+        </>
+      )}
+      {dataAt && (
+        <>
+          {' · '}
+          <span style={{ color: '#1e2e4a' }}>data</span>{' '}
+          <span style={{ color: '#334466' }}>{dataAt}</span>
+        </>
+      )}
+    </div>
+  )
+}
+
 const STYLES = {
   app: {
     background: '#0a0f1e',
@@ -461,7 +541,7 @@ export default function App() {
           . County clerk verification deadline: <strong style={{ color: '#8899bb' }}>March 9, 2026</strong>.
           Election date (if qualifies): <strong style={{ color: '#8899bb' }}>November 3, 2026</strong>.
         </p>
-        <p style={{ margin: 0 }}>
+        <p style={{ margin: '0 0 8px' }}>
           {data?.meta?.modelMode === 'survival'
             ? 'Probability model is in survival mode: submission deadline has passed, projections reflect expected clerk-review removals through March 9.'
             : 'Probability model uses exact dynamic programming across 29 independent district outcomes, with history-weighted linear trajectory projection.'
@@ -477,6 +557,7 @@ export default function App() {
             MIT License
           </a>.
         </p>
+        <BuildInfo meta={data?.meta} />
       </footer>
     </div>
   )
