@@ -1,15 +1,20 @@
 name: Fetch and Process Petition Data
 
+# Runs Monday–Friday at 17:00 UTC (10:00am MT).
+# The LG office only publishes new data on business days, so weekend runs are
+# skipped entirely. On any business-day run where the file hasn't changed
+# (same SHA-256 as latest.xlsx), the workflow exits cleanly with a
+# "No change in the Data" message and no downstream steps are executed.
+
 on:
   schedule:
-    - cron: '0 17 * * *'   # 10:00am MT (UTC-7) daily
-  workflow_dispatch:         # manual trigger from GitHub UI or CLI
+    - cron: '0 17 * * 1-5'    # 10:00am MT, Monday–Friday only
+  workflow_dispatch:             # manual trigger from GitHub UI or CLI
   push:
     branches:
-      - main                # any push to main triggers deploy
-    paths-ignore:
-      - 'instructions/**'   # never trigger on gitignored instructions folder
-      - '*.md'              # ignore readme-only changes
+      - main
+    paths:
+      - 'data/manual/**'        # manual xlsx drop → always run full pipeline
 
 jobs:
   fetch-and-process:
@@ -17,6 +22,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      data_changed: ${{ steps.check.outputs.data_changed }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,30 +37,28 @@ jobs:
 
       - name: Scrape LG site (manual file wins automatically if present)
         id: scrape
-        run: |
-          python scripts/scraper.py
-          echo "changed=true" >> $GITHUB_OUTPUT
+        run: python scripts/scraper.py
         continue-on-error: true
 
-      - name: Mark unchanged if scraper exited cleanly with no new file
-        if: steps.scrape.outcome == 'success'
+      - name: Check whether new data arrived
+        id: check
         run: |
-          # If latest.xlsx doesn't exist, scraper must have found nothing new
-          if [ ! -f data/latest.xlsx ]; then
-            echo "No xlsx available — skipping process.py"
+          if [ -f data/.scraper_changed ]; then
+            echo "data_changed=true"  >> $GITHUB_OUTPUT
+            echo "✅ New data detected — proceeding with pipeline."
+          else
+            echo "data_changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  No change in the Data — will check again next scheduled run."
           fi
 
       - name: Rebuild history and process data
-        if: steps.scrape.outcome == 'success' && steps.scrape.outputs.changed == 'true'
+        if: steps.check.outputs.data_changed == 'true'
         run: |
-          if [ -f data/latest.xlsx ]; then
-            python scripts/replay.py
-            python scripts/process.py
-          else
-            echo "No xlsx available — skipping replay/process, keeping existing data"
-          fi
+          python scripts/replay.py
+          python scripts/process.py
 
       - name: Create PR with updated data
+        if: steps.check.outputs.data_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -61,10 +66,9 @@ jobs:
           git config user.email "bot@t8rsk8s.io"
           git add data/snapshots/*.xlsx data/history.json public/data.json public/lookup.json
           if git diff --staged --quiet; then
-            echo "No data changes — skipping PR"
+            echo "No staged changes — skipping PR"
             exit 0
           fi
-          # Commit on detached main, then branch and rebase onto latest
           git commit -m "data: update $(date -u +%Y-%m-%d)"
           BRANCH="data/update-$(date -u +%Y-%m-%d-%H%M%S)"
           git checkout -b "$BRANCH"
@@ -80,6 +84,8 @@ jobs:
 
   build-and-deploy:
     needs: fetch-and-process
+    # Only deploy when there is actually new data; skip the build entirely otherwise.
+    if: needs.fetch-and-process.outputs.data_changed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read

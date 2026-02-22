@@ -30,6 +30,7 @@ DATA_DIR = REPO_ROOT / "data"
 SNAPSHOTS_DIR = DATA_DIR / "snapshots"
 MANUAL_DIR = DATA_DIR / "manual"
 LATEST_PATH = DATA_DIR / "latest.xlsx"
+CHANGED_SENTINEL = DATA_DIR / ".scraper_changed"   # exists iff this run produced new data
 
 
 def file_sha256(path: Path) -> str:
@@ -126,6 +127,18 @@ def download_file(url: str, dest: Path) -> None:
         sys.exit(1)
 
 
+def mark_changed():
+    """Touch the sentinel file so the CI workflow knows new data arrived."""
+    CHANGED_SENTINEL.parent.mkdir(parents=True, exist_ok=True)
+    CHANGED_SENTINEL.touch()
+
+
+def clear_changed():
+    """Remove the sentinel file so the CI workflow knows nothing changed."""
+    if CHANGED_SENTINEL.exists():
+        CHANGED_SENTINEL.unlink()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Scrape petition xlsx from LG site.")
     parser.add_argument("--debug", action="store_true", help="Dump page HTML to stdout and exit.")
@@ -133,6 +146,9 @@ def main():
 
     SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
     MANUAL_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Always start by clearing the sentinel; we only re-set it if new data arrives.
+    clear_changed()
 
     today_str = datetime.utcnow().strftime("%Y-%m-%d")
     snapshot_path = SNAPSHOTS_DIR / f"{today_str}.xlsx"
@@ -144,6 +160,7 @@ def main():
         new_hash = file_sha256(manual_path)
         if LATEST_PATH.exists() and file_sha256(LATEST_PATH) == new_hash:
             print(f"Manual file is identical to latest (SHA-256: {new_hash[:12]}…) — skipping.")
+            print("No change in the Data.")
             manual_path.unlink()
             sys.exit(0)
         dest_snapshot = SNAPSHOTS_DIR / manual_path.name
@@ -151,6 +168,7 @@ def main():
         shutil.copy2(str(dest_snapshot), str(LATEST_PATH))
         rows = count_rows(LATEST_PATH)
         print(f"Downloaded: {dest_snapshot.name} ({rows} rows)")
+        mark_changed()
         return
 
     # --- Scrape from LG site ---
@@ -172,6 +190,7 @@ def main():
         old_hash = file_sha256(LATEST_PATH)
         if new_hash == old_hash:
             print(f"File unchanged (SHA-256: {new_hash[:12]}…) — skipping update.")
+            print("No change in the Data.")
             tmp_path.unlink()  # discard duplicate
             sys.exit(0)
         print(f"New file detected (old: {old_hash[:12]}… → new: {new_hash[:12]}…)")
@@ -184,6 +203,7 @@ def main():
 
     rows = count_rows(LATEST_PATH)
     print(f"Downloaded: {snapshot_path.name} ({rows} rows)")
+    mark_changed()
 
 
 if __name__ == "__main__":

@@ -10,8 +10,8 @@ export default function DistributionChart({ overall, modelView }) {
     ? (overall?.pExactGrowth ?? overall?.pExact ?? [])
     : (overall?.pExact ?? [])
 
-  // Show k = 18..29
-  const kMin = 18
+  // Show k = 0..29
+  const kMin = 0
   const kMax = 29
   const buckets = []
   for (let k = kMin; k <= kMax; k++) {
@@ -55,7 +55,7 @@ export default function DistributionChart({ overall, modelView }) {
       <div style={{
         display: 'flex',
         alignItems: 'flex-end',
-        gap: 6,
+        gap: 3,
         height: 160,
         position: 'relative',
         marginBottom: 8,
@@ -97,7 +97,7 @@ export default function DistributionChart({ overall, modelView }) {
                   pointerEvents: 'none',
                 }}>
                   <div style={{ fontWeight: 'bold' }}>k = {k} districts</div>
-                  <div style={{ color }}>{(p * 100).toFixed(2)}%</div>
+                  <div style={{ color }}>{(p * 100).toFixed(3)}%</div>
                   {qualifies && <div style={{ color: '#4caf50', fontSize: 11 }}>✓ Qualifies</div>}
                 </div>
               )}
@@ -132,7 +132,7 @@ export default function DistributionChart({ overall, modelView }) {
 
               {/* k label */}
               <div style={{
-                fontSize: 10,
+                fontSize: 9,
                 color: qualifies ? '#4caf50' : '#445577',
                 marginTop: 4,
                 fontWeight: qualifies ? 'bold' : 'normal',
@@ -176,7 +176,7 @@ export default function DistributionChart({ overall, modelView }) {
               P(exactly {k})
             </div>
             <div style={{ fontSize: 22, fontWeight: 'bold', color: '#e8eaf0' }}>
-              {(p * 100).toFixed(1)}%
+              {(p * 100).toFixed(3)}%
             </div>
           </div>
         ))}
