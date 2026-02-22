@@ -46,7 +46,10 @@ function buildId(time, branch) {
 function BuildInfo({ meta }) {
   const buildIdStr = buildId(BUILD_TIME, BUILD_BRANCH)
   const builtAt = formatUTCWithMT(BUILD_TIME)
-  const dataAt = formatUTCWithMT(meta?.lastUpdatedISO)
+  // dataAt = the date the LG file was published (not when the build ran)
+  const dataDate = meta?.lastUpdated   // "YYYY-MM-DD" from process.py
+  // processedAt = when process.py actually ran
+  const processedAt = formatUTCWithMT(meta?.processedAt)
 
   return (
     <div style={{
@@ -70,15 +73,22 @@ function BuildInfo({ meta }) {
       {builtAt && (
         <>
           {' · '}
-          <span style={{ color: '#1e2e4a' }}>built</span>{' '}
+          <span style={{ color: '#1e2e4a' }}>deployed</span>{' '}
           <span style={{ color: '#334466' }}>{builtAt}</span>
         </>
       )}
-      {dataAt && (
+      {dataDate && (
         <>
           {' · '}
           <span style={{ color: '#1e2e4a' }}>data</span>{' '}
-          <span style={{ color: '#334466' }}>{dataAt}</span>
+          <span style={{ color: '#334466' }}>{dataDate}</span>
+        </>
+      )}
+      {processedAt && (
+        <>
+          {' · '}
+          <span style={{ color: '#1e2e4a' }}>processed</span>{' '}
+          <span style={{ color: '#334466' }}>{processedAt}</span>
         </>
       )}
     </div>
