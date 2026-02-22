@@ -59,7 +59,7 @@ const bigNum = (color) => ({
 
 const subStyle = {
   fontSize: 12,
-  color: '#445577',
+  color: '#8899bb',
   marginTop: 2,
 }
 

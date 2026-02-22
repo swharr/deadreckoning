@@ -368,24 +368,24 @@ export default function App() {
                     <button
                       onClick={() => setModelView('growth')}
                       style={{
-                        background: modelView === 'growth' ? '#0d2a1a' : 'transparent',
+                        background: modelView === 'growth' ? '#1a1200' : 'transparent',
                         border: 'none',
                         padding: '5px 14px',
                         fontSize: 10,
                         fontWeight: 'bold',
                         letterSpacing: '0.06em',
                         textTransform: 'uppercase',
-                        color: modelView === 'growth' ? '#4caf50' : '#556688',
+                        color: modelView === 'growth' ? '#ffca28' : '#445566',
                         cursor: 'pointer',
                         fontFamily: 'Georgia, serif',
                         whiteSpace: 'nowrap',
                         transition: 'all 0.15s',
                       }}
                     >
-                      Growth
+                      Growth ⚠️
                     </button>
                     <div className="pill-tooltip">
-                      Hypothetical view of where trajectory was heading before the Feb 15 deadline. Useful for context, but not the operative model.
+                      ⚠️ Outdated — pre-Feb 15 deadline model. Shows hypothetical trajectory context only. Switch to Survival for current operative probabilities.
                     </div>
                   </div>
                 </div>
@@ -394,21 +394,47 @@ export default function App() {
           )}
           {data && data.meta?.modelMode === 'survival' && modelView === 'growth' && (
             <div style={{
-              background: '#0a1f0f',
-              border: '1px solid #2d6a4f',
-              borderRadius: 6,
-              padding: '10px 16px',
+              background: '#1a1400',
+              border: '2px solid #b45309',
+              borderRadius: 8,
+              padding: '14px 18px',
               marginBottom: 16,
-              fontSize: 12,
-              color: '#4caf50',
-              lineHeight: 1.7,
-              maxWidth: 680,
+              fontSize: 13,
+              color: '#e8eaf0',
+              lineHeight: 1.8,
+              maxWidth: 720,
             }}>
-              <strong>📈 Growth View — hypothetical</strong>
-              {' '}The submission deadline passed on Feb 15. This view shows what the
-              growth model <em>would have</em> predicted based on pre-deadline trajectory and
-              velocity — useful for context, but not the operative model.
-              {' '}<span style={{ color: '#2d6a4f' }}>Switch back to Survival View for the current, operative probability.</span>
+              <div style={{ fontWeight: 'bold', color: '#ffca28', fontSize: 14, marginBottom: 6 }}>
+                ⚠️ Growth View — Outdated Pre-Deadline Model
+              </div>
+              <div>
+                The Feb 15 submission deadline has passed. No new signatures can be added.{' '}
+                <strong style={{ color: '#fbbf24' }}>This model is no longer predictive</strong> — it shows
+                what the trajectory <em>would have</em> projected before the deadline, based on pre-Feb-15
+                velocity. Numbers here do not reflect actual clerk-review outcomes.
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <button
+                  onClick={() => setModelView('primary')}
+                  style={{
+                    background: '#fbbf24',
+                    border: 'none',
+                    borderRadius: 5,
+                    color: '#0a0f1e',
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    padding: '6px 18px',
+                    cursor: 'pointer',
+                    fontFamily: 'Georgia, serif',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  → Switch to Survival Model (recommended)
+                </button>
+                <span style={{ marginLeft: 12, fontSize: 11, color: '#92680a' }}>
+                  The Survival Model reflects current clerk-review probabilities through March 9.
+                </span>
+              </div>
             </div>
           )}
           {data && data.meta?.modelMode === 'survival' && modelView === 'primary' && (
