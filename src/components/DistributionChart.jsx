@@ -10,8 +10,8 @@ export default function DistributionChart({ overall, modelView }) {
     ? (overall?.pExactGrowth ?? overall?.pExact ?? [])
     : (overall?.pExact ?? [])
 
-  // Show k = 0..29
-  const kMin = 0
+  // Show k = 11..29 — mass below 11 is negligible given 29 districts
+  const kMin = 11
   const kMax = 29
   const buckets = []
   for (let k = kMin; k <= kMax; k++) {
@@ -150,7 +150,7 @@ export default function DistributionChart({ overall, modelView }) {
         textAlign: 'center',
         marginBottom: 24,
       }}>
-        Number of districts meeting 8% threshold (need ≥26)
+        Districts meeting 8% threshold — showing k=11–29 (need ≥26)
         &nbsp;·&nbsp;
         <span style={{ color: '#4a9eff' }}>■ Does not qualify</span>
         &nbsp;&nbsp;

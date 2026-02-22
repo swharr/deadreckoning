@@ -475,39 +475,6 @@ export default function App() {
 
         {data && (
           <>
-            {isMobile && (
-              <div style={STYLES.section}>
-                <div style={{
-                  background: 'linear-gradient(135deg, #0d1530 0%, #111d40 100%)',
-                  border: '1px solid #2a3a60',
-                  borderRadius: 12,
-                  padding: '24px 20px',
-                  textAlign: 'center',
-                  marginBottom: 8,
-                }}>
-                  <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
-                  <div style={{
-                    fontSize: 20,
-                    fontWeight: 'bold',
-                    color: '#e8eaf0',
-                    marginBottom: 6,
-                    lineHeight: 1.3,
-                    fontFamily: 'Georgia, serif',
-                  }}>
-                    Did you sign?
-                  </div>
-                  <div style={{
-                    fontSize: 13,
-                    color: '#4a9eff',
-                    marginBottom: 16,
-                    fontFamily: 'Georgia, serif',
-                  }}>
-                    Check in 15 seconds
-                  </div>
-                </div>
-                <SignatureLookup districts={data.districts} />
-              </div>
-            )}
 
             <div style={STYLES.section}>
               <SnapshotBoxes
@@ -522,12 +489,6 @@ export default function App() {
                 }}
               />
             </div>
-
-            {!isMobile && (
-              <div style={STYLES.section}>
-                <SignatureLookup districts={data.districts} />
-              </div>
-            )}
 
             <div style={STYLES.section}>
               <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} snapshot={data.snapshot} />
@@ -547,6 +508,10 @@ export default function App() {
 
             <div style={STYLES.section}>
               <DistrictTable districts={data.districts} />
+            </div>
+
+            <div style={STYLES.section}>
+              <SignatureLookup districts={data.districts} />
             </div>
 
             <div style={STYLES.section}>

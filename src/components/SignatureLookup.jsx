@@ -57,7 +57,7 @@ const RESULT = {
   ERROR: 'error',
 }
 
-export default function SignatureLookup({ districts = [] }) {
+function SignatureLookupInner({ districts = [] }) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [senateDistrict, setSenateDistrict] = useState('')
@@ -180,12 +180,7 @@ export default function SignatureLookup({ districts = [] }) {
   }
 
   return (
-    <div style={{
-      background: '#0d1530',
-      border: '1px solid #1e2a4a',
-      borderRadius: 10,
-      padding: '24px 28px',
-    }}>
+    <div style={{ padding: '24px 28px' }}>
       <div style={{
         fontSize: 13,
         fontWeight: 'bold',
@@ -193,6 +188,7 @@ export default function SignatureLookup({ districts = [] }) {
         textTransform: 'uppercase',
         color: '#8899bb',
         marginBottom: 6,
+        display: 'none',   // title now lives in the collapsible header
       }}>
         🔍 Signature Lookup
       </div>
@@ -566,6 +562,76 @@ export default function SignatureLookup({ districts = [] }) {
       <div style={{ marginTop: 14, fontSize: 11, color: '#334466', lineHeight: 1.5 }}>
         Index updated daily from the official Lt. Governor petition list.
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Collapsible wrapper exported as the default
+// ---------------------------------------------------------------------------
+export default function SignatureLookup({ districts = [] }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div style={{
+      background: '#0d1530',
+      border: '1px solid #1e2a4a',
+      borderRadius: 10,
+      overflow: 'hidden',
+    }}>
+      {/* Collapse toggle header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'transparent',
+          border: 'none',
+          borderBottom: open ? '1px solid #1e2a4a' : 'none',
+          padding: '16px 28px',
+          cursor: 'pointer',
+          textAlign: 'left',
+          gap: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 13 }}>🔍</span>
+          <span style={{
+            fontSize: 13,
+            fontWeight: 'bold',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#8899bb',
+          }}>
+            Signature Lookup
+          </span>
+          {!open && (
+            <span style={{ fontSize: 12, color: '#334466', fontWeight: 'normal', letterSpacing: 0, textTransform: 'none' }}>
+              — check if your name is on the petition
+            </span>
+          )}
+        </div>
+        <span style={{
+          fontSize: 12,
+          color: '#445577',
+          fontFamily: 'monospace',
+          flexShrink: 0,
+          transition: 'transform 0.2s',
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          display: 'inline-block',
+        }}>
+          ▼
+        </span>
+      </button>
+
+      {/* Collapsible content — inner component renders inside here without its own card wrapper */}
+      {open && (
+        <div style={{ padding: '0 0 4px' }}>
+          <SignatureLookupInner districts={districts} />
+        </div>
+      )}
     </div>
   )
 }
