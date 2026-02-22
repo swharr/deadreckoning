@@ -220,6 +220,63 @@ These floors reflect a simple reality: a district that already has 75% of the si
 
 ---
 
+## Confidence score
+
+The site displays a **confidence score** (0–100%) on the Ballot Probability card. It answers: *"How much should you trust the number you're seeing right now?"* — not whether the petition will qualify, but how reliable the model's current estimate is given the data available.
+
+The score is a composite of three independent axes, multiplied together:
+
+### 1. Data maturity
+
+How much evidence the model has accumulated.
+
+- **Pre-deadline:** `min(snapshot_count / 22, 1.0)` — where 22 is the estimated number of business-day snapshots from the campaign start through the February 15 submission deadline.
+- **Post-deadline:** Blends snapshot maturity (60%) with clerk-window progress (40%) — `days_elapsed / 22` through the March 9 clerk deadline. As more daily updates arrive during clerk review, this component rises from 0% toward 100%.
+
+Early in the clerk review window, data maturity is typically the primary drag on the overall score, because the Bayesian removal rate prior still dominates observed clerk actions.
+
+### 2. Outcome certainty
+
+How far `expectedDistricts` is from the 26-district qualification threshold.
+
+```
+outcome_certainty = tanh(|expectedDistricts − 26| / 2.5)
+```
+
+When `expectedDistricts` is far from 26 in either direction, the model is confident about the direction of the outcome — even if the precise probability estimate shifts. When `expectedDistricts` is near 26 (e.g., between 24 and 28), this is a genuine coin-flip territory and certainty drops toward zero.
+
+The tanh function reaches ~0.92 at 3 districts away, ~0.99 at 5 districts away.
+
+### 3. Model sharpness
+
+How narrow the DP probability distribution is, measured by its standard deviation:
+
+```
+model_sharpness = max(0.0, 1 − std(pExact) / 5.0)
+```
+
+A tight spike in the distribution (most probability mass concentrated at one or two values of k) means the model's internal math is producing a clean, consistent answer. A wide spread means outcomes are genuinely dispersed and the headline probability is masking meaningful variance. A standard deviation of 5+ (roughly what a 50/50 binomial over 29 districts would produce) maps to 0% sharpness.
+
+### Composite score
+
+```
+confidence = data_maturity × outcome_certainty × model_sharpness
+```
+
+All three are multiplied. A weakness in any one axis reduces the overall score proportionally. The result is labeled:
+
+| Score | Label |
+|---|---|
+| ≥ 85% | Very High |
+| ≥ 65% | High |
+| ≥ 40% | Moderate |
+| ≥ 20% | Low |
+| < 20% | Very Low |
+
+The UI also generates a plain-English explanation of which axis is the current limiting factor, updated automatically on each data refresh. The three component values are available in `overall.confidenceComponents` in `data.json` for independent inspection.
+
+---
+
 ## What the model does not do
 
 - **It does not adjust or edit signature counts.** Every count shown comes directly from the LG xlsx.
