@@ -472,7 +472,30 @@ export default function App() {
             Probability distribution across all 29 Senate districts.
             Requires 26 of 29 to meet the 8% signature threshold.
           </p>
-          <p style={{ ...STYLES.subtitle, marginTop: 10, maxWidth: 680 }}>
+
+          {/* What is Prop 4 — always visible context for first-time visitors */}
+          <div style={{ marginTop: 16, maxWidth: 680, fontSize: 13, color: '#8899bb', lineHeight: 1.8 }}>
+            <p style={{ margin: '0 0 8px' }}>
+              <strong style={{ color: '#e8eaf0' }}>Proposition 4</strong> was a 2018 Utah ballot
+              initiative that created an independent redistricting commission to draw legislative
+              maps — taking that power away from the legislature itself. Voters passed it with
+              50.3% of the vote.
+            </p>
+            <p style={{ margin: '0 0 8px' }}>
+              In 2020, the legislature passed SB 200, which{' '}
+              <strong style={{ color: '#e8eaf0' }}>stripped the commission of binding authority</strong>{' '}
+              and let lawmakers draw maps however they chose. The commission's recommended maps
+              were ignored entirely in the 2021 redistricting cycle.
+            </p>
+            <p style={{ margin: 0 }}>
+              This petition seeks to <strong style={{ color: '#e8eaf0' }}>repeal that override</strong>{' '}
+              and restore the original Prop 4 redistricting rules — putting the question back
+              before Utah voters on the{' '}
+              <span style={{ color: '#4a9eff' }}>November 2026 ballot</span>.
+            </p>
+          </div>
+
+          <p style={{ ...STYLES.subtitle, marginTop: 16, maxWidth: 680 }}>
             To qualify, the petition needs{' '}
             <span style={{ color: '#e8eaf0', fontWeight: 'bold' }}>140,748 verified signatures statewide</span>
             {' '}and must clear the 8% threshold in at least{' '}
@@ -481,53 +504,6 @@ export default function App() {
             County clerks verify signatures through{' '}
             <span style={{ color: '#4a9eff' }}>March 9, 2026</span>.
           </p>
-
-          {/* What is Prop 4 — context for first-time visitors */}
-          <details style={{ marginTop: 20, maxWidth: 680 }}>
-            <summary style={{
-              fontSize: 12,
-              color: '#4a9eff',
-              cursor: 'pointer',
-              letterSpacing: '0.05em',
-              fontFamily: 'Georgia, serif',
-              userSelect: 'none',
-              listStyleType: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}>
-              <span style={{ fontSize: 10 }}>▶</span> What is Utah Prop 4?
-            </summary>
-            <div style={{
-              marginTop: 12,
-              padding: '14px 18px',
-              background: '#0d1530',
-              border: '1px solid #1e2a4a',
-              borderRadius: 8,
-              fontSize: 13,
-              color: '#8899bb',
-              lineHeight: 1.8,
-            }}>
-              <p style={{ margin: '0 0 10px' }}>
-                <strong style={{ color: '#e8eaf0' }}>Proposition 4</strong> was a 2018 Utah ballot
-                initiative that created an independent redistricting commission to draw legislative
-                maps — taking that power away from the legislature itself. Voters passed it with
-                50.3% of the vote.
-              </p>
-              <p style={{ margin: '0 0 10px' }}>
-                In 2020, the legislature passed SB 200, which{' '}
-                <strong style={{ color: '#e8eaf0' }}>stripped the commission of binding authority</strong>{' '}
-                and let lawmakers draw maps however they chose. The commission's recommended maps
-                were ignored entirely in the 2021 redistricting cycle.
-              </p>
-              <p style={{ margin: 0 }}>
-                This petition seeks to <strong style={{ color: '#e8eaf0' }}>repeal that override</strong>{' '}
-                and restore the original Prop 4 redistricting rules — putting the question back
-                before Utah voters on the{' '}
-                <span style={{ color: '#4a9eff' }}>November 2026 ballot</span>.
-              </p>
-            </div>
-          </details>
         </div>
       </header>
 
