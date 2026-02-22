@@ -652,6 +652,10 @@ function StatewideProjectionCard({ overall, meta }) {
     pReachTarget, onTrack,
   } = proj
 
+  // Best estimate of final statewide count (raw district projections, no removal haircut)
+  const projectedRaw = overall?.projectedStatewideRaw ?? projectedFinalCount
+  const projectedSurplus = projectedRaw > 0 ? Math.round(projectedRaw - target) : null
+
   const alreadyMet = current >= target
   const pPct = Math.round(pReachTarget * 100)
   const pColor = pPct >= 70 ? '#4caf50' : pPct >= 40 ? '#ffc107' : '#f44336'
@@ -738,6 +742,11 @@ function StatewideProjectionCard({ overall, meta }) {
                 <div style={{ color: '#556688' }}>
                   At current pace ({netDailyVelocity.toLocaleString()} net/day)
                 </div>
+                {projectedSurplus !== null && (
+                  <div style={{ color: projectedSurplus >= 0 ? '#4caf50' : '#ff7043', marginTop: 2 }}>
+                    {projectedSurplus >= 0 ? '+' : ''}{projectedSurplus.toLocaleString()} projected vs {target.toLocaleString()} target
+                  </div>
+                )}
               </>
             ) : (
               <div style={{ color: '#ff7043' }}>

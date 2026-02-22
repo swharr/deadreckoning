@@ -2,7 +2,7 @@
   "meta": {
     "lastUpdated": "2026-02-20",
     "lastUpdatedISO": "2026-02-20T12:00:00Z",
-    "processedAt": "2026-02-22T22:29:54Z",
+    "processedAt": "2026-02-22T22:33:41Z",
     "sourceFile": "latest.xlsx",
     "totalVerified": 117114,
     "daysToDeadline": 17,
@@ -115,6 +115,13 @@
       "daysToProjectedCrossing": 4,
       "pReachTarget": 0.7895,
       "onTrack": true
+    },
+    "confidence": 0.354,
+    "confidenceLabel": "Low",
+    "confidenceComponents": {
+      "dataMaturity": 0.4818,
+      "outcomeCertainty": 0.9971,
+      "modelSharpness": 0.7369
     }
   },
   "districts": [

@@ -1086,6 +1086,56 @@ def main():
         "onTrack": on_track,
     }
 
+    # --- Confidence score (composite, 0.0–1.0) ---
+    # Three axes multiplied together. Each is 0–1.
+    # Result is stored in overall.confidence and overall.confidenceComponents.
+
+    # 1. Data maturity: how much evidence the model has seen.
+    #    Estimated max useful snapshots ≈ 22 (Jan 16 → Feb 20 business days).
+    #    Post-deadline: also factor in how far through the 22-day clerk window we are.
+    MAX_EXPECTED_SNAPSHOTS = 22
+    snapshot_count = history["snapshotCount"] if history else 1
+    snapshot_maturity = min(snapshot_count / MAX_EXPECTED_SNAPSHOTS, 1.0)
+
+    if post_deadline:
+        days_post = max(0, (date.today() - SUBMISSION_DEADLINE).days)
+        clerk_window = max((CLERK_DEADLINE - SUBMISSION_DEADLINE).days, 1)
+        clerk_progress = min(days_post / clerk_window, 1.0)
+        # Average snapshot maturity with clerk progress so late-window data reads higher
+        data_maturity = 0.6 * snapshot_maturity + 0.4 * clerk_progress
+    else:
+        data_maturity = snapshot_maturity
+
+    # 2. Outcome certainty: how far expectedDistricts is from the 26-district threshold.
+    #    Far from 26 in either direction = we know the answer.
+    #    Right at 26 = genuine uncertainty.
+    dist_from_threshold = abs(exp_districts - DISTRICTS_REQUIRED)
+    # Sigmoid-style ramp: 0 distance → 0 certainty, 5+ districts away → ~1.0
+    # tanh(d/2) reaches 0.92 at d=3, 0.99 at d=5
+    outcome_certainty = math.tanh(dist_from_threshold / 2.5)
+
+    # 3. Model sharpness: how narrow the DP pExact distribution is.
+    #    Compute mean and std dev of the distribution using k as the random variable.
+    n_districts = TOTAL_DISTRICTS
+    dp_mean = sum(k * p_exact[k] for k in range(n_districts + 1))
+    dp_var = sum((k - dp_mean) ** 2 * p_exact[k] for k in range(n_districts + 1))
+    dp_std = dp_var ** 0.5
+    # Normalize: std dev of ~0 = very sharp (1.0), std dev of ~5+ = broad (0.0)
+    # A binomial(29, 0.5) has std≈2.7; use 5.0 as the "wide" reference
+    model_sharpness = max(0.0, 1.0 - dp_std / 5.0)
+
+    confidence_raw = data_maturity * outcome_certainty * model_sharpness
+    # Clamp to [0, 1] and round
+    confidence = round(min(1.0, max(0.0, confidence_raw)), 4)
+
+    confidence_label = (
+        "Very High" if confidence >= 0.85 else
+        "High"      if confidence >= 0.65 else
+        "Moderate"  if confidence >= 0.40 else
+        "Low"       if confidence >= 0.20 else
+        "Very Low"
+    )
+
     # --- Build output ---
     now_utc = datetime.now(timezone.utc)
 
@@ -1139,6 +1189,13 @@ def main():
             "expectedDistrictsGrowth": round(exp_districts_growth, 2),
             "pExactGrowth": p_exact_growth,
             "statewideProjection": statewide_projection,
+            "confidence": confidence,
+            "confidenceLabel": confidence_label,
+            "confidenceComponents": {
+                "dataMaturity": round(data_maturity, 4),
+                "outcomeCertainty": round(outcome_certainty, 4),
+                "modelSharpness": round(model_sharpness, 4),
+            },
         },
         "districts": districts_out,
         "snapshot": {
