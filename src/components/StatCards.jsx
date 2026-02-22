@@ -63,6 +63,48 @@ const subStyle = {
   marginTop: 2,
 }
 
+function confidenceColor(label) {
+  if (label === 'Very High') return '#4caf50'
+  if (label === 'High')      return '#69f0ae'
+  if (label === 'Moderate')  return '#ffca28'
+  if (label === 'Low')       return '#ff7043'
+  return '#ef5350'  // Very Low
+}
+
+function ConfidenceMeter({ value, label }) {
+  // value is 0–1
+  const pct = Math.round(value * 100)
+  const color = confidenceColor(label)
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+        <span style={{ fontSize: 10, color: '#445577', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+          Confidence
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 'bold', color, fontFamily: 'monospace' }}>
+          {label} · {pct}%
+        </span>
+      </div>
+      <div style={{
+        height: 4,
+        background: '#0a0f1e',
+        borderRadius: 2,
+        border: '1px solid #1e2a4a',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          height: '100%',
+          width: `${pct}%`,
+          background: color,
+          borderRadius: 2,
+          transition: 'width 0.8s ease-out',
+          opacity: 0.85,
+        }} />
+      </div>
+    </div>
+  )
+}
+
 export default function StatCards({ overall, meta, districts, modelView, snapshot }) {
   const isGrowthView = modelView === 'growth'
   const newlyMet = snapshot?.newlyMet || []
@@ -81,6 +123,9 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
     const threshold = THRESHOLDS[d.d] || d.threshold
     return d.verified >= threshold
   }).length
+
+  const confidence = overall?.confidence ?? null
+  const confidenceLabel = overall?.confidenceLabel ?? null
 
   // Animate the probability percentage (0–100)
   const pPct = Math.round(pQualify * 100)
@@ -105,6 +150,9 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
           P(≥26 districts qualify)
           {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
         </div>
+        {confidence !== null && confidenceLabel && (
+          <ConfidenceMeter value={confidence} label={confidenceLabel} />
+        )}
       </div>
 
       {/* Card 2: Expected Districts */}
