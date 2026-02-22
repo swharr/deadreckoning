@@ -344,11 +344,19 @@ function PredictionCard({ snapshot, meta, districts, overall, modelView }) {
         </div>
       )}
 
-      {meta?.clerkDeadline && (
-        <div style={{ marginTop: 14, fontSize: 12, color: '#445577' }}>
-          Next update expected: <strong style={{ color: '#4a9eff' }}>{meta.clerkDeadline}</strong>
-        </div>
-      )}
+      {meta?.lastUpdated && meta?.clerkDeadline && (() => {
+        // Compute next M–F business day after last data date, capped at clerkDeadline
+        const d = new Date(meta.lastUpdated + 'T12:00:00Z')
+        do { d.setUTCDate(d.getUTCDate() + 1) } while (d.getUTCDay() === 0 || d.getUTCDay() === 6)
+        const nextBizDay = d.toISOString().slice(0, 10)
+        const cap = meta.clerkDeadline
+        const nextUpdate = nextBizDay <= cap ? nextBizDay : cap
+        return (
+          <div style={{ marginTop: 14, fontSize: 12, color: '#445577' }}>
+            Next update expected: <strong style={{ color: '#4a9eff' }}>{nextUpdate}</strong>
+          </div>
+        )
+      })()}
     </div>
   )
 }
