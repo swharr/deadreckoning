@@ -71,7 +71,38 @@ function confidenceColor(label) {
   return '#ef5350'  // Very Low
 }
 
-function ConfidenceMeter({ value, label }) {
+function confidenceExplain(components) {
+  if (!components) return null
+  const { dataMaturity, outcomeCertainty, modelSharpness } = components
+  const matPct  = Math.round(dataMaturity     * 100)
+  const certPct = Math.round(outcomeCertainty * 100)
+  const sharpPct = Math.round(modelSharpness  * 100)
+
+  // Plain-English sentence for the weakest axis
+  let drag = null
+  if (dataMaturity < 0.60) {
+    drag = `Data maturity is the main drag (${matPct}%) — the model has only seen a portion of the clerk review window so far. Confidence will rise as more daily updates arrive before the March 9 deadline.`
+  } else if (modelSharpness < 0.70) {
+    drag = `Model sharpness is limiting confidence (${sharpPct}%) — the outcome distribution is still spread across several scenarios. More data will narrow it.`
+  } else if (outcomeCertainty < 0.80) {
+    drag = `Outcome certainty is moderate (${certPct}%) — the expected district count is close enough to the 26-district threshold that the model can't rule out a different result with high confidence.`
+  } else {
+    drag = `All three inputs are strong. The model has good data, a clear distribution, and the outcome is well away from the qualification threshold.`
+  }
+
+  return (
+    <div style={{ marginTop: 8, fontSize: 11, color: '#334466', lineHeight: 1.6 }}>
+      <span style={{ color: '#2a3a55', fontWeight: 'bold' }}>Why {Math.round((dataMaturity * outcomeCertainty * modelSharpness) * 100)}%? </span>
+      {drag}
+      {' '}
+      <span style={{ color: '#2a3a55' }}>
+        (Data maturity {matPct}% · Outcome certainty {certPct}% · Model sharpness {sharpPct}%)
+      </span>
+    </div>
+  )
+}
+
+function ConfidenceMeter({ value, label, components }) {
   // value is 0–1
   const pct = Math.round(value * 100)
   const color = confidenceColor(label)
@@ -101,6 +132,7 @@ function ConfidenceMeter({ value, label }) {
           opacity: 0.85,
         }} />
       </div>
+      {confidenceExplain(components)}
     </div>
   )
 }
@@ -126,6 +158,7 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
 
   const confidence = overall?.confidence ?? null
   const confidenceLabel = overall?.confidenceLabel ?? null
+  const confidenceComponents = overall?.confidenceComponents ?? null
 
   // Animate the probability percentage (0–100)
   const pPct = Math.round(pQualify * 100)
@@ -151,7 +184,7 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
           {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
         </div>
         {confidence !== null && confidenceLabel && (
-          <ConfidenceMeter value={confidence} label={confidenceLabel} />
+          <ConfidenceMeter value={confidence} label={confidenceLabel} components={confidenceComponents} />
         )}
       </div>
 
