@@ -77,22 +77,29 @@ Full Azure docs: https://learn.microsoft.com/en-us/azure/static-web-apps/get-sta
 ---
 ## 4. Updating the Probability Model
 
-The model lives in `scripts/process.py`, in the `compute_district_prob()` function.
+The model lives in `scripts/process.py`. Key tunable constants at the top of the file:
 
-Key parameters to tune:
-- **`ESTIMATED_VALID_UNVERIFIED`** — currently `81620`. Update this once actual March 9 clerk counts land in the spreadsheet (set to `0` when actual numbers are in).
-- **Weighting factors** inside `compute_district_prob()` — base score 50%, projected 30%, trend-adjusted 20%. Adjust these if the model drifts from reality.
 - **`THRESHOLDS`** dict — update if the LG office revises district thresholds (D8 and D9 were revised Feb 5, 2026).
+- **`REMOVAL_PRIOR`** inside `bayesian_removal_rate()` — currently `0.0165` (1.65%), derived from county clerk removal-request data as of Feb 12, 2026. Update if better empirical data becomes available.
+- **`CORRELATION_PENALTY_SCALE`** — currently `0.030` (3%). Scales the inter-district correlation deflator applied to `p_qualify`.
+- **`LG_LAG_DAYS`** — currently `14`. The number of calendar days over which the LG posting lag weight decays. Empirically calibrated from Feb 16–20 data showing 25.8% post-deadline gain rate.
 
 After editing:
 
 ```bash
-python scripts/process.py  # regenerates public/data.json
-# check the output looks sane
-cat public/data.json | python -m json.tool | head -60
+# Rebuild history from all snapshots (if adding new ones)
+.venv/bin/python scripts/replay.py
+
+# Regenerate data.json
+.venv/bin/python scripts/process.py
+
+# Check output
+python3 -c "import json; d=json.load(open('public/data.json')); print(d['overall']['pQualify'], d['overall']['expectedDistricts'])"
 ```
 
 The JavaScript mirror at `src/lib/probability.js` exports `THRESHOLDS` and `TIER_CONFIG` — keep these in sync if you change district thresholds.
+
+See `MODEL-DESCRIPTION.md` for a full description of all model components.
 
 ---
 
@@ -102,8 +109,8 @@ The JavaScript mirror at `src/lib/probability.js` exports `THRESHOLDS` and `TIER
 |------|-------|
 | Oct 24, 2025 | Petition filed |
 | Feb 15, 2026 | Signature submission deadline (passed) |
-| **Mar 7, 2026** | County clerk verification deadline — **we are here** |
-| Mar 7, 2026 | Public list should reflect all verified + removed signatures |
+| **Mar 9, 2026** | County clerk verification deadline — **we are here** |
+| Mar 9, 2026 | Public list should reflect all verified + removed signatures |
 | Nov 3, 2026 | General election (if petition qualifies) |
 
 ---
@@ -129,7 +136,9 @@ The JavaScript mirror at `src/lib/probability.js` exports `THRESHOLDS` and `TIER
 │   │   └── DistrictTable.jsx
 │   └── lib/
 │       └── probability.js
-├── .github/workflows/fetch.yml
+├── .github/workflows/
+│   ├── fetch.yml         ← daily data pipeline (scrape → replay → process → deploy)
+│   └── deploy.yml        ← frontend-only deploy on non-data pushes to main
 ├── staticwebapp.config.json
 ├── index.html
 ├── vite.config.js
