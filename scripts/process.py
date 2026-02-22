@@ -222,13 +222,35 @@ def compute_district_prob(
     return max(0.00, min(0.99, raw))
 
 
+def bayesian_removal_rate(
+    observed_rate: float,
+    days_post_deadline: int,
+    clerk_window_days: int = 22,  # Feb 15 → Mar 9
+) -> float:
+    """
+    Blend observed post-deadline removal rate with an empirical prior.
+
+    Prior: 1.65% total removal over the full clerk window, derived from
+    county clerk removal-request data reported by KSL/SLTrib (Feb 12, 2026):
+    2,325 removal requests / ~141k verified = ~1.65% statewide.
+
+    As more post-deadline snapshots accumulate, the observed rate gains
+    credibility and the prior fades. Full credibility after clerk_window_days.
+    """
+    REMOVAL_PRIOR = 0.0165  # empirical prior: ~1.65% statewide removal rate
+    credibility = min(1.0, days_post_deadline / clerk_window_days)
+    return credibility * observed_rate + (1.0 - credibility) * REMOVAL_PRIOR
+
+
 def compute_district_prob_survival(
-    verified: int,
+    verified: float,
     threshold: int,
-    peak_verified: int,       # highest count ever seen for this district
+    peak_verified: int,           # highest count ever seen for this district
     post_deadline_removal_rate: float,  # removals / peak since submission deadline
     observed_removal_rate: float,       # full-history removal rate (background)
     days_remaining: int,
+    days_post_deadline: int = 0,  # days elapsed since submission deadline
+    pre_deadline_slope: float = 0.0,  # sigs/day velocity just before deadline
 ) -> float:
     """
     Post-submission-deadline survival model.
@@ -236,46 +258,67 @@ def compute_district_prob_survival(
     No new signatures can be added. The question is purely:
     will enough of the current verified signatures survive clerk review?
 
-    Model:
-      - Start from current verified count
-      - Project remaining removals based on observed post-deadline removal rate
-        extrapolated over remaining days (if we have post-deadline data)
-        or conservative background rate otherwise
-      - P(survive) = P(verified_at_deadline >= threshold)
+    Uses a Bayesian blend of observed post-deadline removal rate with an
+    empirical prior (1.65%) calibrated from county clerk removal-request
+    data (KSL/SLTrib, Feb 12, 2026). Prior fades as more data accumulates.
+
+    For below-threshold districts: also applies a trajectory multiplier —
+    districts that were accelerating strongly just before the deadline are
+    more likely to have unposted signatures still in the LG pipeline.
 
     Returns a value in [0.0, 1.0].
     """
+    # Effective removal rate: Bayesian blend of observed + prior
+    effective_rate = bayesian_removal_rate(post_deadline_removal_rate, days_post_deadline)
+
     if verified >= threshold:
         # Already met — P = 1.0 only if we think removals won't push below threshold
-        # Apply safety margin: if verified is well above threshold, still certain
         buffer = (verified - threshold) / threshold
         if buffer >= 0.10:
-            return 1.0
-        # Close to threshold — small prob of falling back below due to removals
-        removal_risk = min(post_deadline_removal_rate * 3, 0.15)
+            # Well above threshold — apply removal risk to see if we could fall back
+            projected_remaining = verified * (1.0 - effective_rate)
+            if projected_remaining >= threshold:
+                return 1.0
+            # Blended removal risk could theoretically breach threshold
+            removal_risk = min(effective_rate * 2, 0.10)
+            return max(0.92, 1.0 - removal_risk)
+        # Close to threshold — meaningful chance of falling back below due to removals
+        removal_risk = min(effective_rate * 3, 0.15)
         return max(0.90, 1.0 - removal_risk)
 
-    # Below threshold — in survival mode, the verified count is the LG-posted count.
-    # Due to LG posting lag, effective_verified passed in may already be blended
-    # with the growth projection to reflect pending-but-unposted signatures.
-    # The gap below threshold tells us how likely late postings can close it.
+    # Below threshold — the gap tells us how likely late LG postings can close it.
     current_pct = verified / threshold if threshold > 0 else 0.0
-    gap_pct = 1.0 - current_pct  # how far below threshold (using raw verified, not blended)
+    gap_pct = 1.0 - current_pct
 
+    # Base gap-to-probability lookup (calibrated to 1.65% prior removal environment)
     if gap_pct <= 0.02:
-        # Within 2% — small chance LG posting lag resolves in their favor
-        return 0.20
+        base_p = 0.18   # Within 2% — small chance LG posting lag resolves it
     elif gap_pct <= 0.05:
-        return 0.12
+        base_p = 0.10
     elif gap_pct <= 0.10:
-        return 0.06
+        base_p = 0.05
     elif gap_pct <= 0.15:
-        return 0.03
+        base_p = 0.02
     elif gap_pct <= 0.25:
-        return 0.01
+        base_p = 0.005
     else:
-        # Structurally impossible — too far below threshold
-        return 0.00
+        return 0.00  # Structurally impossible
+
+    # Trajectory multiplier: if a district had strong pre-deadline velocity,
+    # it may have unposted signatures still in the LG pipeline. Boost base_p
+    # proportional to the slope, capped at 1.5×. Only applies early post-deadline
+    # while the LG lag window is still plausible (within 10 days of deadline).
+    if pre_deadline_slope > 0 and days_post_deadline <= 10:
+        # Normalize slope: 50 sigs/day = meaningful surge for any district
+        trajectory_bonus = min(0.5, pre_deadline_slope / 50.0) * (1.0 - days_post_deadline / 10.0)
+        base_p = base_p * (1.0 + trajectory_bonus)
+
+    # Downward nudge if effective removal rate is meaningfully above prior
+    # (i.e., this district is under heavier-than-average clerk scrutiny)
+    if effective_rate > 0.03:
+        base_p *= max(0.5, 1.0 - (effective_rate - 0.03) * 10)
+
+    return round(max(0.0, min(0.99, base_p)), 4)
 
 
 def compute_distribution(probs: list[float]) -> list[float]:
@@ -325,32 +368,47 @@ def compute_trend(weekly: list[int]) -> str:
 def compute_trend_from_history(district_snapshots: list[dict]) -> str:
     """
     Compute ACCEL/STABLE/DECEL from inter-snapshot deltas.
-    Uses last 2 intervals vs prior 2 intervals (weighted by days between snapshots).
+
+    Uses a linear regression on per-day rates (velocity series) to detect
+    whether velocity is meaningfully increasing or decreasing. Requires the
+    slope to exceed a noise threshold before calling ACCEL or DECEL, to
+    avoid false signals from single-interval noise with small sample sizes.
     """
     if len(district_snapshots) < 3:
         return "STABLE"
 
     # Compute per-day rates for each interval
     rates = []
+    xs = []  # interval index (for regression)
     for i in range(1, len(district_snapshots)):
         prev_date = date.fromisoformat(district_snapshots[i - 1]["date"])
         cur_date = date.fromisoformat(district_snapshots[i]["date"])
         days = max((cur_date - prev_date).days, 1)
         net = district_snapshots[i]["count"] - district_snapshots[i - 1]["count"]
         rates.append(net / days)  # sigs/day
+        xs.append(i)
 
     if len(rates) < 2:
         return "STABLE"
 
-    recent = sum(rates[-2:]) / 2
-    prior = sum(rates[:-2]) / max(len(rates[:-2]), 1)
+    # Fit a linear regression to the velocity series
+    # slope > 0 → velocity accelerating; slope < 0 → decelerating
+    n = len(rates)
+    x_mean = sum(xs) / n
+    r_mean = sum(rates) / n
+    num = sum((xs[i] - x_mean) * (rates[i] - r_mean) for i in range(n))
+    den = sum((xs[i] - x_mean) ** 2 for i in range(n))
+    slope = num / den if den != 0 else 0.0
 
-    if prior <= 0:
-        return "STABLE"
-    ratio = recent / prior
-    if ratio >= 1.15:
+    # Noise threshold: only signal ACCEL/DECEL if the slope exceeds 1 sig/day per interval
+    # relative to the mean rate (i.e., >~10% change in rate per interval step).
+    # This prevents noise from single-interval spikes dominating the signal.
+    mean_abs_rate = max(abs(r_mean), 1.0)
+    relative_slope = slope / mean_abs_rate  # normalized slope
+
+    if relative_slope >= 0.10:
         return "ACCEL"
-    if ratio <= 0.85:
+    if relative_slope <= -0.10:
         return "DECEL"
     return "STABLE"
 
@@ -619,8 +677,10 @@ def main():
             # We blend: early post-deadline → lean on growth projection as "pending"
             #           later → trust only the actual LG count
             #
-            # LG_LAG_DAYS: how many business days we expect lag to persist
-            LG_LAG_DAYS = 7  # full business week for LG to post all pre-deadline submissions
+            # LG_LAG_DAYS: how many calendar days we expect lag to persist (extended to 14)
+            # Empirical: 22,934 net gains appeared Feb 16-20 (25.8% of pre-deadline total),
+            # confirming the LG was still posting a large pre-deadline backlog through day 7.
+            LG_LAG_DAYS = 14  # extended from 7 — data shows lag persists beyond one week
             days_elapsed = max(0, (date.today() - SUBMISSION_DEADLINE).days)
             # lag_weight decays from 1.0 on day 0 to 0.0 after LG_LAG_DAYS
             lag_weight = max(0.0, 1.0 - days_elapsed / LG_LAG_DAYS)
@@ -630,12 +690,113 @@ def main():
             if history and str(d_num) in projections:
                 growth_proj_raw = projections[str(d_num)]["raw"]
 
-            # Effective verified count: blend current count with growth projection
-            # to account for signatures submitted pre-deadline but not yet posted
-            if growth_proj_raw and lag_weight > 0:
+            # Empirical LG lag estimate: observe net gains in post-deadline snapshots.
+            # Any net additions after Feb 15 are pre-deadline sigs that LG hadn't posted yet.
+            # If post-deadline gains are substantial (>0.5% of last pre-deadline count),
+            # the lag window is still active; otherwise it has likely resolved.
+            empirical_lag_active = True
+            if history and "snapshots" in history:
+                post_snaps = [
+                    s for s in history["snapshots"]
+                    if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE
+                ]
+                if len(post_snaps) >= 2:
+                    # Total net additions (statewide) across post-deadline snapshots
+                    post_gains = sum(
+                        max(0, post_snaps[i]["total"] - post_snaps[i - 1]["total"])
+                        for i in range(1, len(post_snaps))
+                    )
+                    last_pre_snap = next(
+                        (s for s in reversed(history["snapshots"])
+                         if date.fromisoformat(s["date"]) <= SUBMISSION_DEADLINE),
+                        None
+                    )
+                    if last_pre_snap and last_pre_snap["total"] > 0:
+                        gain_rate = post_gains / last_pre_snap["total"]
+                        # If post-deadline gains are tiny (<0.1%), lag has likely resolved
+                        empirical_lag_active = gain_rate >= 0.001
+
+            # Empirical override: if post-deadline gains are still substantial (>5% of
+            # pre-deadline total), the LG backlog is clearly not resolved — extend lag weight.
+            # Conversely, if gains are tiny, lag has resolved and we trust LG counts fully.
+            if not empirical_lag_active:
+                lag_weight = 0.0
+            elif lag_weight == 0.0 and empirical_lag_active:
+                # Fixed window expired but data shows lag is still active — give a small floor
+                lag_weight = 0.10
+
+            # Per-district post-deadline velocity: sigs/day added or removed since Feb 15.
+            # This is a real-time signal — if LG is still posting backlog sigs for this
+            # district, the velocity will be positive. If clerk is removing, negative.
+            post_deadline_velocity = 0.0  # sigs/day since deadline
+            post_deadline_projected = float(verified)  # where this district lands by March 9
+            if d_num in district_history:
+                post_snaps = [
+                    s for s in district_history[d_num]
+                    if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE
+                ]
+                if len(post_snaps) >= 2:
+                    # Compute velocity across all post-deadline intervals
+                    total_net = post_snaps[-1]["count"] - post_snaps[0]["count"]
+                    total_days = max(
+                        1,
+                        (date.fromisoformat(post_snaps[-1]["date"])
+                         - date.fromisoformat(post_snaps[0]["date"])).days
+                    )
+                    post_deadline_velocity = total_net / total_days
+                    # Project to March 9 using this velocity
+                    post_deadline_projected = verified + post_deadline_velocity * days_to_deadline
+                    post_deadline_projected = max(float(verified), post_deadline_projected) \
+                        if post_deadline_velocity < 0 else post_deadline_projected
+                elif len(post_snaps) == 1 and d_num in district_history:
+                    # Only one post-deadline snapshot: use velocity from last pre→post interval
+                    pre_snaps = [
+                        s for s in district_history[d_num]
+                        if date.fromisoformat(s["date"]) <= SUBMISSION_DEADLINE
+                    ]
+                    if pre_snaps:
+                        span_days = max(1, (
+                            date.fromisoformat(post_snaps[0]["date"])
+                            - date.fromisoformat(pre_snaps[-1]["date"])
+                        ).days)
+                        post_deadline_velocity = (
+                            post_snaps[0]["count"] - pre_snaps[-1]["count"]
+                        ) / span_days
+                        post_deadline_projected = verified + post_deadline_velocity * days_to_deadline
+
+            # Effective verified count: use post-deadline projection when we have velocity data,
+            # otherwise fall back to growth-projection blend weighted by lag.
+            if len([s for s in district_history.get(d_num, [])
+                    if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE]) >= 2:
+                # Have real post-deadline velocity — use it directly, clipped to growth proj
+                upper_bound = growth_proj_raw if growth_proj_raw else post_deadline_projected
+                effective_verified = min(post_deadline_projected, upper_bound)
+                effective_verified = max(float(verified), effective_verified)
+            elif growth_proj_raw and lag_weight > 0:
+                # No post-deadline velocity yet — blend with growth projection
                 effective_verified = verified + lag_weight * max(0, growth_proj_raw - verified)
             else:
                 effective_verified = float(verified)
+
+            # Days elapsed since submission deadline (for Bayesian prior credibility)
+            days_post_deadline = max(0, (date.today() - SUBMISSION_DEADLINE).days)
+
+            # Pre-deadline slope: sigs/day rate in the last pre-deadline interval
+            # Used to boost survival odds for districts that were surging just before cutoff
+            pre_deadline_slope = 0.0
+            if d_num in district_history:
+                pre_snaps = [
+                    s for s in district_history[d_num]
+                    if date.fromisoformat(s["date"]) <= SUBMISSION_DEADLINE
+                ]
+                if len(pre_snaps) >= 2:
+                    last_pre = pre_snaps[-1]
+                    prev_pre = pre_snaps[-2]
+                    interval_days = max(
+                        1,
+                        (date.fromisoformat(last_pre["date"]) - date.fromisoformat(prev_pre["date"])).days
+                    )
+                    pre_deadline_slope = max(0.0, (last_pre["count"] - prev_pre["count"]) / interval_days)
 
             # Pure survival prob from the current (possibly lag-blended) count
             survival_prob = compute_district_prob_survival(
@@ -645,6 +806,8 @@ def main():
                 post_deadline_removal_rate=post_deadline_rate,
                 observed_removal_rate=rejection_rate,
                 days_remaining=days_to_deadline,
+                days_post_deadline=days_post_deadline,
+                pre_deadline_slope=pre_deadline_slope,
             )
 
             # Growth prob: what would the growth model say about this district?
@@ -738,13 +901,28 @@ def main():
 
     # --- DP distribution (primary model) ---
     dp = compute_distribution(all_probs)
-    p_qual = p_qualify(dp)
+    p_qual_raw = p_qualify(dp)
     exp_districts = expected_districts(all_probs)
     p_exact = [round(dp[k], 6) for k in range(TOTAL_DISTRICTS + 1)]
 
+    # --- Correlation penalty: districts are not independent ---
+    # Shared risks (statewide fraud wave, clerk ruling, organizing surge) create
+    # inter-district correlation ~0.10-0.15. This causes the independence DP to
+    # underestimate tail risk (p_qualify is too high). We apply a conservative
+    # deflator that grows with p_qual_raw — the higher the raw probability, the
+    # more a correlated downside matters. Penalty calibrated to ~2-3 pp at p=0.95.
+    # Source: Utah county removal-request data (Feb 12) showed concentrated
+    # fraud risk in specific districts (Utah Co., SL Co.), consistent with
+    # correlated district-level exposure.
+    CORRELATION_PENALTY_SCALE = 0.030  # max penalty at p_qual = 1.0
+    correlation_penalty = CORRELATION_PENALTY_SCALE * p_qual_raw
+    p_qual = max(0.0, p_qual_raw - correlation_penalty)
+
     # --- DP distribution (growth-model shadow, for toggle) ---
     dp_growth = compute_distribution(all_growth_probs)
-    p_qual_growth = p_qualify(dp_growth)
+    p_qual_growth_raw = p_qualify(dp_growth)
+    correlation_penalty_growth = CORRELATION_PENALTY_SCALE * p_qual_growth_raw
+    p_qual_growth = max(0.0, p_qual_growth_raw - correlation_penalty_growth)
     exp_districts_growth = expected_districts(all_growth_probs)
     p_exact_growth = [round(dp_growth[k], 6) for k in range(TOTAL_DISTRICTS + 1)]
 
@@ -772,8 +950,14 @@ def main():
         overall_prob_delta = round(p_qual - prev_p_qualify, 4)
         expected_districts_delta = round(exp_districts - prev_expected_districts, 2)
 
-    # --- Anomalies from history ---
+    # --- Anomalies from history —-- feed back into rejection rates ---
+    # Districts with flagged packet-level fraud anomalies get a rejection rate bump.
+    # A single anomaly adds +1 pp to their effective removal rate, capped at 5%.
     anomalies = history.get("anomalies", []) if history else []
+    anomaly_districts = set(a["district"] for a in anomalies)
+    for d_rec in districts_out:
+        if d_rec["d"] in anomaly_districts:
+            d_rec["rejectionRate"] = round(min(0.05, d_rec["rejectionRate"] + 0.01), 4)
 
     # --- Signature flow from history (net new / removals) ---
     if history and "snapshots" in history:
