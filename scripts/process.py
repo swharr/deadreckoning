@@ -1088,10 +1088,31 @@ def main():
 
     # --- Build output ---
     now_utc = datetime.now(timezone.utc)
+
+    # lastUpdated = the date of the actual data file, not the processing time.
+    # Priority: history["lastSnapshot"] > xlsx filename (YYYY-MM-DD.xlsx) > today.
+    data_date_str = None
+    if history and history.get("lastSnapshot"):
+        data_date_str = history["lastSnapshot"]   # e.g. "2026-02-20"
+    else:
+        # Try to parse date from filename (data/snapshots/2026-02-20.xlsx)
+        stem = xlsx_path.stem   # "2026-02-20" or "latest" etc.
+        try:
+            date.fromisoformat(stem)   # validates format
+            data_date_str = stem
+        except ValueError:
+            pass
+    if not data_date_str:
+        data_date_str = now_utc.strftime("%Y-%m-%d")
+
+    # Build an ISO timestamp at noon UTC on data_date_str (neutral, avoids TZ artifacts)
+    data_datetime_iso = f"{data_date_str}T12:00:00Z"
+
     output = {
         "meta": {
-            "lastUpdated": now_utc.strftime("%Y-%m-%d"),
-            "lastUpdatedISO": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "lastUpdated": data_date_str,
+            "lastUpdatedISO": data_datetime_iso,
+            "processedAt": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "sourceFile": source_file,
             "totalVerified": total_verified,
             "daysToDeadline": days_to_deadline,
