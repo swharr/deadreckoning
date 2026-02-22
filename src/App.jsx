@@ -6,6 +6,7 @@ import DistrictTable from './components/DistrictTable.jsx'
 import SignatureLookup from './components/SignatureLookup.jsx'
 import DistrictMap from './components/DistrictMap.jsx'
 import VelocityTracker from './components/VelocityTracker.jsx'
+import MonteCarloPanel from './components/MonteCarloPanel.jsx'
 import { THRESHOLDS } from './lib/probability.js'
 
 // Injected at build time by vite.config.js
@@ -538,6 +539,10 @@ export default function App() {
 
             <div style={STYLES.section}>
               <DistributionChart overall={data.overall} modelView={modelView} />
+            </div>
+
+            <div style={STYLES.section}>
+              <MonteCarloPanel districts={data.districts} overall={data.overall} />
             </div>
 
             <div style={STYLES.section}>
