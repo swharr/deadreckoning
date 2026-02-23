@@ -337,6 +337,11 @@ export default function DistrictTable({ districts }) {
                     <div style={{ fontSize: 10, color: '#334466', marginTop: 1 }}>
                       {(d.threshold || THRESHOLDS[d.d]).toLocaleString()} needed
                     </div>
+                    {d.verified < (d.threshold || THRESHOLDS[d.d]) && (
+                      <div style={{ fontSize: 10, color: '#ff7043', marginTop: 1, fontWeight: 'bold' }}>
+                        {((d.threshold || THRESHOLDS[d.d]) - d.verified).toLocaleString()} to go
+                      </div>
+                    )}
                   </td>
                   <td style={tdStyle}>
                     <TierBadge tier={d.tier} />
