@@ -27,26 +27,58 @@ function TierBadge({ tier }) {
 }
 
 function RingGauge({ value, color, size = 38, strokeWidth = 4, label }) {
-  // value: 0–1
-  const r = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * r
-  const pct = Math.min(Math.max(value, 0), 1)
-  const dash = pct * circumference
-  const gap = circumference - dash
+  // value: 0–N (supports >1 for "second lap" districts)
+  const lapped = value > 1
+  const outerR = (size - strokeWidth) / 2
+  const outerC = 2 * Math.PI * outerR
+
+  // Inner ring: fits inside outer with a gap
+  const innerStroke = strokeWidth - 1
+  const innerR = outerR - strokeWidth - 2
+  const innerC = 2 * Math.PI * innerR
+  const overageFraction = lapped ? (value - 1) : 0
+  const innerDash = overageFraction * innerC
+  const innerGap = innerC - innerDash
+
+  // Outer ring: always full when lapped, normal fill otherwise
+  const outerFraction = lapped ? 1 : Math.min(Math.max(value, 0), 1)
+  const outerDash = outerFraction * outerC
+  const outerGap = outerC - outerDash
+
+  const glowColor = lapped ? '#00c853' : color
+  const glowFilter = lapped ? 'drop-shadow(0 0 3px #00c85388)' : 'none'
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
-        <circle cx={size / 2} cy={size / 2} r={r}
+      <svg
+        width={size} height={size}
+        style={{ transform: 'rotate(-90deg)', flexShrink: 0, filter: glowFilter }}
+      >
+        {/* Outer track */}
+        <circle cx={size / 2} cy={size / 2} r={outerR}
           fill="none" stroke="#1e2a4a" strokeWidth={strokeWidth} />
-        <circle cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={color} strokeWidth={strokeWidth}
-          strokeDasharray={`${dash} ${gap}`}
+        {/* Outer fill */}
+        <circle cx={size / 2} cy={size / 2} r={outerR}
+          fill="none" stroke={glowColor} strokeWidth={strokeWidth}
+          strokeDasharray={`${outerDash} ${outerGap}`}
           strokeLinecap="round"
           style={{ transition: 'stroke-dasharray 0.5s ease' }}
         />
+        {/* Inner "second lap" ring — only shown when over 100% */}
+        {lapped && innerR > 2 && (
+          <>
+            <circle cx={size / 2} cy={size / 2} r={innerR}
+              fill="none" stroke="#1e2a4a" strokeWidth={innerStroke} />
+            <circle cx={size / 2} cy={size / 2} r={innerR}
+              fill="none" stroke="#69f0ae" strokeWidth={innerStroke}
+              strokeDasharray={`${innerDash} ${innerGap}`}
+              strokeLinecap="round"
+              style={{ transition: 'stroke-dasharray 0.5s ease' }}
+            />
+          </>
+        )}
       </svg>
-      <span style={{ fontSize: 13, color, fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
+      <span style={{ fontSize: 13, color: glowColor, fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
         {label}
       </span>
     </div>
@@ -322,7 +354,7 @@ export default function DistrictTable({ districts }) {
                   </td>
                   <td style={tdStyle}>
                     <RingGauge
-                      value={Math.min(d.pctVerified, 1)}
+                      value={d.pctVerified}
                       color={d.pctVerified >= 1 ? '#00c853' : '#4a9eff'}
                       label={`${(d.pctVerified * 100).toFixed(1)}%`}
                     />
