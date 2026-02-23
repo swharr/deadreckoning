@@ -64,7 +64,7 @@ jobs:
         run: |
           git config user.name  "t8rsk8s Data Robot"
           git config user.email "bot@t8rsk8s.io"
-          git add data/snapshots/*.xlsx data/history.json public/data.json public/lookup.json
+          git add data/snapshots/*.xlsx data/history.json data/removals.json public/data.json public/lookup.json
           if git diff --staged --quiet; then
             echo "No staged changes — skipping PR"
             exit 0

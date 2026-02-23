@@ -31,6 +31,7 @@ LATEST_PATH = DATA_DIR / "latest.xlsx"
 DATA_JSON_PATH = PUBLIC_DIR / "data.json"
 LOOKUP_INDEX_PATH = PUBLIC_DIR / "lookup.json"
 HISTORY_PATH = DATA_DIR / "history.json"
+REMOVALS_PATH = DATA_DIR / "removals.json"
 
 THRESHOLDS = {
     1: 5238, 2: 4687, 3: 4737, 4: 5099, 5: 4115, 6: 4745, 7: 5294,
@@ -157,6 +158,18 @@ def load_history() -> dict | None:
             return json.load(f)
     except Exception as e:
         print(f"Warning: could not load history.json: {e}")
+        return None
+
+
+def load_removals() -> dict | None:
+    """Load data/removals.json if present, else return None."""
+    if not REMOVALS_PATH.exists():
+        return None
+    try:
+        with open(REMOVALS_PATH) as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Warning: could not load removals.json: {e}")
         return None
 
 
@@ -569,6 +582,11 @@ def main():
               f"{history['firstSnapshot']} → {history['lastSnapshot']}")
     else:
         print("No history.json found — using intra-file date bucketing only.")
+
+    # --- Load removals audit ---
+    removals = load_removals()
+    if removals:
+        print(f"Loaded removals.json: {removals['totalRemoved']:,} voter IDs removed across history")
 
     # --- Load previous data.json for deltas ---
     prev_data: dict = {}
@@ -1178,6 +1196,8 @@ def main():
             "snapshotCount": history["snapshotCount"] if history else 1,
             "historyRange": f"{history['firstSnapshot']} → {history['lastSnapshot']}" if history else "n/a",
             "snapshotDates": [s["date"] for s in history["snapshots"]] if history else [],
+            "totalWithdrawn": removals["totalRemoved"] if removals else 0,
+            "withdrawnByDistrict": removals["byDistrict"] if removals else {},
         },
         "overall": {
             "pQualify": round(p_qual, 4),
