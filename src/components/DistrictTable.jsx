@@ -26,28 +26,63 @@ function TierBadge({ tier }) {
   )
 }
 
-function ProbBar({ prob, color }) {
+function RingGauge({ value, color, size = 38, strokeWidth = 4, label }) {
+  // value: 0–1
+  const r = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * r
+  const pct = Math.min(Math.max(value, 0), 1)
+  const dash = pct * circumference
+  const gap = circumference - dash
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 120 }}>
-      <div style={{
-        flex: 1,
-        height: 6,
-        background: '#1e2a4a',
-        borderRadius: 3,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          width: `${Math.min(prob * 100, 100)}%`,
-          height: '100%',
-          background: color,
-          borderRadius: 3,
-          transition: 'width 0.4s ease',
-        }} />
-      </div>
-      <span style={{ fontSize: 13, color, fontWeight: 'bold', minWidth: 42, textAlign: 'right' }}>
-        {(prob * 100).toFixed(0)}%
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+        <circle cx={size / 2} cy={size / 2} r={r}
+          fill="none" stroke="#1e2a4a" strokeWidth={strokeWidth} />
+        <circle cx={size / 2} cy={size / 2} r={r}
+          fill="none" stroke={color} strokeWidth={strokeWidth}
+          strokeDasharray={`${dash} ${gap}`}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dasharray 0.5s ease' }}
+        />
+      </svg>
+      <span style={{ fontSize: 13, color, fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
+        {label}
       </span>
     </div>
+  )
+}
+
+function ProbCell({ prob, tier }) {
+  // Confirmed districts: show a green checkmark instead of a gauge
+  if (tier === 'CONFIRMED') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <svg width={38} height={38} viewBox="0 0 38 38" style={{ flexShrink: 0 }}>
+          <circle cx={19} cy={19} r={17} fill="#003318" stroke="#00c853" strokeWidth={1.5} />
+          <polyline
+            points="11,19 16.5,25 27,13"
+            fill="none"
+            stroke="#00c853"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span style={{ fontSize: 13, color: '#00c853', fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
+          ✓
+        </span>
+      </div>
+    )
+  }
+
+  const cfg = TIER_CONFIG[tier] || TIER_CONFIG['NO CHANCE']
+  return (
+    <RingGauge
+      value={prob}
+      color={cfg.color}
+      label={`${(prob * 100).toFixed(0)}%`}
+    />
   )
 }
 
@@ -283,28 +318,14 @@ export default function DistrictTable({ districts }) {
                     </span>
                   </td>
                   <td style={tdStyle}>
-                    <ProbBar prob={d.prob} color={cfg.color} />
+                    <ProbCell prob={d.prob} tier={d.tier} />
                   </td>
                   <td style={tdStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{
-                        width: 60,
-                        height: 4,
-                        background: '#1e2a4a',
-                        borderRadius: 2,
-                        overflow: 'hidden',
-                      }}>
-                        <div style={{
-                          width: `${Math.min(d.pctVerified * 100, 100)}%`,
-                          height: '100%',
-                          background: d.pctVerified >= 1 ? '#00c853' : '#4a9eff',
-                          borderRadius: 2,
-                        }} />
-                      </div>
-                      <span style={{ fontSize: 12, color: '#8899bb' }}>
-                        {(d.pctVerified * 100).toFixed(1)}%
-                      </span>
-                    </div>
+                    <RingGauge
+                      value={Math.min(d.pctVerified, 1)}
+                      color={d.pctVerified >= 1 ? '#00c853' : '#4a9eff'}
+                      label={`${(d.pctVerified * 100).toFixed(1)}%`}
+                    />
                   </td>
                   <td style={tdStyle}>
                     <DeltaCell delta={d.delta} />
