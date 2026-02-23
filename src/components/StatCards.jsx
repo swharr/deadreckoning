@@ -195,7 +195,7 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
           {(animatedExpected10 / 10).toFixed(1)}
         </div>
         <div style={subStyle}>
-          of 29 required districts
+          of 26 required districts
           {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
         </div>
       </div>
