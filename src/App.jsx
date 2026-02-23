@@ -8,6 +8,7 @@ import DistrictMap from './components/DistrictMap.jsx'
 import VelocityTracker from './components/VelocityTracker.jsx'
 import MonteCarloPanel from './components/MonteCarloPanel.jsx'
 import { THRESHOLDS } from './lib/probability.js'
+import './telemetry.js'
 
 // Injected at build time by vite.config.js
 const BUILD_SHA = __BUILD_SHA__

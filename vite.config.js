@@ -14,6 +14,7 @@ function getGitInfo() {
 
 const { sha, branch } = getGitInfo()
 const buildTime = new Date().toISOString()
+const appInsightsConnStr = process.env.APPINSIGHTS_CONNECTION_STRING || ''
 
 export default defineConfig({
   plugins: [react()],
@@ -24,5 +25,6 @@ export default defineConfig({
     __BUILD_SHA__: JSON.stringify(sha),
     __BUILD_BRANCH__: JSON.stringify(branch),
     __BUILD_TIME__: JSON.stringify(buildTime),
+    __APPINSIGHTS_CONNECTION_STRING__: JSON.stringify(appInsightsConnStr),
   },
 })
