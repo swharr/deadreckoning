@@ -1,18 +1,14 @@
-name: Build and Deploy (no data pipeline)
+name: Build and Deploy
 
-# Triggers on any push to main that is NOT a data-only update.
-# This lets frontend/model changes ship immediately without needing
-# a new xlsx file.  The data pipeline (fetch.yml) handles data updates
-# separately via its own cron + push triggers.
+# SINGLE deploy pipeline for ALL pushes to main — UX changes, data updates,
+# or both. The data pipeline (fetch.yml) handles scraping and processing;
+# when it merges its PR to main, this workflow picks up and deploys.
 
 on:
   push:
     branches:
       - main
     paths-ignore:
-      - 'data/**'            # data pipeline handles these via fetch.yml
-      - 'public/data.json'   # written by process.py; fetch.yml deploys after data runs
-      - 'public/lookup.json' # written by process.py; fetch.yml deploys after data runs
       - 'instructions/**'    # gitignored; should never reach CI
       - '*.md'               # docs-only changes don't need a deploy
 
@@ -35,6 +31,8 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          APPINSIGHTS_CONNECTION_STRING: ${{ secrets.APPINSIGHTS_CONNECTION_STRING }}
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
