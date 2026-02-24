@@ -4,7 +4,7 @@ name: Data Pipeline
 # Deploying is handled by deploy.yml, which triggers when this pipeline's
 # PR merge pushes to main.
 #
-# Runs Monday–Friday at 17:00 UTC (10:00am MT).
+# Runs Monday–Friday at 16:05 UTC (9:05am MT).
 # The LG office only publishes new data on business days, so weekend runs are
 # skipped entirely. On any business-day run where the file hasn't changed
 # (same SHA-256 as latest.xlsx), the workflow exits cleanly with a
@@ -12,7 +12,7 @@ name: Data Pipeline
 
 on:
   schedule:
-    - cron: '0 17 * * 1-5'    # 10:00am MT, Monday–Friday only
+    - cron: '5 16 * * 1-5'    # 9:05am MT, Monday–Friday only
   workflow_dispatch:             # manual trigger from GitHub UI or CLI
   push:
     branches:
