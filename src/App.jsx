@@ -474,24 +474,30 @@ export default function App() {
             Requires 26 of 29 to meet the 8% signature threshold.
           </p>
 
-          {/* What is Prop 4 — always visible context for first-time visitors */}
+          {/* What is this initiative — always visible context for first-time visitors */}
           <div style={{ marginTop: 16, maxWidth: 680, fontSize: 13, color: '#8899bb', lineHeight: 1.8 }}>
             <p style={{ margin: '0 0 8px' }}>
               <strong style={{ color: '#e8eaf0' }}>Proposition 4</strong> was a 2018 Utah ballot
-              initiative that created an independent redistricting commission to draw legislative
-              maps — taking that power away from the legislature itself. Voters passed it with
-              50.3% of the vote.
+              initiative that created an independent redistricting commission and banned partisan
+              gerrymandering. Voters passed it with 50.3% of the vote.
             </p>
             <p style={{ margin: '0 0 8px' }}>
-              In 2020, the legislature passed SB 200, which{' '}
-              <strong style={{ color: '#e8eaf0' }}>stripped the commission of binding authority</strong>{' '}
-              and let lawmakers draw maps however they chose. The commission's recommended maps
-              were ignored entirely in the 2021 redistricting cycle.
+              The Republican supermajority in the legislature{' '}
+              <strong style={{ color: '#e8eaf0' }}>gutted Prop 4 with SB 200 in 2020</strong>,
+              reducing the commission to an advisory role and drawing their own maps. What followed
+              was years of court battles — the League of Women Voters sued, the Utah Supreme Court
+              ruled the override unconstitutional in 2024, and when the legislature{' '}
+              <strong style={{ color: '#e8eaf0' }}>refused to draw a lawful map</strong>, District
+              Judge Dianna Gibson imposed one herself in November 2025. The legislature has fought
+              the ruling at every turn, including a failed constitutional amendment and multiple
+              appeals — all rejected by the courts.
             </p>
             <p style={{ margin: 0 }}>
-              This petition seeks to <strong style={{ color: '#e8eaf0' }}>repeal that override</strong>{' '}
-              and restore the original Prop 4 redistricting rules — putting the question back
-              before Utah voters on the{' '}
+              This petition is their latest effort:{' '}
+              <strong style={{ color: '#e8eaf0' }}>fully repeal Proposition 4</strong> and the
+              independent redistricting commission it created — wiping the slate clean as if
+              Prop 4 never existed and returning all redistricting power to the legislature. If
+              the petition qualifies, the question goes before Utah voters on the{' '}
               <span style={{ color: '#4a9eff' }}>November 2026 ballot</span>.
             </p>
           </div>
