@@ -24,7 +24,7 @@ export const TIER_CONFIG = {
   'LIKELY':        { label: 'Likely',        min: 0.50, color: '#4a9eff', bg: '#001a33' },
   'POSSIBLE':      { label: 'Possible',      min: 0.25, color: '#ffca28', bg: '#332800' },
   'UNLIKELY':      { label: 'Unlikely',      min: 0.10, color: '#ff7043', bg: '#331a00' },
-  'NO CHANCE':     { label: 'No Chance',     min: 0.00, color: '#ef5350', bg: '#2d0000' },
+  'NO CHANCE':     { label: 'Long Shot',     min: 0.00, color: '#ef5350', bg: '#2d0000' },
 }
 
 // Ordered list for filtering UI

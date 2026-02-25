@@ -16,7 +16,7 @@ function TierBadge({ tier }) {
       border: `1px solid ${cfg.color}33`,
       borderRadius: 4,
       padding: '2px 7px',
-      fontSize: 10,
+      fontSize: 11,
       fontWeight: 'bold',
       letterSpacing: '0.06em',
       whiteSpace: 'nowrap',
@@ -78,7 +78,7 @@ function RingGauge({ value, color, size = 38, strokeWidth = 4, label }) {
           </>
         )}
       </svg>
-      <span style={{ fontSize: 13, color: glowColor, fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
+      <span style={{ fontSize: 14, color: glowColor, fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
         {label}
       </span>
     </div>
@@ -101,7 +101,7 @@ function ProbCell({ prob, tier }) {
             strokeLinejoin="round"
           />
         </svg>
-        <span style={{ fontSize: 13, color: '#00c853', fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
+        <span style={{ fontSize: 14, color: '#00c853', fontWeight: 'bold', minWidth: 34, textAlign: 'right' }}>
           ✓
         </span>
       </div>
@@ -130,7 +130,7 @@ function DeltaCell({ delta }) {
 
 const thStyle = {
   textAlign: 'left',
-  fontSize: 11,
+  fontSize: 12,
   color: '#445577',
   fontWeight: 'bold',
   letterSpacing: '0.07em',
@@ -144,7 +144,7 @@ const thStyle = {
 
 const tdStyle = {
   padding: '10px 12px',
-  fontSize: 13,
+  fontSize: 14,
   color: '#c8d8f0',
   borderBottom: '1px solid #111827',
   verticalAlign: 'middle',
@@ -244,7 +244,7 @@ export default function DistrictTable({ districts }) {
         gap: 10,
       }}>
         <div style={{
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 'bold',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
@@ -267,7 +267,7 @@ export default function DistrictTable({ districts }) {
                 color: active ? (cfg?.color || '#4a9eff') : '#445577',
                 borderRadius: 4,
                 padding: '3px 10px',
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 'bold',
                 cursor: 'pointer',
                 letterSpacing: '0.05em',
@@ -312,15 +312,20 @@ export default function DistrictTable({ districts }) {
               const cfg = TIER_CONFIG[d.tier] || TIER_CONFIG['NO CHANCE']
               const trend = TREND_ARROWS[d.trend] || TREND_ARROWS.STABLE
 
+              const met = d.pctVerified >= 1.0
+              const glowOpacity = met ? 0 : Math.max(0.02, 0.10 * (1 - d.pctVerified))
+              const rowBg = met ? 'transparent' : `rgba(255, 112, 67, ${glowOpacity.toFixed(3)})`
+
               return (
                 <tr
                   key={d.d}
                   style={{
                     borderLeft: `3px solid ${cfg.color}`,
+                    background: rowBg,
                     transition: 'background 0.1s',
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = '#0f1a35'}
-                  onMouseLeave={e => e.currentTarget.style.background = ''}
+                  onMouseLeave={e => e.currentTarget.style.background = rowBg}
                 >
                   <td style={{ ...tdStyle, fontWeight: 'bold', color: '#e8eaf0' }}>
                     <span>D{d.d}</span>
@@ -334,12 +339,25 @@ export default function DistrictTable({ districts }) {
                     {medals[d.d]?.slow && (
                       <span title="Slowest growth" style={{ marginLeft: 3, fontSize: 13 }}>{medals[d.d].slow}</span>
                     )}
-                    <div style={{ fontSize: 10, color: '#334466', marginTop: 1 }}>
+                    <div style={{ fontSize: 11, color: '#334466', marginTop: 1 }}>
                       {(d.threshold || THRESHOLDS[d.d]).toLocaleString()} needed
                     </div>
-                    {d.verified < (d.threshold || THRESHOLDS[d.d]) && (
-                      <div style={{ fontSize: 10, color: '#ff7043', marginTop: 1, fontWeight: 'bold' }}>
-                        {((d.threshold || THRESHOLDS[d.d]) - d.verified).toLocaleString()} to go
+                    {!met && (
+                      <div style={{ marginTop: 4 }}>
+                        <div style={{ width: 72, height: 4, borderRadius: 2, background: '#1e2a4a', overflow: 'hidden' }}>
+                          <div style={{
+                            width: `${Math.min(d.pctVerified * 100, 100)}%`,
+                            height: '100%',
+                            borderRadius: 2,
+                            background: d.pctVerified >= 0.85 ? '#4caf50'
+                                      : d.pctVerified >= 0.65 ? '#ffca28'
+                                      : '#ff7043',
+                            transition: 'width 0.4s ease',
+                          }} />
+                        </div>
+                        <div style={{ fontSize: 11, color: '#ff7043', marginTop: 2, fontWeight: 'bold' }}>
+                          {((d.threshold || THRESHOLDS[d.d]) - d.verified).toLocaleString()} to go
+                        </div>
                       </div>
                     )}
                   </td>
@@ -382,7 +400,7 @@ export default function DistrictTable({ districts }) {
         </table>
       </div>
 
-      <div style={{ padding: '10px 20px', fontSize: 11, color: '#334466' }}>
+      <div style={{ padding: '10px 20px', fontSize: 12, color: '#334466' }}>
         {sorted.length} district{sorted.length !== 1 ? 's' : ''} shown
         {tierFilter !== 'All' && ` (filtered: ${TIER_CONFIG[tierFilter]?.label || tierFilter})`}
         &nbsp;· Click column headers to sort
