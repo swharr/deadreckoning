@@ -84,3 +84,9 @@ jobs:
             --head "$BRANCH"
           gh pr merge "$BRANCH" --squash --delete-branch
 
+      - name: Trigger deploy
+        if: steps.check.outputs.data_changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml
+

@@ -11,6 +11,7 @@ on:
     paths-ignore:
       - 'instructions/**'    # gitignored; should never reach CI
       - '*.md'               # docs-only changes don't need a deploy
+  workflow_dispatch:             # manual trigger + called by data pipeline after PR merge
 
 jobs:
   build-and-deploy:
