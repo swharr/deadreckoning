@@ -16,6 +16,11 @@ if (connStr) {
       enableAutoRouteTracking: true,
       disableCookiesUsage: true,        // privacy-first: no cookies
       disableAjaxTracking: false,       // track fetch/XHR (data.json load)
+      // Exclude privacy-sensitive local lookup assets used by SignatureLookup.
+      excludeRequestFromAutoTrackingPatterns: [
+        /\/lookup\.json(?:\?|$)/i,
+        /\/districts-by-zip\.json(?:\?|$)/i,
+      ],
       enableCorsCorrelation: false,
       samplingPercentage: 100,
     },

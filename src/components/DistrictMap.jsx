@@ -73,7 +73,8 @@ export default function DistrictMap({ districts = [] }) {
   const hd = activeNum ? byDistrict[activeNum] : null
 
   function handleMouseMove(e, distNum) {
-    const rect = e.currentTarget.closest('svg').getBoundingClientRect()
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
     setTooltipPos({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,

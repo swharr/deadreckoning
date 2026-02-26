@@ -303,6 +303,12 @@ The complete source code for the model is available at [github.com/swharr/deadre
 
 ---
 
+## Updates
+
+On February 26, 2026, a pipeline bug in `scripts/process.py` was fixed so anomaly-based rejection-rate adjustments (the +1 percentage point penalty for districts flagged by historical packet-level anomalies, capped at 5%) are applied **before** district probabilities are calculated instead of after. Previously, the anomaly bump only changed the exported `rejectionRate` shown in the UI/JSON and did not affect `prob`, `pQualify`, or the DP distribution, which made the anomaly logic effectively cosmetic. This change makes the model internally consistent with the methodology, so anomaly risk now influences probability outputs as intended. Re-running the model on the February 25, 2026 snapshot produced small but real probability shifts (for example, `pQualify` changed from `0.8149` to `0.8233`) without any source-data change.
+
+---
+
 ## Name lookup — privacy model
 
 The signature lookup tool allows users to check whether their name appears on the verified petition list. It is designed so that no name or query ever leaves the user's device.

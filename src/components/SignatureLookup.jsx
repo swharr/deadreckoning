@@ -171,12 +171,13 @@ function SignatureLookupInner({ districts = [] }) {
   }
 
   const tierColor = {
+    'CONFIRMED': '#00c853',
     'NEARLY CERTAIN': '#4caf50',
+    'VERY LIKELY': '#69f0ae',
     'LIKELY': '#8bc34a',
-    'LEANING': '#ffb300',
-    'TOSS-UP': '#ff9800',
+    'POSSIBLE': '#ffca28',
     'UNLIKELY': '#ff5722',
-    'CRITICAL': '#f44336',
+    'NO CHANCE': '#f44336',
   }
 
   return (
@@ -243,7 +244,7 @@ function SignatureLookupInner({ districts = [] }) {
           <div style={{ fontSize: 12, color: '#556688', lineHeight: 1.7 }}>
             SHA-256 is a one-way function — the index cannot be reverse-engineered
             to recover signer names. The lookup file contains only hashes, not names.
-            No analytics, no logging, no server ever sees what you type.
+            Lookup inputs stay in your browser and are not sent to a server.
           </div>
         </div>
       </div>
@@ -426,7 +427,12 @@ function SignatureLookupInner({ districts = [] }) {
           </div>
           <div>
             <div style={{ fontSize: 11, color: '#445577', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 2 }}>Threshold</div>
-            <div style={{ fontSize: 13, color: '#e8eaf0' }}>{Math.round(selectedDistrict.pctVerified * 100)}% of {Math.round(selectedDistrict.threshold / selectedDistrict.pctVerified * 8 / 100).toLocaleString()} eligible signers</div>
+            <div style={{ fontSize: 13, color: '#e8eaf0' }}>
+              {Math.round(selectedDistrict.pctVerified * 100)}% of{' '}
+              {selectedDistrict.pctVerified > 0
+                ? Math.round(selectedDistrict.threshold / selectedDistrict.pctVerified * 8 / 100).toLocaleString()
+                : '—'} eligible signers
+            </div>
           </div>
         </div>
       )}

@@ -646,6 +646,13 @@ def main():
         daily_velocity = history.get("dailyVelocity", 0.0)
         days_to_deadline = history.get("daysToDeadline", days_to_deadline)
 
+    # Districts with flagged packet-level anomalies get a rejection-rate bump.
+    # Apply this before probability calculation so it affects the model, not just display.
+    anomalies = history.get("anomalies", []) if history else []
+    anomaly_districts = set(a["district"] for a in anomalies)
+    for d_num in anomaly_districts:
+        rejection_rates[d_num] = min(0.05, rejection_rates.get(d_num, 0.0) + 0.01)
+
     # --- Build per-district records ---
     districts_out = []
     all_probs = []
@@ -967,15 +974,6 @@ def main():
     else:
         overall_prob_delta = round(p_qual - prev_p_qualify, 4)
         expected_districts_delta = round(exp_districts - prev_expected_districts, 2)
-
-    # --- Anomalies from history —-- feed back into rejection rates ---
-    # Districts with flagged packet-level fraud anomalies get a rejection rate bump.
-    # A single anomaly adds +1 pp to their effective removal rate, capped at 5%.
-    anomalies = history.get("anomalies", []) if history else []
-    anomaly_districts = set(a["district"] for a in anomalies)
-    for d_rec in districts_out:
-        if d_rec["d"] in anomaly_districts:
-            d_rec["rejectionRate"] = round(min(0.05, d_rec["rejectionRate"] + 0.01), 4)
 
     # --- Signature flow from history (net new / removals) ---
     if history and "snapshots" in history:

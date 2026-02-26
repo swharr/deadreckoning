@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback, Component } from 'react'
+import React, { useState, useMemo, useRef, useCallback, useEffect, Component } from 'react'
 import { TIER_CONFIG } from '../lib/probability.js'
 
 // ---------------------------------------------------------------------------
@@ -237,7 +237,17 @@ function VelocityTrackerInner({ districts, meta, defaultExpanded = false }) {
   const [sortKey, setSortKey] = useState('velocity')
   const [trendFilter, setTrendFilter] = useState('all')
   const [expanded, setExpanded] = useState(defaultExpanded)
-  const [isMobile] = useState(() => window.innerWidth <= 768)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768)
+
+  useEffect(() => {
+    if (defaultExpanded) setExpanded(true)
+  }, [defaultExpanded])
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const snapshotDates = meta?.snapshotDates || []
   const statewideSparkline = useMemo(() => aggregateSparkline(districts), [districts])
