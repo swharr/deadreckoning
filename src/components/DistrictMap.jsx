@@ -25,22 +25,41 @@ function tierToFill(tier) {
   return cfg.color
 }
 
-function tierToStroke(tier) {
-  const cfg = TIER_CONFIG[tier] || TIER_CONFIG['NO CHANCE']
-  return cfg.color + 'aa'
+function tierToStroke() {
+  return '#0a0f1e'
 }
 
-// Compute bounding-box centroid from an SVG path string
+// Compute polygon centroid (area-weighted) from an SVG path string.
+// Falls back to bounding-box center when the polygon area is degenerate.
 function pathCentroid(pathD) {
   const nums = pathD.match(/-?\d+\.?\d*/g).map(Number)
-  let xs = [], ys = []
+  const pts = []
   for (let i = 0; i < nums.length - 1; i += 2) {
-    xs.push(nums[i]); ys.push(nums[i + 1])
+    pts.push({ x: nums[i], y: nums[i + 1] })
   }
-  return {
-    x: (Math.min(...xs) + Math.max(...xs)) / 2,
-    y: (Math.min(...ys) + Math.max(...ys)) / 2,
+  if (pts.length < 3) {
+    return { x: (pts[0]?.x || 0), y: (pts[0]?.y || 0) }
   }
+  let area = 0, cx = 0, cy = 0
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i + 1) % pts.length
+    const cross = pts[i].x * pts[j].y - pts[j].x * pts[i].y
+    area += cross
+    cx += (pts[i].x + pts[j].x) * cross
+    cy += (pts[i].y + pts[j].y) * cross
+  }
+  area /= 2
+  if (Math.abs(area) < 0.01) {
+    // Degenerate — fall back to bounding box center
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y)
+    return {
+      x: (Math.min(...xs) + Math.max(...xs)) / 2,
+      y: (Math.min(...ys) + Math.max(...ys)) / 2,
+    }
+  }
+  cx /= (6 * area)
+  cy /= (6 * area)
+  return { x: cx, y: cy }
 }
 
 export default function DistrictMap({ districts = [] }) {
@@ -127,7 +146,7 @@ export default function DistrictMap({ districts = [] }) {
         d={pathD}
         fill={isActive ? fill + 'dd' : fill}
         stroke={isActive ? '#ffffff' : stroke}
-        strokeWidth={isActive ? (isInset ? 0.8 : 1.5) : (isInset ? 0.3 : 0.5)}
+        strokeWidth={isActive ? (isInset ? 1.0 : 2.0) : (isInset ? 0.5 : 1.2)}
         style={{ cursor: 'pointer', transition: 'stroke 0.1s, stroke-width 0.1s, fill 0.1s' }}
         onMouseMove={e => handleMouseMove(e, distNum)}
         onMouseEnter={() => setHovered(distNum)}

@@ -663,6 +663,31 @@ function StatewideProjectionCard({ overall, meta }) {
   const daysToDeadline = meta?.daysToDeadline ?? 0
   const clerkDeadline = meta?.clerkDeadline || '2026-03-09'
 
+  // Clerk verification window progress (Feb 15 → Mar 9)
+  const windowStart = new Date('2026-02-15T00:00:00')
+  const windowEnd   = new Date('2026-03-09T00:00:00')
+  const today       = new Date()
+  today.setHours(0, 0, 0, 0)
+  const bizDaysBetween = (a, b) => {
+    let count = 0
+    const d = new Date(a)
+    while (d <= b) {
+      const day = d.getDay()
+      if (day !== 0 && day !== 6) count++
+      d.setDate(d.getDate() + 1)
+    }
+    return count
+  }
+  const totalBizDays = bizDaysBetween(windowStart, windowEnd)
+  const clamped = today < windowStart ? windowStart : today > windowEnd ? windowEnd : today
+  const elapsedBizDays = bizDaysBetween(windowStart, clamped)
+  const remainingBizDays = bizDaysBetween(
+    clamped < windowEnd ? new Date(clamped.getTime() + 86400000) : windowEnd,
+    windowEnd,
+  )
+  const pctElapsed = totalBizDays > 0 ? (elapsedBizDays / totalBizDays) * 100 : 0
+  const windowDone = today >= windowEnd
+
   // Format crossing date nicely
   let crossingLabel = null
   if (projectedCrossingDate) {
@@ -759,12 +784,43 @@ function StatewideProjectionCard({ overall, meta }) {
                 )}
               </div>
             )}
-            <div style={{ color: '#445577', marginTop: 4 }}>
-              Clerk deadline: {clerkDeadline} ({daysToDeadline} day{daysToDeadline !== 1 ? 's' : ''})
-            </div>
           </div>
         </>
       )}
+
+      {/* Clerk verification window countdown */}
+      <div style={{ borderTop: '1px solid #1e2a4a', marginTop: 16, paddingTop: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold' }}>
+            Clerk Verification Window
+          </div>
+          <div style={{ fontSize: 13, color: windowDone ? '#4caf50' : '#e8eaf0', fontWeight: 'bold' }}>
+            {windowDone ? 'Complete' : <>{remainingBizDays} <span style={{ fontWeight: 'normal', color: '#556688' }}>working day{remainingBizDays !== 1 ? 's' : ''} left</span></>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#556688', marginBottom: 4 }}>
+          <span>Feb 15</span>
+          <span>Mar 9</span>
+        </div>
+        <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{
+            width: `${pctElapsed}%`,
+            background: '#4caf50',
+            borderRadius: pctElapsed >= 100 ? 4 : '4px 0 0 4px',
+            transition: 'width 0.3s ease',
+          }} />
+          <div style={{
+            width: `${100 - pctElapsed}%`,
+            background: '#ef5350',
+            borderRadius: pctElapsed <= 0 ? 4 : '0 4px 4px 0',
+            transition: 'width 0.3s ease',
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 4 }}>
+          <span style={{ color: '#4caf50' }}>{elapsedBizDays} days elapsed</span>
+          <span style={{ color: '#ef5350' }}>{remainingBizDays} remaining</span>
+        </div>
+      </div>
     </div>
   )
 }
