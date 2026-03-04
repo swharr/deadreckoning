@@ -418,52 +418,72 @@ function NewlyMetBanner({ newlyMet, newlyFailed, districts }) {
 // ---------------------------------------------------------------------------
 // Confirmed Districts card — shows all districts that have met their threshold
 // ---------------------------------------------------------------------------
-function ConfirmedDistrictsCard({ districts, newlyMet }) {
+function ConfirmedDistrictsCard({ districts }) {
   const confirmed = (districts || []).filter(d => d.verified >= d.threshold)
-    .sort((a, b) => (b.verified / b.threshold) - (a.verified / a.threshold))
-  const newlyMetSet = new Set(newlyMet || [])
+    .sort((a, b) => (a.verified / a.threshold) - (b.verified / b.threshold))  // tightest margins first
+  const newlyFailedSet = new Set(
+    (districts || []).filter(d => {
+      const prev = d.prevVerified ?? d.verified
+      return prev >= d.threshold && d.verified < d.threshold
+    }).map(d => d.d)
+  )
+  const totalDelta = confirmed.reduce((sum, d) => sum + (d.delta || 0), 0)
 
   return (
     <div style={card}>
       <div style={cardTitle}>✅ Confirmed Districts</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+        <span style={{ fontSize: 13, color: '#8899bb' }}>{confirmed.length} of 26 required</span>
+        <span style={{ fontSize: 13, fontWeight: 'bold', color: totalDelta < 0 ? '#ff7043' : totalDelta > 0 ? '#4caf50' : '#556688' }}>
+          {totalDelta > 0 ? '+' : ''}{totalDelta.toLocaleString()} net today
+        </span>
+      </div>
       {confirmed.length === 0 ? (
         <p style={emptyNote}>No districts have met their threshold yet.</p>
       ) : (
         confirmed.map(d => {
-          const pct = (d.verified / d.threshold * 100).toFixed(1)
-          const isNew = newlyMetSet.has(d.d)
+          const surplus = d.verified - d.threshold
+          const delta = d.delta || 0
+          const atRisk = surplus < 200  // thin margin
           return (
             <div key={d.d} style={{
               ...row,
-              background: isNew ? 'rgba(76, 175, 80, 0.06)' : 'transparent',
-              borderRadius: isNew ? 4 : 0,
+              background: atRisk ? 'rgba(255, 112, 67, 0.06)' : 'transparent',
+              borderRadius: 4,
               padding: '6px 4px',
             }}>
               <span style={{ color: '#c8d8f0' }}>
                 District {d.d}
-                {isNew && (
+                {atRisk && (
                   <span style={{
                     marginLeft: 6,
                     fontSize: 10,
-                    background: '#1a3d2a',
-                    color: '#4caf50',
-                    border: '1px solid #2d6a4f',
+                    background: '#3d1a1a',
+                    color: '#ff7043',
+                    border: '1px solid #6a2d2d',
                     borderRadius: 4,
                     padding: '1px 5px',
                     fontWeight: 'bold',
                     letterSpacing: '0.05em',
                     verticalAlign: 'middle',
-                  }}>NEW</span>
+                  }}>THIN</span>
                 )}
               </span>
-              <span style={{ color: '#4caf50', fontWeight: 'bold' }}>{pct}%</span>
+              <span style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
+                <span style={{ fontSize: 12, color: delta < 0 ? '#ff7043' : delta > 0 ? '#4caf50' : '#556688' }}>
+                  {delta > 0 ? '+' : ''}{delta}
+                </span>
+                <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{surplus.toLocaleString()}</span>
+              </span>
             </div>
           )
         })
       )}
-      <div style={{ marginTop: 10, fontSize: 11, color: '#334466' }}>
-        {confirmed.length} of 26 required districts confirmed
-      </div>
+      {newlyFailedSet.size > 0 && (
+        <div style={{ marginTop: 10, fontSize: 12, color: '#ff7043', fontWeight: 'bold' }}>
+          ⚠️ {newlyFailedSet.size} district{newlyFailedSet.size !== 1 ? 's' : ''} dropped below threshold
+        </div>
+      )}
     </div>
   )
 }

@@ -139,9 +139,6 @@ function ConfidenceMeter({ value, label, components }) {
 
 export default function StatCards({ overall, meta, districts, modelView, snapshot }) {
   const isGrowthView = modelView === 'growth'
-  const newlyMet = snapshot?.newlyMet || []
-  const hasNewlyMet = newlyMet.length > 0
-
   // Switch between survival (primary) and growth shadow numbers
   const pQualify = isGrowthView
     ? (overall?.pQualifyGrowth ?? overall?.pQualify ?? 0)
@@ -155,6 +152,11 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
     const threshold = THRESHOLDS[d.d] || d.threshold
     return d.verified >= threshold
   }).length
+  const prevConfirmedCount = (districts || []).filter(d => {
+    const threshold = THRESHOLDS[d.d] || d.threshold
+    return (d.prevVerified ?? d.verified) >= threshold
+  }).length
+  const confirmedDelta = confirmedCount - prevConfirmedCount
 
   const confidence = overall?.confidence ?? null
   const confidenceLabel = overall?.confidenceLabel ?? null
@@ -212,28 +214,19 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
       {/* Card 4: Already Confirmed */}
       <div style={{
         ...cardStyle,
-        borderTop: `3px solid ${hasNewlyMet ? '#4caf50' : '#00c853'}`,
-        background: hasNewlyMet ? 'linear-gradient(135deg, #0d1530 0%, #0d2a1a 100%)' : '#0d1530',
+        borderTop: `3px solid ${confirmedDelta < 0 ? '#ff7043' : '#00c853'}`,
       }}>
         <div style={labelStyle}>Districts Confirmed</div>
         <div style={bigNum('#00c853')}>{animatedConfirmed}</div>
-        <div style={subStyle}>districts at or above threshold</div>
-        {hasNewlyMet && (
+        <div style={subStyle}>of 26 required · {confirmedCount - 26} above minimum</div>
+        {confirmedDelta !== 0 && (
           <div style={{
             marginTop: 6,
             fontSize: 11,
-            color: '#4caf50',
+            color: confirmedDelta > 0 ? '#4caf50' : '#ff7043',
             fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
           }}>
-            🎉 +{newlyMet.length} new this update
-            {newlyMet.length <= 3 && (
-              <span style={{ color: '#2d6a4f', fontWeight: 'normal' }}>
-                (D{newlyMet.join(', D')})
-              </span>
-            )}
+            {confirmedDelta > 0 ? '+' : ''}{confirmedDelta} since last update
           </div>
         )}
       </div>
