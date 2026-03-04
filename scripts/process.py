@@ -1177,15 +1177,7 @@ def main():
     else:
         data_maturity = snapshot_maturity
 
-    # 2. Outcome certainty: how far expectedDistricts is from the 26-district threshold.
-    #    Far from 26 in either direction = we know the answer.
-    #    Right at 26 = genuine uncertainty.
-    dist_from_threshold = abs(exp_districts - DISTRICTS_REQUIRED)
-    # Sigmoid-style ramp: 0 distance → 0 certainty, 5+ districts away → ~1.0
-    # tanh(d/2) reaches 0.92 at d=3, 0.99 at d=5
-    outcome_certainty = math.tanh(dist_from_threshold / 2.5)
-
-    # 3. Model sharpness: how narrow the DP pExact distribution is.
+    # 2. Model sharpness: how narrow the DP pExact distribution is.
     #    Compute mean and std dev of the distribution using k as the random variable.
     n_districts = TOTAL_DISTRICTS
     dp_mean = sum(k * p_exact[k] for k in range(n_districts + 1))
@@ -1195,7 +1187,12 @@ def main():
     # A binomial(29, 0.5) has std≈2.7; use 5.0 as the "wide" reference
     model_sharpness = max(0.0, 1.0 - dp_std / 5.0)
 
-    confidence_raw = data_maturity * outcome_certainty * model_sharpness
+    # Confidence = data maturity × model sharpness.
+    # Outcome certainty (distance from 26-district threshold) is deliberately
+    # excluded — the probability itself already communicates threshold proximity,
+    # and folding it in here would make the CI read "Very Low" precisely when
+    # the model is delivering its most useful (close-call) answer.
+    confidence_raw = data_maturity * model_sharpness
     # Clamp to [0, 1] and round
     confidence = round(min(1.0, max(0.0, confidence_raw)), 4)
 
@@ -1266,7 +1263,6 @@ def main():
             "confidenceLabel": confidence_label,
             "confidenceComponents": {
                 "dataMaturity": round(data_maturity, 4),
-                "outcomeCertainty": round(outcome_certainty, 4),
                 "modelSharpness": round(model_sharpness, 4),
             },
         },
