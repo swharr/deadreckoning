@@ -364,18 +364,16 @@ function PredictionCard({ snapshot, meta, districts, overall, modelView }) {
 // ---------------------------------------------------------------------------
 // Newly Met Districts banner — shows when any district newly crossed threshold
 // ---------------------------------------------------------------------------
-function NewlyMetBanner({ newlyMet, newlyFailed, districts }) {
-  const hasMet = newlyMet && newlyMet.length > 0
-  const hasFailed = newlyFailed && newlyFailed.length > 0
-  if (!hasMet && !hasFailed) return null
+function NewlyFailedBanner({ newlyFailed, districts }) {
+  if (!newlyFailed || newlyFailed.length === 0) return null
 
   const districtMap = {}
   ;(districts || []).forEach(d => { districtMap[d.d] = d })
 
   return (
     <div style={{
-      background: hasMet ? 'linear-gradient(135deg, #0a1f0f 0%, #0d2a1a 100%)' : '#1a0a0a',
-      border: `1px solid ${hasMet ? '#2d6a4f' : '#7f1d1d'}`,
+      background: '#1a0a0a',
+      border: '1px solid #7f1d1d',
       borderRadius: 10,
       padding: '16px 20px',
       marginBottom: 16,
@@ -384,29 +382,20 @@ function NewlyMetBanner({ newlyMet, newlyFailed, districts }) {
       alignItems: 'center',
       gap: 12,
     }}>
-      <span style={{ fontSize: 24 }}>{hasMet ? '🎉' : '⚠️'}</span>
+      <span style={{ fontSize: 24 }}>⚠️</span>
       <div style={{ flex: 1, minWidth: 200 }}>
-        {hasMet && (
-          <div style={{ color: '#4caf50', fontWeight: 'bold', fontSize: 14, marginBottom: hasFailed ? 4 : 0 }}>
-            {newlyMet.length === 1
-              ? `District ${newlyMet[0]} just crossed its threshold!`
-              : `${newlyMet.length} districts just crossed their thresholds!`}
-          </div>
-        )}
-        {hasFailed && (
-          <div style={{ color: '#f44336', fontWeight: 'bold', fontSize: 14 }}>
-            {newlyFailed.length === 1
-              ? `District ${newlyFailed[0]} dropped back below threshold.`
-              : `${newlyFailed.length} districts dropped below threshold.`}
-          </div>
-        )}
-        {hasMet && newlyMet.map(dNum => {
+        <div style={{ color: '#f44336', fontWeight: 'bold', fontSize: 14 }}>
+          {newlyFailed.length === 1
+            ? `District ${newlyFailed[0]} dropped below threshold`
+            : `${newlyFailed.length} districts dropped below threshold`}
+        </div>
+        {newlyFailed.map(dNum => {
           const d = districtMap[dNum]
           if (!d) return null
-          const pct = d.verified / d.threshold * 100
+          const deficit = d.threshold - d.verified
           return (
-            <div key={dNum} style={{ fontSize: 12, color: '#667799', marginTop: 2 }}>
-              D{dNum}: {d.verified.toLocaleString()} verified / {d.threshold.toLocaleString()} needed ({pct.toFixed(1)}%)
+            <div key={dNum} style={{ fontSize: 12, color: '#ff7043', marginTop: 2 }}>
+              D{dNum}: {d.verified.toLocaleString()} / {d.threshold.toLocaleString()} needed ({deficit.toLocaleString()} short)
             </div>
           )
         })}
@@ -955,12 +944,11 @@ function VelocityCard({ meta, districts, onExpand }) {
 // ---------------------------------------------------------------------------
 export default function SnapshotBoxes({ snapshot, meta, districts, overall, modelView, onExpandVelocity }) {
   const anomalies = snapshot?.anomalies || []
-  const newlyMet = snapshot?.newlyMet || []
   const newlyFailed = snapshot?.newlyFailed || []
 
   return (
     <div>
-      <NewlyMetBanner newlyMet={newlyMet} newlyFailed={newlyFailed} districts={districts} />
+      <NewlyFailedBanner newlyFailed={newlyFailed} districts={districts} />
       <AnomalyBanner anomalies={anomalies} />
       <div style={{
         display: 'flex',
@@ -976,7 +964,6 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
         />
         <ConfirmedDistrictsCard
           districts={districts}
-          newlyMet={newlyMet}
         />
         <StatewideProjectionCard
           overall={overall}
