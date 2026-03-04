@@ -692,6 +692,14 @@ def main():
     # Snapshot count for uncertainty discount (used in per-district prob functions)
     snapshot_count = history["snapshotCount"] if history else 1
 
+    # --- Build previous-snapshot lookup from history (authoritative for deltas) ---
+    prev_snapshot_counts: dict[int, int] = {}
+    if history and len(history.get("snapshots", [])) >= 2:
+        prev_snap = history["snapshots"][-2]
+        for k, v in prev_snap.get("districts", {}).items():
+            prev_snapshot_counts[int(k)] = v
+        print(f"Using history snapshot {prev_snap['date']} for prevVerified deltas")
+
     # --- Build per-district records ---
     districts_out = []
     all_probs = []
@@ -707,6 +715,10 @@ def main():
             # Same data — carry forward previous deltas instead of zeroing
             prev_verified = prev_rec.get("prevVerified", verified)
             delta = prev_rec.get("delta", 0)
+        elif d_num in prev_snapshot_counts:
+            # Use authoritative history snapshot for accurate day-over-day delta
+            prev_verified = prev_snapshot_counts[d_num]
+            delta = verified - prev_verified
         else:
             prev_verified = prev_rec.get("verified", verified)
             delta = verified - prev_verified
