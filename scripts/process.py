@@ -54,6 +54,11 @@ ELECTION_DATE = "2026-11-03"
 # Number of historical weekly buckets for sparkline display
 WEEKLY_BUCKETS = 10
 
+# Minimum snapshots before per-district probabilities reach full credibility.
+# Below this, probabilities are pulled toward 0.5 (maximum entropy) to express
+# wider uncertainty when data is sparse. ~2 weeks at current snapshot cadence.
+MIN_CREDIBLE_SNAPSHOTS = 8
+
 
 # ---------------------------------------------------------------------------
 # Name lookup helpers
@@ -184,6 +189,7 @@ def compute_district_prob(
     final_week_sigs: int,
     projected_adj: float,   # rejection-adjusted linear projection to deadline
     rejection_rate: float,  # observed per-district removal rate [0,1]
+    snapshot_count: int = 16,  # number of historical snapshots available
 ) -> float:
     """
     Compute P(district meets threshold) using history-informed inputs where available.
@@ -195,15 +201,24 @@ def compute_district_prob(
     # Structural feasibility gate: if the projection can't get close to threshold,
     # the district has very low odds regardless of trend noise.
     proj_pct = projected_adj / threshold if threshold > 0 else 0.0
-    if proj_pct < 0.65:
-        # Very far off — scale from 0 to 0.02
-        return round(proj_pct * 0.031, 4)  # max 0.02 at 0.65
-    if proj_pct < 0.80:
-        # Hard climb zone: 0.02 → 0.08
-        return round(0.02 + (proj_pct - 0.65) * 0.40, 4)
     if proj_pct < 0.90:
-        # Getting realistic: 0.08 → 0.18
-        return round(0.08 + (proj_pct - 0.80) * 1.00, 4)
+        if proj_pct < 0.65:
+            # Very far off — scale from 0 to 0.02
+            raw = proj_pct * 0.031  # max 0.02 at 0.65
+        elif proj_pct < 0.80:
+            # Hard climb zone: 0.02 → 0.08
+            raw = 0.02 + (proj_pct - 0.65) * 0.40
+        else:
+            # Getting realistic: 0.08 → 0.18
+            raw = 0.08 + (proj_pct - 0.80) * 1.00
+
+        # Entropy pull: with sparse data, pull high-confidence estimates toward 0.5.
+        # Only applies when raw > 0.5 — low estimates reflect structural arithmetic
+        # (verified << threshold) that doesn't depend on data volume.
+        if raw > 0.5:
+            credibility = min(snapshot_count / MIN_CREDIBLE_SNAPSHOTS, 1.0)
+            raw = 0.5 + (raw - 0.5) * credibility
+        return round(max(0.00, min(0.99, raw)), 4)
 
     # Base: raw fraction already verified
     base_score = verified / threshold
@@ -232,7 +247,16 @@ def compute_district_prob(
     elif final_week_sigs > 200:
         raw += 0.01
 
-    return max(0.00, min(0.99, raw))
+    raw = max(0.00, min(0.99, raw))
+
+    # Entropy pull: with sparse data, pull high-confidence estimates toward 0.5.
+    # Only applies when raw > 0.5 — low estimates reflect structural arithmetic
+    # (verified << threshold) that doesn't depend on data volume.
+    if raw > 0.5:
+        credibility = min(snapshot_count / MIN_CREDIBLE_SNAPSHOTS, 1.0)
+        raw = 0.5 + (raw - 0.5) * credibility
+
+    return round(max(0.00, min(0.99, raw)), 4)
 
 
 def bayesian_removal_rate(
@@ -264,6 +288,7 @@ def compute_district_prob_survival(
     days_remaining: int,
     days_post_deadline: int = 0,  # days elapsed since submission deadline
     pre_deadline_slope: float = 0.0,  # sigs/day velocity just before deadline
+    snapshot_count: int = 16,  # number of historical snapshots available
 ) -> float:
     """
     Post-submission-deadline survival model.
@@ -291,47 +316,58 @@ def compute_district_prob_survival(
             # Well above threshold — apply removal risk to see if we could fall back
             projected_remaining = verified * (1.0 - effective_rate)
             if projected_remaining >= threshold:
-                return 1.0
-            # Blended removal risk could theoretically breach threshold
-            removal_risk = min(effective_rate * 2, 0.10)
-            return max(0.92, 1.0 - removal_risk)
-        # Close to threshold — meaningful chance of falling back below due to removals
-        removal_risk = min(effective_rate * 3, 0.15)
-        return max(0.90, 1.0 - removal_risk)
-
-    # Below threshold — the gap tells us how likely late LG postings can close it.
-    current_pct = verified / threshold if threshold > 0 else 0.0
-    gap_pct = 1.0 - current_pct
-
-    # Base gap-to-probability lookup (calibrated to 1.65% prior removal environment)
-    if gap_pct <= 0.02:
-        base_p = 0.18   # Within 2% — small chance LG posting lag resolves it
-    elif gap_pct <= 0.05:
-        base_p = 0.10
-    elif gap_pct <= 0.10:
-        base_p = 0.05
-    elif gap_pct <= 0.15:
-        base_p = 0.02
-    elif gap_pct <= 0.25:
-        base_p = 0.005
+                raw = 1.0
+            else:
+                # Blended removal risk could theoretically breach threshold
+                removal_risk = min(effective_rate * 2, 0.10)
+                raw = max(0.92, 1.0 - removal_risk)
+        else:
+            # Close to threshold — meaningful chance of falling back below due to removals
+            removal_risk = min(effective_rate * 3, 0.15)
+            raw = max(0.90, 1.0 - removal_risk)
     else:
-        return 0.00  # Structurally impossible
+        # Below threshold — the gap tells us how likely late LG postings can close it.
+        current_pct = verified / threshold if threshold > 0 else 0.0
+        gap_pct = 1.0 - current_pct
 
-    # Trajectory multiplier: if a district had strong pre-deadline velocity,
-    # it may have unposted signatures still in the LG pipeline. Boost base_p
-    # proportional to the slope, capped at 1.5×. Only applies early post-deadline
-    # while the LG lag window is still plausible (within 10 days of deadline).
-    if pre_deadline_slope > 0 and days_post_deadline <= 10:
-        # Normalize slope: 50 sigs/day = meaningful surge for any district
-        trajectory_bonus = min(0.5, pre_deadline_slope / 50.0) * (1.0 - days_post_deadline / 10.0)
-        base_p = base_p * (1.0 + trajectory_bonus)
+        # Base gap-to-probability lookup (calibrated to 1.65% prior removal environment)
+        if gap_pct <= 0.02:
+            raw = 0.18   # Within 2% — small chance LG posting lag resolves it
+        elif gap_pct <= 0.05:
+            raw = 0.10
+        elif gap_pct <= 0.10:
+            raw = 0.05
+        elif gap_pct <= 0.15:
+            raw = 0.02
+        elif gap_pct <= 0.25:
+            raw = 0.005
+        else:
+            return 0.00  # Structurally impossible — no entropy pull needed
 
-    # Downward nudge if effective removal rate is meaningfully above prior
-    # (i.e., this district is under heavier-than-average clerk scrutiny)
-    if effective_rate > 0.03:
-        base_p *= max(0.5, 1.0 - (effective_rate - 0.03) * 10)
+        # Trajectory multiplier: if a district had strong pre-deadline velocity,
+        # it may have unposted signatures still in the LG pipeline. Boost raw
+        # proportional to the slope, capped at 1.5×. Only applies early post-deadline
+        # while the LG lag window is still plausible (within 10 days of deadline).
+        if pre_deadline_slope > 0 and days_post_deadline <= 10:
+            # Normalize slope: 50 sigs/day = meaningful surge for any district
+            trajectory_bonus = min(0.5, pre_deadline_slope / 50.0) * (1.0 - days_post_deadline / 10.0)
+            raw = raw * (1.0 + trajectory_bonus)
 
-    return round(max(0.0, min(0.99, base_p)), 4)
+        # Downward nudge if effective removal rate is meaningfully above prior
+        # (i.e., this district is under heavier-than-average clerk scrutiny)
+        if effective_rate > 0.03:
+            raw *= max(0.5, 1.0 - (effective_rate - 0.03) * 10)
+
+    raw = max(0.0, min(0.99, raw))
+
+    # Entropy pull: with sparse data, pull high-confidence estimates toward 0.5.
+    # Only applies when raw > 0.5 — low estimates reflect structural arithmetic
+    # (verified << threshold) that doesn't depend on data volume.
+    if raw > 0.5:
+        credibility = min(snapshot_count / MIN_CREDIBLE_SNAPSHOTS, 1.0)
+        raw = 0.5 + (raw - 0.5) * credibility
+
+    return round(max(0.0, min(0.99, raw)), 4)
 
 
 def compute_distribution(probs: list[float]) -> list[float]:
@@ -653,6 +689,9 @@ def main():
     for d_num in anomaly_districts:
         rejection_rates[d_num] = min(0.05, rejection_rates.get(d_num, 0.0) + 0.01)
 
+    # Snapshot count for uncertainty discount (used in per-district prob functions)
+    snapshot_count = history["snapshotCount"] if history else 1
+
     # --- Build per-district records ---
     districts_out = []
     all_probs = []
@@ -833,6 +872,7 @@ def main():
                 days_remaining=days_to_deadline,
                 days_post_deadline=days_post_deadline,
                 pre_deadline_slope=pre_deadline_slope,
+                snapshot_count=snapshot_count,
             )
 
             # Growth prob: what would the growth model say about this district?
@@ -844,6 +884,7 @@ def main():
                 final_week_sigs=final_week_sigs,
                 projected_adj=growth_proj_raw if growth_proj_raw else float(verified),
                 rejection_rate=rejection_rate,
+                snapshot_count=snapshot_count,
             )
 
             # Blend: early post-deadline leans on growth signal;
@@ -878,7 +919,8 @@ def main():
 
             prob = compute_district_prob(
                 verified, threshold, trend, final_week_sigs,
-                projected_total, rejection_rate
+                projected_total, rejection_rate,
+                snapshot_count=snapshot_count,
             )
 
         if is_reprocessing:
@@ -895,7 +937,8 @@ def main():
             # What would the growth model say if we hadn't hit the deadline?
             growth_prob = compute_district_prob(
                 verified, threshold, trend, final_week_sigs,
-                projected_raw, rejection_rate
+                projected_raw, rejection_rate,
+                snapshot_count=snapshot_count,
             )
         else:
             growth_prob = prob  # Already in growth mode
@@ -1110,7 +1153,7 @@ def main():
     #    Estimated max useful snapshots ≈ 22 (Jan 16 → Feb 20 business days).
     #    Post-deadline: also factor in how far through the 22-day clerk window we are.
     MAX_EXPECTED_SNAPSHOTS = 22
-    snapshot_count = history["snapshotCount"] if history else 1
+    # snapshot_count already computed above (before per-district loop)
     snapshot_maturity = min(snapshot_count / MAX_EXPECTED_SNAPSHOTS, 1.0)
 
     if post_deadline:

@@ -821,6 +821,32 @@ function StatewideProjectionCard({ overall, meta }) {
           <span style={{ color: '#ef5350' }}>{remainingBizDays} remaining</span>
         </div>
       </div>
+
+      {/* Signature Removal Window */}
+      {(() => {
+        const now = new Date()
+        const end = new Date('2026-04-23T00:00:00')
+        let bizDays = 0
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        while (d <= end) {
+          if (d.getDay() !== 0 && d.getDay() !== 6) bizDays++
+          d.setDate(d.getDate() + 1)
+        }
+        if (bizDays <= 0) return null
+        return (
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #1e2a4a' }}>
+            <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
+              Signature Removal Window
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#ff7043', lineHeight: 1.2 }}>
+              {bizDays} <span style={{ fontSize: 14, fontWeight: 'normal', color: '#8899bb' }}>business days</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#556688', marginTop: 4 }}>
+              Signers have 45 days after the LG's office posted their name online to remove their support
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
