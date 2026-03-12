@@ -44,20 +44,36 @@ function Sparkline({ values, trend, snapshotDates, width = 200, height = 40, int
   // Guard: need at least 2 points to draw a line
   if (!values || values.length < 2) return null
 
-  const max = Math.max(...values, 1)
+  const hasNegative = values.some(v => v < 0)
+  const vMin = Math.min(...values, 0)  // floor at 0 so zero-line is always at bottom when all positive
+  const vMax = Math.max(...values, 1)
+  const range = vMax - vMin || 1
+  const pad = 2  // px padding top/bottom
+
   const xStep = width / (values.length - 1)
+  const toY = (v) => pad + (height - 2 * pad) * (1 - (v - vMin) / range)
+  const zeroY = toY(0)
+
   const pts = values.map((v, i) => ({
     x: i * xStep,
-    y: height - (v / max) * (height - 4) - 2,
+    y: toY(v),
     v,
   }))
 
   const linePoints = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
-  const areaPoints = [
-    `0,${height}`,
-    ...pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`),
-    `${width},${height}`,
+
+  // Area fill: when all values ≥ 0, fill from zero line (bottom). When mixed,
+  // use a clip approach — positive fill above zero, negative fill below zero.
+  const posAreaPoints = [
+    `0,${zeroY.toFixed(1)}`,
+    ...pts.map(p => `${p.x.toFixed(1)},${Math.min(p.y, zeroY).toFixed(1)}`),
+    `${width},${zeroY.toFixed(1)}`,
   ].join(' ')
+  const negAreaPoints = hasNegative ? [
+    `0,${zeroY.toFixed(1)}`,
+    ...pts.map(p => `${p.x.toFixed(1)},${Math.max(p.y, zeroY).toFixed(1)}`),
+    `${width},${zeroY.toFixed(1)}`,
+  ].join(' ') : null
 
   const color = TREND_COLORS[trend] || '#8899bb'
   const lastPt = pts[pts.length - 1]
@@ -93,7 +109,16 @@ function Sparkline({ values, trend, snapshotDates, width = 200, height = 40, int
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <polygon points={areaPoints} fill={color} fillOpacity={0.12} />
+        {/* Positive area (green-ish, above zero line) */}
+        <polygon points={posAreaPoints} fill={color} fillOpacity={0.12} />
+        {/* Negative area (red, below zero line) */}
+        {negAreaPoints && (
+          <polygon points={negAreaPoints} fill="#ef5350" fillOpacity={0.15} />
+        )}
+        {/* Zero line when there are negative values */}
+        {hasNegative && (
+          <line x1={0} y1={zeroY} x2={width} y2={zeroY} stroke="#556688" strokeWidth={0.5} strokeDasharray="3 3" strokeOpacity={0.6} />
+        )}
         <polyline points={linePoints} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
         <circle cx={lastPt.x} cy={lastPt.y} r={2.5} fill={color} />
         {hoverPt && (
@@ -120,7 +145,9 @@ function Sparkline({ values, trend, snapshotDates, width = 200, height = 40, int
           lineHeight: 1.5,
         }}>
           {getLabel(hoverIdx) && <div style={{ color: '#8899bb' }}>{getLabel(hoverIdx)}</div>}
-          <div style={{ color, fontWeight: 'bold' }}>+{values[hoverIdx].toLocaleString()}</div>
+          <div style={{ color: values[hoverIdx] < 0 ? '#ef5350' : color, fontWeight: 'bold' }}>
+            {values[hoverIdx] >= 0 ? '+' : ''}{values[hoverIdx].toLocaleString()}
+          </div>
         </div>
       )}
     </div>
@@ -294,9 +321,14 @@ function VelocityTrackerInner({ districts, meta, defaultExpanded = false }) {
                 {meta?.dailyVelocity != null ? meta.dailyVelocity.toLocaleString() : '—'}
               </span>
               {' '}sigs/day
-              {meta?.daysToDeadline != null && (
+              {meta?.daysToDeadline != null && meta.daysToDeadline > 0 && (
                 <span style={{ color: '#556688', marginLeft: 8, fontSize: 11 }}>
-                  · {meta.daysToDeadline}d to deadline
+                  · {meta.daysToDeadline}d to clerk deadline
+                </span>
+              )}
+              {meta?.daysToDeadline != null && meta.daysToDeadline <= 0 && (
+                <span style={{ color: '#4caf50', marginLeft: 8, fontSize: 11 }}>
+                  · clerk validation ended
                 </span>
               )}
             </div>

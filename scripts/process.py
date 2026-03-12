@@ -582,7 +582,7 @@ def build_weekly_buckets_from_history(district_snapshots: list[dict], n_buckets:
     # Compute deltas between consecutive snapshots
     deltas = []
     for i in range(1, len(district_snapshots)):
-        net = max(0, district_snapshots[i]["count"] - district_snapshots[i - 1]["count"])
+        net = district_snapshots[i]["count"] - district_snapshots[i - 1]["count"]
         deltas.append(net)
 
     if not deltas:

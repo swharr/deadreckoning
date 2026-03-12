@@ -797,62 +797,188 @@ function StatewideProjectionCard({ overall, meta }) {
         </>
       )}
 
-      {/* Clerk verification window countdown */}
-      <div style={{ borderTop: '1px solid #1e2a4a', marginTop: 16, paddingTop: 14 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold' }}>
-            Clerk Verification Window
-          </div>
-          <div style={{ fontSize: 13, color: windowDone ? '#4caf50' : '#e8eaf0', fontWeight: 'bold' }}>
-            {windowDone ? 'Complete' : <>{remainingBizDays} <span style={{ fontWeight: 'normal', color: '#556688' }}>working day{remainingBizDays !== 1 ? 's' : ''} left</span></>}
-          </div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#556688', marginBottom: 4 }}>
-          <span>Feb 15</span>
-          <span>Mar 9</span>
-        </div>
-        <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden' }}>
-          <div style={{
-            width: `${pctElapsed}%`,
-            background: '#4caf50',
-            borderRadius: pctElapsed >= 100 ? 4 : '4px 0 0 4px',
-            transition: 'width 0.3s ease',
-          }} />
-          <div style={{
-            width: `${100 - pctElapsed}%`,
-            background: '#ef5350',
-            borderRadius: pctElapsed <= 0 ? 4 : '0 4px 4px 0',
-            transition: 'width 0.3s ease',
-          }} />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 4 }}>
-          <span style={{ color: '#4caf50' }}>{elapsedBizDays} days elapsed</span>
-          <span style={{ color: '#ef5350' }}>{remainingBizDays} remaining</span>
-        </div>
-      </div>
-
-      {/* Signature Removal Window */}
+      {/* Ballot Timeline — unified phases */}
       {(() => {
-        const now = new Date()
-        const end = new Date('2026-04-23T00:00:00')
-        let bizDays = 0
-        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        while (d <= end) {
-          if (d.getDay() !== 0 && d.getDay() !== 6) bizDays++
-          d.setDate(d.getDate() + 1)
+        const submissionEnd = new Date('2026-02-15T00:00:00')
+        const clerkEnd      = new Date('2026-03-09T00:00:00')
+        const removalEnd    = new Date('2026-04-23T00:00:00')
+        const ballotDate    = new Date('2026-04-30T00:00:00')
+        const now           = new Date()
+        now.setHours(0, 0, 0, 0)
+
+        // Business-day counter between two dates (inclusive of both)
+        const bizDaysBtwn = (a, b) => {
+          let count = 0
+          const d = new Date(a)
+          while (d <= b) {
+            const day = d.getDay()
+            if (day !== 0 && day !== 6) count++
+            d.setDate(d.getDate() + 1)
+          }
+          return count
         }
-        if (bizDays <= 0) return null
+
+        // Phase statuses
+        const submissionDone = now > submissionEnd
+        const clerkDone      = now > clerkEnd
+        const removalDone    = now > removalEnd
+
+        // Removal window progress
+        const removalTotalBiz   = bizDaysBtwn(clerkEnd, removalEnd)
+        const removalClampedNow = now < clerkEnd ? clerkEnd : now > removalEnd ? removalEnd : now
+        const removalElapsedBiz = bizDaysBtwn(clerkEnd, removalClampedNow)
+        const removalRemainingBiz = removalDone ? 0 : bizDaysBtwn(
+          new Date(Math.max(now.getTime(), clerkEnd.getTime()) + 86400000),
+          removalEnd,
+        )
+        const removalPct = removalTotalBiz > 0 ? Math.min((removalElapsedBiz / removalTotalBiz) * 100, 100) : 0
+
+        // The overall timeline runs Feb 15 → Apr 30
+        const totalSpan = ballotDate.getTime() - submissionEnd.getTime()
+        const clerkPct   = ((clerkEnd.getTime()   - submissionEnd.getTime()) / totalSpan) * 100
+        const removalPctOfTotal = ((removalEnd.getTime() - clerkEnd.getTime()) / totalSpan) * 100
+        const ballotPctOfTotal  = 100 - clerkPct - removalPctOfTotal
+
+        // Where is "now" on the overall bar?
+        const nowPct = Math.min(Math.max(((now.getTime() - submissionEnd.getTime()) / totalSpan) * 100, 0), 100)
+
+        const phaseStyle = (done, active) => ({
+          fontSize: 12,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '8px 0',
+          borderBottom: '1px solid #131c33',
+          color: done ? '#4caf50' : active ? '#e8eaf0' : '#445577',
+        })
+
         return (
-          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #1e2a4a' }}>
-            <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 6 }}>
-              Signature Removal Window
+          <div style={{ borderTop: '1px solid #1e2a4a', marginTop: 16, paddingTop: 14 }}>
+            <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 12 }}>
+              Ballot Timeline
             </div>
-            <div style={{ fontSize: 28, fontWeight: 'bold', color: '#ff7043', lineHeight: 1.2 }}>
-              {bizDays} <span style={{ fontSize: 14, fontWeight: 'normal', color: '#8899bb' }}>business days</span>
+
+            {/* Overall timeline bar */}
+            <div style={{ position: 'relative', marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#445577', marginBottom: 4 }}>
+                <span>Feb 15</span>
+                <span>Mar 9</span>
+                <span>Apr 23</span>
+                <span>Apr 30</span>
+              </div>
+              <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+                {/* Clerk verification segment */}
+                <div style={{
+                  width: `${clerkPct}%`,
+                  background: clerkDone ? '#4caf50' : '#4a9eff',
+                  transition: 'width 0.3s ease',
+                }} />
+                {/* Removal window segment */}
+                <div style={{
+                  width: `${removalPctOfTotal}%`,
+                  background: removalDone ? '#4caf50' : '#1a2040',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}>
+                  {/* Fill within removal segment */}
+                  {!removalDone && clerkDone && (
+                    <div style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      height: '100%',
+                      width: `${removalPct}%`,
+                      background: '#ff7043',
+                      transition: 'width 0.3s ease',
+                    }} />
+                  )}
+                  {removalDone && (
+                    <div style={{ width: '100%', height: '100%', background: '#4caf50' }} />
+                  )}
+                </div>
+                {/* Ballot confirmation segment */}
+                <div style={{
+                  width: `${ballotPctOfTotal}%`,
+                  background: removalDone ? '#4a9eff' : '#0d1530',
+                  borderLeft: '1px solid #1e2a4a',
+                }} />
+              </div>
+              {/* "Now" marker */}
+              {nowPct > 0 && nowPct < 100 && (
+                <div style={{
+                  position: 'absolute',
+                  left: `${nowPct}%`,
+                  bottom: 0,
+                  transform: 'translateX(-50%)',
+                  width: 2,
+                  height: 8,
+                  background: '#e8eaf0',
+                  borderRadius: 1,
+                }} />
+              )}
             </div>
-            <div style={{ fontSize: 12, color: '#556688', marginTop: 4 }}>
-              Signers have 45 days after the LG's office posted their name online to remove their support
+
+            {/* Phase checklist */}
+            <div style={{ marginTop: 10 }}>
+              <div style={phaseStyle(submissionDone, false)}>
+                <span>{submissionDone ? '✓' : '○'} Signature submission</span>
+                <span style={{ fontSize: 11, color: '#556688' }}>Ended Feb 15</span>
+              </div>
+              <div style={phaseStyle(clerkDone, !clerkDone && submissionDone)}>
+                <span>{clerkDone ? '✓' : '◉'} Clerk verification</span>
+                <span style={{ fontSize: 11, color: clerkDone ? '#4caf50' : '#4a9eff' }}>
+                  {clerkDone ? 'Ended Mar 9' : `${remainingBizDays} biz days left`}
+                </span>
+              </div>
+              <div style={phaseStyle(removalDone, !removalDone && clerkDone)}>
+                <span>{removalDone ? '✓' : clerkDone ? '◉' : '○'} Signature removal window</span>
+                <span style={{ fontSize: 11, color: removalDone ? '#4caf50' : clerkDone ? '#ff7043' : '#445577', fontWeight: clerkDone && !removalDone ? 'bold' : 'normal' }}>
+                  {removalDone
+                    ? 'Ended Apr 23'
+                    : clerkDone
+                      ? <>{removalRemainingBiz} <span style={{ fontWeight: 'normal', color: '#8899bb' }}>business days left</span></>
+                      : 'Apr 23'}
+                </span>
+              </div>
+              <div style={{ ...phaseStyle(false, removalDone), borderBottom: 'none' }}>
+                <span>{removalDone ? '◉' : '○'} LG certifies for November ballot</span>
+                <span style={{ fontSize: 11, color: removalDone ? '#4a9eff' : '#445577' }}>Apr 30</span>
+              </div>
             </div>
+
+            {/* Active phase callout */}
+            {clerkDone && !removalDone && (
+              <div style={{
+                marginTop: 10,
+                background: '#1a1000',
+                border: '1px solid #3d2800',
+                borderRadius: 6,
+                padding: '10px 14px',
+                fontSize: 12,
+                color: '#cc8833',
+                lineHeight: 1.6,
+              }}>
+                <strong style={{ color: '#ff7043' }}>Removal window open.</strong>{' '}
+                Signers can remove their names through Apr 23.
+                If the petition stays above {target.toLocaleString()} statewide
+                and meets 26/29 districts, it goes on the ballot Apr 30.
+              </div>
+            )}
+            {!clerkDone && (
+              <div style={{
+                marginTop: 10,
+                background: '#001020',
+                border: '1px solid #1a3050',
+                borderRadius: 6,
+                padding: '10px 14px',
+                fontSize: 12,
+                color: '#6699bb',
+                lineHeight: 1.6,
+              }}>
+                County clerks are validating signatures through <strong style={{ color: '#4a9eff' }}>Mar 9</strong>.
+                Counts may decrease as invalid signatures are removed.
+              </div>
+            )}
           </div>
         )
       })()}
