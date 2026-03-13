@@ -43,7 +43,7 @@ export default function DistributionChart({ overall, modelView }) {
         alignItems: 'center',
         gap: 10,
       }}>
-        Qualification Probability Distribution
+        District Rule Probability Distribution
         {isGrowthView && (
           <span style={{ fontSize: 11, color: '#4caf50', fontWeight: 'bold', letterSpacing: '0.06em' }}>
             · growth view
@@ -150,7 +150,7 @@ export default function DistributionChart({ overall, modelView }) {
         textAlign: 'center',
         marginBottom: 24,
       }}>
-        Districts meeting 8% threshold — showing k=11–29 (need ≥26)
+        Districts meeting 8% threshold — showing k=11–29 (need ≥26 for the district rule)
         &nbsp;·&nbsp;
         <span style={{ color: '#4a9eff' }}>■ Does not qualify</span>
         &nbsp;&nbsp;

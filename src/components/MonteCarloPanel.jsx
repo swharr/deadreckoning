@@ -186,7 +186,7 @@ export default function MonteCarloPanel({ districts, overall }) {
     [districts]
   )
 
-  const dpPQualify = overall?.pQualify ?? 0
+  const dpPQualify = overall?.pDistrictRule ?? overall?.pQualify ?? 0
 
   const handleRun = useCallback(() => {
     if (running || districtProbs.length === 0) return
@@ -224,8 +224,8 @@ export default function MonteCarloPanel({ districts, overall }) {
         Monte Carlo Simulation
       </div>
       <div style={{ fontSize: 11, color: '#334466', marginBottom: 20, lineHeight: 1.5 }}>
-        Samples each district independently using its model probability.
-        Results should converge toward the DP exact answer with more runs.
+        Samples the district-rule model independently across all 29 districts.
+        Results should converge toward the exact DP answer for P(&gt;=26 districts).
       </div>
 
       {/* Controls */}

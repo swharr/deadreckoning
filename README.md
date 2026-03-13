@@ -94,7 +94,7 @@ After editing:
 .venv/bin/python scripts/process.py
 
 # Check output
-python3 -c "import json; d=json.load(open('public/data.json')); print(d['overall']['pQualify'], d['overall']['expectedDistricts'])"
+python3 -c "import json; d=json.load(open('public/data.json')); print(d['overall']['pDistrictRule'], d['overall']['expectedDistricts'])"
 ```
 
 The JavaScript mirror at `src/lib/probability.js` exports `THRESHOLDS` and `TIER_CONFIG` — keep these in sync if you change district thresholds.

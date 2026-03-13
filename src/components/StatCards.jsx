@@ -78,14 +78,11 @@ function confidenceExplain(components) {
   const sharpPct = Math.round(modelSharpness * 100)
 
   // Plain-English sentence for the weakest axis
-  let drag = null
-  if (dataMaturity < 0.60) {
-    drag = `Data maturity is the main factor (${matPct}%) — the model has only seen a portion of the clerk review window so far. Confidence will rise as more daily updates arrive.`
-  } else if (modelSharpness < 0.70) {
-    drag = `Model sharpness is limiting confidence (${sharpPct}%) — the outcome distribution is still spread across several scenarios. More data will narrow it.`
-  } else {
-    drag = `Both inputs are strong. The model has good data coverage and a focused outcome distribution.`
-  }
+  const drag = dataMaturity < 0.60
+    ? `Data maturity is the main factor (${matPct}%) — the model has only seen a portion of the clerk review window so far. Confidence will rise as more daily updates arrive.`
+    : modelSharpness < 0.70
+      ? `Model sharpness is limiting confidence (${sharpPct}%) — the outcome distribution is still spread across several scenarios. More data will narrow it.`
+      : 'Both inputs are strong. The model has good data coverage and a focused outcome distribution.'
 
   return (
     <div style={{ marginTop: 8, fontSize: 11, color: '#334466', lineHeight: 1.6 }}>
@@ -134,12 +131,12 @@ function ConfidenceMeter({ value, label, components }) {
   )
 }
 
-export default function StatCards({ overall, meta, districts, modelView, snapshot }) {
+export default function StatCards({ overall, meta, districts, modelView }) {
   const isGrowthView = modelView === 'growth'
   // Switch between survival (primary) and growth shadow numbers
   const pQualify = isGrowthView
-    ? (overall?.pQualifyGrowth ?? overall?.pQualify ?? 0)
-    : (overall?.pQualify ?? 0)
+    ? (overall?.pDistrictRuleGrowth ?? overall?.pQualifyGrowth ?? overall?.pDistrictRule ?? overall?.pQualify ?? 0)
+    : (overall?.pDistrictRule ?? overall?.pQualify ?? 0)
   const expectedDist = isGrowthView
     ? (overall?.expectedDistrictsGrowth ?? overall?.expectedDistricts ?? 0)
     : (overall?.expectedDistricts ?? 0)
@@ -174,12 +171,13 @@ export default function StatCards({ overall, meta, districts, modelView, snapsho
       flexWrap: 'wrap',
       gap: 16,
     }}>
-      {/* Card 1: Ballot Probability */}
+      {/* Card 1: District rule probability */}
       <div style={{ ...cardStyle, borderTop: `3px solid ${probColor}` }}>
-        <div style={labelStyle}>Ballot Probability</div>
+        <div style={labelStyle}>District Rule Probability</div>
         <div style={bigNum(probColor)}>{animatedPct}%</div>
         <div style={subStyle}>
           P(≥26 districts qualify)
+          {!isGrowthView && <span style={{ color: '#556688', marginLeft: 4 }}>· statewide target tracked separately</span>}
           {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
         </div>
         {confidence !== null && confidenceLabel && (

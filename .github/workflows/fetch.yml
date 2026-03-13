@@ -36,12 +36,16 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
       - run: pip install -r requirements.txt
 
       - name: Scrape LG site (manual file wins automatically if present)
         id: scrape
         run: python scripts/scraper.py
-        continue-on-error: true
 
       - name: Check whether new data arrived
         id: check
@@ -60,6 +64,10 @@ jobs:
           python scripts/replay.py
           python scripts/process.py
 
+      - name: Run quality checks
+        if: steps.check.outputs.data_changed == 'true'
+        run: npm run check
+
       - name: Create PR with updated data
         if: steps.check.outputs.data_changed == 'true'
         env:
@@ -67,7 +75,7 @@ jobs:
         run: |
           git config user.name  "t8rsk8s Data Robot"
           git config user.email "bot@t8rsk8s.io"
-          git add data/snapshots/*.xlsx data/history.json data/removals.json public/data.json public/lookup.json
+          git add data/snapshots/*.xlsx data/history.json data/removals.json public/data.json
           if git diff --staged --quiet; then
             echo "No staged changes — skipping PR"
             exit 0
@@ -91,3 +99,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy.yml
 
+      - name: Summarize pipeline result
+        if: always()
+        run: |
+          {
+            echo "## Data pipeline"
+            echo
+            echo "- Job status: ${{ job.status }}"
+            echo "- Data changed: ${{ steps.check.outputs.data_changed || 'unknown' }}"
+          } >> "$GITHUB_STEP_SUMMARY"

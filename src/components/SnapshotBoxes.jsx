@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { THRESHOLDS } from '../lib/probability.js'
 
 const card = {
   background: '#0d1530',
@@ -383,38 +382,6 @@ function SignatureFlowCard({ snapshot, districts }) {
 // ---------------------------------------------------------------------------
 // Inline tooltip for scenario range labels
 // ---------------------------------------------------------------------------
-function ScenarioTooltip({ label, value, valueColor, tip }) {
-  const [visible, setVisible] = useState(false)
-  return (
-    <div style={{ marginBottom: 4 }}>
-      <div
-        style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', cursor: 'help' }}
-        onMouseEnter={() => setVisible(true)}
-        onMouseLeave={() => setVisible(false)}
-      >
-        <span style={{ borderBottom: '1px dotted #445577' }}>{label}</span>
-        <span style={{ color: valueColor }}>{value}</span>
-      </div>
-      {visible && (
-        <div style={{
-          marginTop: 4,
-          width: '100%',
-          background: '#0d1530',
-          border: '1px solid #2a3a60',
-          borderRadius: 7,
-          padding: '9px 12px',
-          fontSize: 11,
-          color: '#8899bb',
-          lineHeight: 1.6,
-          boxShadow: '0 4px 18px rgba(0,0,0,0.6)',
-        }}>
-          {tip}
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ---------------------------------------------------------------------------
 // Prediction Outlook card
 // ---------------------------------------------------------------------------
@@ -652,43 +619,6 @@ function ConfirmedDistrictsCard({ districts }) {
 // ---------------------------------------------------------------------------
 // Biggest Drops by Day — compact inline list, only shows with 3+ anomalies
 // ---------------------------------------------------------------------------
-function AnomalyBanner({ anomalies }) {
-  if (!anomalies || anomalies.length < 3) return null
-
-  return (
-    <div style={{
-      ...card,
-      borderColor: '#b4530933',
-      marginBottom: 16,
-    }}>
-      <div style={cardTitle}>📉 Biggest Drops by Day</div>
-      {anomalies.slice(0, 8).map((a, i) => (
-        <div key={i} style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '6px 0',
-          borderBottom: '1px solid #131c33',
-          fontSize: 13,
-        }}>
-          <span style={{ color: '#8899bb' }}>
-            D{a.district} <span style={{ color: '#445577', fontSize: 11 }}>· {a.date}</span>
-          </span>
-          <span style={{ color: '#f44336', fontWeight: 'bold' }}>
-            −{a.drop.toLocaleString()}
-            <span style={{ color: '#77444a', fontWeight: 'normal', fontSize: 11 }}> ({(a.dropPct * 100).toFixed(1)}%)</span>
-          </span>
-        </div>
-      ))}
-      {anomalies.length > 8 && (
-        <div style={{ fontSize: 11, color: '#445577', marginTop: 6 }}>
-          +{anomalies.length - 8} more
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ---------------------------------------------------------------------------
 // "How we calculate this" methodology panel
 // ---------------------------------------------------------------------------
@@ -752,13 +682,13 @@ function MethodologyPanel({ meta }) {
 
           <div>
             <div style={{ color: '#4a9eff', fontWeight: 'bold', marginBottom: 6, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Overall Ballot Probability
+              District Rule Probability
             </div>
             <p style={{ margin: 0 }}>
               We run an exact dynamic programming calculation across all 29 independent district
               outcomes — each with its own probability — to compute the precise probability that
-              at least 26 of 29 reach their threshold. This accounts for every combination of
-              which districts qualify, not just an average.
+              at least 26 of 29 reach their threshold. The statewide signature target is tracked
+              separately below, so this number should be read as the district-rule side of ballot qualification.
             </p>
           </div>
 
@@ -841,9 +771,6 @@ function StatewideProjectionCard({ overall, meta }) {
   const pPct = Math.round(pReachTarget * 100)
   const pColor = pPct >= 70 ? '#4caf50' : pPct >= 40 ? '#ffc107' : '#f44336'
   const barPct = Math.min(pctComplete * 100, 100)
-  const daysToDeadline = meta?.daysToDeadline ?? 0
-  const clerkDeadline = meta?.clerkDeadline || '2026-03-09'
-
   // Clerk verification window progress (Feb 15 → Mar 9)
   const windowStart = new Date('2026-02-15T00:00:00')
   const windowEnd   = new Date('2026-03-09T00:00:00')
@@ -859,15 +786,11 @@ function StatewideProjectionCard({ overall, meta }) {
     }
     return count
   }
-  const totalBizDays = bizDaysBetween(windowStart, windowEnd)
   const clamped = today < windowStart ? windowStart : today > windowEnd ? windowEnd : today
-  const elapsedBizDays = bizDaysBetween(windowStart, clamped)
   const remainingBizDays = bizDaysBetween(
     clamped < windowEnd ? new Date(clamped.getTime() + 86400000) : windowEnd,
     windowEnd,
   )
-  const pctElapsed = totalBizDays > 0 ? (elapsedBizDays / totalBizDays) * 100 : 0
-  const windowDone = today >= windowEnd
 
   // Format crossing date nicely
   let crossingLabel = null
@@ -975,7 +898,8 @@ function StatewideProjectionCard({ overall, meta }) {
         const clerkEnd      = new Date('2026-03-09T00:00:00')
         const removalEnd    = new Date('2026-04-23T00:00:00')
         const ballotDate    = new Date('2026-04-30T00:00:00')
-        const now           = new Date()
+        const asOfIso = `${meta?.lastUpdated || '2026-03-09'}T00:00:00`
+        const now = new Date(asOfIso)
         now.setHours(0, 0, 0, 0)
 
         // Business-day counter between two dates (inclusive of both)

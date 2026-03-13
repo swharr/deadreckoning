@@ -12,10 +12,8 @@ Usage:
 """
 
 import argparse
-import hashlib
 import json
 import math
-import os
 import sys
 from collections import defaultdict
 from datetime import datetime, date, timezone
@@ -29,7 +27,6 @@ DATA_DIR = REPO_ROOT / "data"
 PUBLIC_DIR = REPO_ROOT / "public"
 LATEST_PATH = DATA_DIR / "latest.xlsx"
 DATA_JSON_PATH = PUBLIC_DIR / "data.json"
-LOOKUP_INDEX_PATH = PUBLIC_DIR / "lookup.json"
 HISTORY_PATH = DATA_DIR / "history.json"
 REMOVALS_PATH = DATA_DIR / "removals.json"
 
@@ -58,96 +55,6 @@ WEEKLY_BUCKETS = 10
 # Below this, probabilities are pulled toward 0.5 (maximum entropy) to express
 # wider uncertainty when data is sparse. ~2 weeks at current snapshot cadence.
 MIN_CREDIBLE_SNAPSHOTS = 8
-
-
-# ---------------------------------------------------------------------------
-# Name lookup helpers
-# ---------------------------------------------------------------------------
-
-def normalize_name(raw: str) -> str:
-    """
-    Normalize a name from the xlsx for hashing.
-    Input format: "Lastname, Firstname Middlename" or "Lastname, Firstname"
-    Output: "LASTNAME,FIRSTNAME" (uppercase, no middle name, no spaces)
-    """
-    raw = str(raw).strip().upper()
-    if ',' in raw:
-        parts = raw.split(',', 1)
-        last = parts[0].strip()
-        first_parts = parts[1].strip().split()
-        first = first_parts[0] if first_parts else ''
-    else:
-        last = raw
-        first = ''
-    return f"{last},{first}"
-
-
-def name_hash(normalized: str) -> str:
-    """First 20 hex chars of SHA-256 (10 bytes = 80 bits)."""
-    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()[:20]
-
-
-def bloom_hash_positions(key: str, m: int, k: int) -> list[int]:
-    """
-    Generate k bit positions for a key in a bloom filter of m bits.
-    Uses double hashing: h_i(x) = (h1(x) + i*h2(x)) mod m
-    where h1 = SHA-256 first 8 bytes, h2 = SHA-256 bytes 8-16.
-    This matches the JS implementation exactly.
-    """
-    digest = hashlib.sha256(key.encode('utf-8')).digest()
-    h1 = int.from_bytes(digest[0:8], 'big')
-    h2 = int.from_bytes(digest[8:16], 'big') | 1  # ensure odd for full coverage
-    return [(h1 + i * h2) % m for i in range(k)]
-
-
-def build_bloom_filter(keys: list[str], m: int = 65536, k: int = 7) -> dict:
-    """
-    Build a bloom filter for a set of keys.
-    m: number of bits (65536 = 8KB per district)
-    k: number of hash functions (7 is optimal for ~3000-8000 entries at 8KB)
-    Returns a base64-encoded bit array.
-    """
-    import base64
-    bits = bytearray(m // 8)
-    for key in keys:
-        for pos in bloom_hash_positions(key, m, k):
-            bits[pos >> 3] |= (1 << (pos & 7))
-    return {
-        "m": m,
-        "k": k,
-        "bits": base64.b64encode(bytes(bits)).decode('ascii'),
-    }
-
-
-def build_lookup_index(district_names: dict[int, list[str]]) -> dict:
-    """
-    Build per-district bloom filters. Key = "LASTNAME,FIRSTNAME,D{n}".
-    This scopes lookups to district so cross-district false positives are eliminated.
-    """
-    import base64
-    M = 65536  # 8KB per district (64K bits)
-    K = 7      # 7 hash functions → ~0.3% FP rate at 8K entries
-
-    districts_bloom = {}
-    total_names = 0
-    for d_num, names in district_names.items():
-        keys = []
-        for raw in names:
-            norm = normalize_name(raw)
-            if norm and norm != ',':
-                # District-scoped key: eliminates cross-district false positives
-                keys.append(f"{norm},D{d_num}")
-        bf = build_bloom_filter(keys, M, K)
-        districts_bloom[str(d_num)] = bf
-        total_names += len(keys)
-
-    return {
-        "version": 2,
-        "m": M,
-        "k": K,
-        "count": total_names,
-        "districts": districts_bloom,
-    }
 
 
 # ---------------------------------------------------------------------------
@@ -493,12 +400,11 @@ def classify_tier(prob: float, pct_verified: float = 0.0) -> str:
 # xlsx parsing
 # ---------------------------------------------------------------------------
 
-def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], dict[int, list[str]]]:
+def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]]]:
     """
     Read xlsx, return:
       - district_counts: {district_num: verified_count}
       - district_dates:  {district_num: [datetime, ...]}
-      - district_names:  {district_num: [raw name string, ...]}
     """
     print(f"Reading {path} ...")
     wb = load_workbook(path, read_only=True, data_only=True)
@@ -506,7 +412,6 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], d
 
     district_counts: dict[int, int] = defaultdict(int)
     district_dates: dict[int, list[datetime]] = defaultdict(list)
-    district_names: dict[int, list[str]] = defaultdict(list)
     skipped = 0
     total = 0
 
@@ -516,7 +421,6 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], d
             continue
 
         entry_date_raw = row[1]
-        name_raw = row[2]
         district_raw = row[3]
 
         try:
@@ -542,13 +446,11 @@ def parse_xlsx(path: Path) -> tuple[dict[int, int], dict[int, list[datetime]], d
         district_counts[district] += 1
         if entry_dt:
             district_dates[district].append(entry_dt)
-        if name_raw:
-            district_names[district].append(str(name_raw))
         total += 1
 
     wb.close()
     print(f"Parsed {total:,} rows ({skipped} skipped).")
-    return dict(district_counts), dict(district_dates), dict(district_names)
+    return dict(district_counts), dict(district_dates)
 
 
 # ---------------------------------------------------------------------------
@@ -595,6 +497,16 @@ def build_weekly_buckets_from_history(district_snapshots: list[dict], n_buckets:
         return ([0] * (n_buckets - len(deltas))) + deltas
 
 
+def resolve_as_of_date(history: dict | None, xlsx_path: Path, fallback_date: date) -> date:
+    """Resolve the effective data date used for all time-relative calculations."""
+    if history and history.get("lastSnapshot"):
+        return date.fromisoformat(history["lastSnapshot"])
+    try:
+        return date.fromisoformat(xlsx_path.stem)
+    except ValueError:
+        return fallback_date
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -624,6 +536,9 @@ def main():
     if removals:
         print(f"Loaded removals.json: {removals['totalRemoved']:,} voter IDs removed across history")
 
+    now_utc = datetime.now(timezone.utc)
+    as_of_date = resolve_as_of_date(history, xlsx_path, now_utc.date())
+
     # --- Load previous data.json for deltas ---
     prev_data: dict = {}
     if DATA_JSON_PATH.exists():
@@ -638,11 +553,11 @@ def main():
         for d in prev_data["districts"]:
             prev_district_map[d["d"]] = d
     prev_overall = prev_data.get("overall", {})
-    prev_p_qualify = prev_overall.get("pQualify", 0.0)
+    prev_p_qualify = prev_overall.get("pDistrictRule", prev_overall.get("pQualify", 0.0))
     prev_expected_districts = prev_overall.get("expectedDistricts", 0.0)
 
     # --- Parse xlsx ---
-    district_counts, district_dates, district_names = parse_xlsx(xlsx_path)
+    district_counts, district_dates = parse_xlsx(xlsx_path)
     total_verified = sum(district_counts.values())
 
     # --- Detect reprocessing (same data as prev_data) ---
@@ -654,11 +569,11 @@ def main():
         print(f"Reprocessing detected (total={total_verified} unchanged) — carrying forward previous deltas")
 
     # --- Determine model mode ---
-    today = date.today()
-    post_deadline = today > SUBMISSION_DEADLINE
+    post_deadline = as_of_date > SUBMISSION_DEADLINE
     model_mode = "survival" if post_deadline else "growth"
     print(f"Model mode: {model_mode.upper()} "
-          f"({'submission deadline passed' if post_deadline else 'accepting new signatures'})")
+          f"({'submission deadline passed' if post_deadline else 'accepting new signatures'}) "
+          f"as of {as_of_date.isoformat()}")
 
     # --- Build per-district history lookup (if available) ---
     district_history: dict[int, list[dict]] = {}
@@ -667,7 +582,7 @@ def main():
     peak_verified_map: dict[int, int] = {}
     projections: dict[int, dict] = {}
     daily_velocity = 0.0
-    days_to_deadline = max((CLERK_DEADLINE - today).days, 0)
+    days_to_deadline = max((CLERK_DEADLINE - as_of_date).days, 0)
 
     if history:
         for d_num in THRESHOLDS:
@@ -757,7 +672,7 @@ def main():
             # Empirical: 22,934 net gains appeared Feb 16-20 (25.8% of pre-deadline total),
             # confirming the LG was still posting a large pre-deadline backlog through day 7.
             LG_LAG_DAYS = 14  # extended from 7 — data shows lag persists beyond one week
-            days_elapsed = max(0, (date.today() - SUBMISSION_DEADLINE).days)
+            days_elapsed = max(0, (as_of_date - SUBMISSION_DEADLINE).days)
             # lag_weight decays from 1.0 on day 0 to 0.0 after LG_LAG_DAYS
             lag_weight = max(0.0, 1.0 - days_elapsed / LG_LAG_DAYS)
 
@@ -855,7 +770,7 @@ def main():
                 effective_verified = float(verified)
 
             # Days elapsed since submission deadline (for Bayesian prior credibility)
-            days_post_deadline = max(0, (date.today() - SUBMISSION_DEADLINE).days)
+            days_post_deadline = max(0, (as_of_date - SUBMISSION_DEADLINE).days)
 
             # Pre-deadline slope: sigs/day rate in the last pre-deadline interval
             # Used to boost survival odds for districts that were surging just before cutoff
@@ -1091,14 +1006,14 @@ def main():
     days_to_crossing = None
     if statewide_remaining > 0 and net_daily_velocity > 0:
         days_to_crossing = math.ceil(statewide_remaining / net_daily_velocity)
-        crossing = today + __import__('datetime').timedelta(days=days_to_crossing)
+        crossing = as_of_date + __import__('datetime').timedelta(days=days_to_crossing)
         if crossing <= CLERK_DEADLINE:
             projected_crossing_date = crossing.isoformat()
         else:
             projected_crossing_date = None  # won't make it before deadline
     elif statewide_remaining <= 0:
         days_to_crossing = 0
-        projected_crossing_date = today.isoformat()
+        projected_crossing_date = as_of_date.isoformat()
 
     # P(reaching statewide target)
     # Use projectedStatewideRaw and projectedStatewideAdjusted as upper/lower bounds
@@ -1169,7 +1084,7 @@ def main():
     snapshot_maturity = min(snapshot_count / MAX_EXPECTED_SNAPSHOTS, 1.0)
 
     if post_deadline:
-        days_post = max(0, (date.today() - SUBMISSION_DEADLINE).days)
+        days_post = max(0, (as_of_date - SUBMISSION_DEADLINE).days)
         clerk_window = max((CLERK_DEADLINE - SUBMISSION_DEADLINE).days, 1)
         clerk_progress = min(days_post / clerk_window, 1.0)
         # Average snapshot maturity with clerk progress so late-window data reads higher
@@ -1205,23 +1120,7 @@ def main():
     )
 
     # --- Build output ---
-    now_utc = datetime.now(timezone.utc)
-
-    # lastUpdated = the date of the actual data file, not the processing time.
-    # Priority: history["lastSnapshot"] > xlsx filename (YYYY-MM-DD.xlsx) > today.
-    data_date_str = None
-    if history and history.get("lastSnapshot"):
-        data_date_str = history["lastSnapshot"]   # e.g. "2026-02-20"
-    else:
-        # Try to parse date from filename (data/snapshots/2026-02-20.xlsx)
-        stem = xlsx_path.stem   # "2026-02-20" or "latest" etc.
-        try:
-            date.fromisoformat(stem)   # validates format
-            data_date_str = stem
-        except ValueError:
-            pass
-    if not data_date_str:
-        data_date_str = now_utc.strftime("%Y-%m-%d")
+    data_date_str = as_of_date.isoformat()
 
     # Build an ISO timestamp at noon UTC on data_date_str (neutral, avoids TZ artifacts)
     data_datetime_iso = f"{data_date_str}T12:00:00Z"
@@ -1231,6 +1130,7 @@ def main():
             "lastUpdated": data_date_str,
             "lastUpdatedISO": data_datetime_iso,
             "processedAt": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "asOfDate": data_date_str,
             "sourceFile": source_file,
             "totalVerified": total_verified,
             "daysToDeadline": days_to_deadline,
@@ -1250,15 +1150,18 @@ def main():
             "withdrawnByDistrict": removals["byDistrict"] if removals else {},
         },
         "overall": {
+            "pDistrictRule": round(p_qual, 4),
             "pQualify": round(p_qual, 4),
             "expectedDistricts": round(exp_districts, 2),
             "pExact": p_exact,
             "projectedStatewideRaw": round(statewide_proj_raw, 0),
             "projectedStatewideAdjusted": round(statewide_proj_adj, 0),
+            "pDistrictRuleGrowth": round(p_qual_growth, 4),
             "pQualifyGrowth": round(p_qual_growth, 4),
             "expectedDistrictsGrowth": round(exp_districts_growth, 2),
             "pExactGrowth": p_exact_growth,
             "statewideProjection": statewide_projection,
+            "probabilityScope": "district_rule_only",
             "confidence": confidence,
             "confidenceLabel": confidence_label,
             "confidenceComponents": {
@@ -1293,17 +1196,12 @@ def main():
         json.dump(output, f, indent=2)
     print(f"Wrote {DATA_JSON_PATH}")
 
-    lookup = build_lookup_index(district_names)
-    with open(LOOKUP_INDEX_PATH, "w") as f:
-        json.dump(lookup, f, separators=(',', ':'))
-    print(f"Wrote {LOOKUP_INDEX_PATH} ({lookup['count']:,} name hashes)")
-
     confirmed = sum(1 for d in districts_out if d["verified"] >= d["threshold"])
     print(
-        f"Summary: {now_utc.strftime('%Y-%m-%d')} | "
+        f"Summary: {data_date_str} | "
         f"Verified: {total_verified:,} | "
         f"Districts meeting threshold: {confirmed}/{TOTAL_DISTRICTS} | "
-        f"P(qualify): {p_qual:.1%} | "
+        f"P(>=26 districts): {p_qual:.1%} | "
         f"Rejection rate: {statewide_rejection_rate:.1%}"
     )
 

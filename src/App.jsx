@@ -3,7 +3,6 @@ import SnapshotBoxes from './components/SnapshotBoxes.jsx'
 import StatCards from './components/StatCards.jsx'
 import DistributionChart from './components/DistributionChart.jsx'
 import DistrictTable from './components/DistrictTable.jsx'
-import SignatureLookup from './components/SignatureLookup.jsx'
 import DistrictMap from './components/DistrictMap.jsx'
 import VelocityTracker from './components/VelocityTracker.jsx'
 import MonteCarloPanel from './components/MonteCarloPanel.jsx'
@@ -219,16 +218,8 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [modelView, setModelView] = useState('primary') // 'primary' | 'growth'
-  const [isMobile, setIsMobile] = useState(false)
   const [velocityExpanded, setVelocityExpanded] = useState(false)
   const velocityRef = useRef(null)
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   useEffect(() => {
     // Inject global styles once
@@ -564,10 +555,6 @@ export default function App() {
 
             <div style={STYLES.section}>
               <DistrictTable districts={data.districts} />
-            </div>
-
-            <div style={STYLES.section}>
-              <SignatureLookup districts={data.districts} />
             </div>
 
             <div style={STYLES.section}>

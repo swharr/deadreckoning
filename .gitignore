@@ -10,6 +10,7 @@ __pycache__/
 
 # Data files — working xlsx are local only
 data/latest.xlsx
+data/.scraper_changed
 data/manual/*.xlsx
 # NOTE: data/snapshots/*.xlsx are intentionally tracked.
 # replay.py needs all historical snapshots to rebuild history.json.

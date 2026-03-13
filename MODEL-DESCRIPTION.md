@@ -162,13 +162,19 @@ For each of the 29 districts, the survival model receives:
 
 ---
 
-## Overall ballot probability
+## District-rule probability
 
-Each district's probability is first computed independently. The model then applies two corrections before computing the overall P(qualify):
+Each district's probability is first computed independently. The model then applies two corrections before computing the probability that the petition clears the **district rule**:
+
+- at least 26 of 29 districts reach threshold
+
+This is the exported `overall.pDistrictRule` value in `public/data.json`. For backwards compatibility the same value is also written to `overall.pQualify`.
+
+The statewide signature threshold is modeled separately in `overall.statewideProjection.pReachTarget`. The current app surfaces both numbers, but it does **not** yet publish a single fully joint `P(ballot qualification)` field that couples the district rule and statewide target in one dependence model.
 
 ### 1. Exact DP distribution
 
-We use **dynamic programming** over all 29 district probabilities to compute the complete distribution: `P(exactly k districts qualify)` for k = 0 through 29. The overall ballot probability is the sum of `P(k ≥ 26)`.
+We use **dynamic programming** over all 29 district probabilities to compute the complete distribution: `P(exactly k districts qualify)` for k = 0 through 29. The district-rule probability is the sum of `P(k ≥ 26)`.
 
 ```python
 dp = [0.0] * (n + 1)
@@ -222,9 +228,9 @@ These floors reflect a simple reality: a district that already has 75% of the si
 
 ## Confidence score
 
-The site displays a **confidence score** (0–100%) on the Ballot Probability card. It answers: *"How much should you trust the number you're seeing right now?"* — not whether the petition will qualify, but how reliable the model's current estimate is given the data available.
+The site displays a **confidence score** (0–100%) on the District Rule Probability card. It answers: *"How much should you trust the number you're seeing right now?"* — not whether the petition will qualify, but how reliable the model's current estimate is given the data available.
 
-The score is a composite of three independent axes, multiplied together:
+The current implementation uses **two** axes, multiplied together:
 
 ### 1. Data maturity
 
@@ -235,19 +241,7 @@ How much evidence the model has accumulated.
 
 Early in the clerk review window, data maturity is typically the primary drag on the overall score, because the Bayesian removal rate prior still dominates observed clerk actions.
 
-### 2. Outcome certainty
-
-How far `expectedDistricts` is from the 26-district qualification threshold.
-
-```
-outcome_certainty = tanh(|expectedDistricts − 26| / 2.5)
-```
-
-When `expectedDistricts` is far from 26 in either direction, the model is confident about the direction of the outcome — even if the precise probability estimate shifts. When `expectedDistricts` is near 26 (e.g., between 24 and 28), this is a genuine coin-flip territory and certainty drops toward zero.
-
-The tanh function reaches ~0.92 at 3 districts away, ~0.99 at 5 districts away.
-
-### 3. Model sharpness
+### 2. Model sharpness
 
 How narrow the DP probability distribution is, measured by its standard deviation:
 
@@ -260,10 +254,12 @@ A tight spike in the distribution (most probability mass concentrated at one or 
 ### Composite score
 
 ```
-confidence = data_maturity × outcome_certainty × model_sharpness
+confidence = data_maturity × model_sharpness
 ```
 
-All three are multiplied. A weakness in any one axis reduces the overall score proportionally. The result is labeled:
+The model deliberately does **not** include an additional "outcome certainty" multiplier based on distance from 26 districts. The probability itself already communicates threshold proximity, and penalizing close-call scenarios again in the confidence score made the UI read artificially low precisely when the model was providing its most useful answer.
+
+The result is labeled:
 
 | Score | Label |
 |---|---|
@@ -273,7 +269,7 @@ All three are multiplied. A weakness in any one axis reduces the overall score p
 | ≥ 20% | Low |
 | < 20% | Very Low |
 
-The UI also generates a plain-English explanation of which axis is the current limiting factor, updated automatically on each data refresh. The three component values are available in `overall.confidenceComponents` in `data.json` for independent inspection.
+The UI also generates a plain-English explanation of which axis is the current limiting factor, updated automatically on each data refresh. The component values are available in `overall.confidenceComponents` in `data.json` for independent inspection.
 
 ---
 
@@ -305,7 +301,7 @@ The complete source code for the model is available at [github.com/swharr/deadre
 
 ## Updates
 
-On February 26, 2026, a pipeline bug in `scripts/process.py` was fixed so anomaly-based rejection-rate adjustments (the +1 percentage point penalty for districts flagged by historical packet-level anomalies, capped at 5%) are applied **before** district probabilities are calculated instead of after. Previously, the anomaly bump only changed the exported `rejectionRate` shown in the UI/JSON and did not affect `prob`, `pQualify`, or the DP distribution, which made the anomaly logic effectively cosmetic. This change makes the model internally consistent with the methodology, so anomaly risk now influences probability outputs as intended. Re-running the model on the February 25, 2026 snapshot produced small but real probability shifts (for example, `pQualify` changed from `0.8149` to `0.8233`) without any source-data change.
+On February 26, 2026, a pipeline bug in `scripts/process.py` was fixed so anomaly-based rejection-rate adjustments (the +1 percentage point penalty for districts flagged by historical packet-level anomalies, capped at 5%) are applied **before** district probabilities are calculated instead of after. Previously, the anomaly bump only changed the exported `rejectionRate` shown in the UI/JSON and did not affect `prob`, `pDistrictRule` / `pQualify`, or the DP distribution, which made the anomaly logic effectively cosmetic. This change makes the model internally consistent with the methodology, so anomaly risk now influences probability outputs as intended. Re-running the model on the February 25, 2026 snapshot produced small but real probability shifts (for example, the district-rule probability changed from `0.8149` to `0.8233`) without any source-data change.
 
 ---
 
