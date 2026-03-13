@@ -17,6 +17,9 @@ Removed the redundant deploy dispatch from `fetch.yml` and added workflow concur
 ### Calibration and regression coverage
 Added Python regression tests for model helpers and generated artifacts, plus a `scripts/backtest.py` harness that replays historical snapshots and writes calibration metrics to `data/calibration.json`.
 
+### Reprocessing preserves day-over-day snapshot changes
+Processing the same daily xlsx more than once now still derives district count deltas, gains, losses, and newly-met/newly-failed status from `history.json` instead of flattening those fields to zero. That keeps the dashboard's "today vs. yesterday" view intact on repeat runs and redeploys.
+
 ## 2026-02-28
 
 ### Clerk Verification Window countdown

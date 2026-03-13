@@ -567,12 +567,13 @@ def main():
     total_verified = sum(district_counts.values())
 
     # --- Detect reprocessing (same data as prev_data) ---
-    # When CI re-runs on the same xlsx, verified counts match prev_data exactly.
-    # In that case, carry forward the previous prevVerified/delta instead of zeroing.
+    # When CI re-runs on the same xlsx, verified counts may match prev_data exactly.
+    # We still prefer history-driven count deltas when a prior snapshot exists, but
+    # preserve probability deltas from the previous output as a fallback.
     prev_total = prev_data.get("meta", {}).get("totalVerified", None)
     is_reprocessing = (prev_total is not None and prev_total == total_verified)
     if is_reprocessing:
-        print(f"Reprocessing detected (total={total_verified} unchanged) — carrying forward previous deltas")
+        print(f"Reprocessing detected (total={total_verified} unchanged) — using history for count deltas and prior output for probability deltas when needed")
 
     # --- Determine model mode ---
     post_deadline = as_of_date > SUBMISSION_DEADLINE
@@ -634,14 +635,15 @@ def main():
         dates = district_dates.get(d_num, [])
 
         prev_rec = prev_district_map.get(d_num, {})
-        if is_reprocessing:
-            # Same data — carry forward previous deltas instead of zeroing
-            prev_verified = prev_rec.get("prevVerified", verified)
-            delta = prev_rec.get("delta", 0)
-        elif d_num in prev_snapshot_counts:
+        if d_num in prev_snapshot_counts:
             # Use authoritative history snapshot for accurate day-over-day delta
             prev_verified = prev_snapshot_counts[d_num]
             delta = verified - prev_verified
+        elif is_reprocessing:
+            # Same data with no prior history snapshot available — carry forward
+            # the last exported comparison rather than zeroing it out.
+            prev_verified = prev_rec.get("prevVerified", verified)
+            delta = prev_rec.get("delta", 0)
         else:
             prev_verified = prev_rec.get("verified", verified)
             delta = verified - prev_verified
