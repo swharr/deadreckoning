@@ -56,8 +56,49 @@ const calloutTitle = {
 // ---------------------------------------------------------------------------
 // Biggest Gains card
 // ---------------------------------------------------------------------------
-function GainsCard({ gains, districts }) {
+function GainsCard({ gains, districts, anomalies }) {
   const hasGains = gains && gains.length > 0
+  const hasDrops = anomalies && anomalies.length >= 3
+
+  // Drops section — shared between both branches
+  const dropsSection = hasDrops && (
+    <div style={{ marginTop: hasGains ? 16 : 0 }}>
+      {hasGains && <div style={{ borderTop: '1px solid #1e2a4a', marginBottom: 14 }} />}
+      <div style={{
+        fontSize: 12,
+        fontWeight: 'bold',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        color: '#f44336',
+        marginBottom: 10,
+      }}>
+        📉 Biggest Drops by Day
+      </div>
+      {anomalies.slice(0, 6).map((a, i) => (
+        <div key={i} style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '5px 0',
+          borderBottom: '1px solid #131c33',
+          fontSize: 13,
+        }}>
+          <span style={{ color: '#8899bb' }}>
+            D{a.district} <span style={{ color: '#445577', fontSize: 11 }}>· {a.date}</span>
+          </span>
+          <span style={{ color: '#f44336', fontWeight: 'bold' }}>
+            −{a.drop.toLocaleString()}
+            <span style={{ color: '#77444a', fontWeight: 'normal', fontSize: 11 }}> ({(a.dropPct * 100).toFixed(1)}%)</span>
+          </span>
+        </div>
+      ))}
+      {anomalies.length > 6 && (
+        <div style={{ fontSize: 11, color: '#445577', marginTop: 6 }}>
+          +{anomalies.length - 6} more
+        </div>
+      )}
+    </div>
+  )
 
   if (hasGains) {
     return (
@@ -69,6 +110,7 @@ function GainsCard({ gains, districts }) {
             <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{g.delta.toLocaleString()}</span>
           </div>
         ))}
+        {dropsSection}
       </div>
     )
   }
@@ -86,24 +128,27 @@ function GainsCard({ gains, districts }) {
 
   return (
     <div style={card}>
-      <div style={cardTitle}>📈 Biggest Gains</div>
+      <div style={cardTitle}>📈 Gains & Drops</div>
       <p style={emptyNote}>
-        No new signatures recorded in this update. We're currently in the county clerk
-        verification window — signatures submitted before Feb 15 are being reviewed
-        through <strong style={{ color: '#8899bb' }}>March 9, 2026</strong>.
+        No new signatures recorded in this update. We're currently in the
+        signature removal window — names can be withdrawn through
+        <strong style={{ color: '#8899bb' }}> April 23, 2026</strong>.
       </p>
+      {dropsSection}
       {byVelocity.length > 0 && (
-        <div style={callout}>
-          <span style={calloutTitle}>What to watch for — highest final-week velocity:</span>
-          {byVelocity.map(d => {
-            const lastWeek = d.weeklySignatures[d.weeklySignatures.length - 1] || 0
-            return (
-              <div key={d.d} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                <span>District {d.d}</span>
-                <span style={{ color: '#4a9eff' }}>{lastWeek.toLocaleString()} final-wk sigs</span>
-              </div>
-            )
-          })}
+        <div style={{ marginTop: hasDrops ? 16 : 0 }}>
+          <div style={callout}>
+            <span style={calloutTitle}>What to watch for — highest final-week velocity:</span>
+            {byVelocity.map(d => {
+              const lastWeek = d.weeklySignatures[d.weeklySignatures.length - 1] || 0
+              return (
+                <div key={d.d} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                  <span>District {d.d}</span>
+                  <span style={{ color: '#4a9eff' }}>{lastWeek.toLocaleString()} final-wk sigs</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -1202,7 +1247,6 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
   return (
     <div>
       <NewlyFailedBanner newlyFailed={newlyFailed} districts={districts} />
-      <AnomalyBanner anomalies={anomalies} />
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -1211,6 +1255,7 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
         <GainsCard
           gains={snapshot?.biggestGains}
           districts={districts}
+          anomalies={anomalies}
         />
         <SignatureFlowCard
           snapshot={snapshot}

@@ -1,36 +1,36 @@
 {
-  "generated": "2026-03-12T20:18:43Z",
-  "totalRemoved": 6752,
+  "generated": "2026-03-13T15:53:54Z",
+  "totalRemoved": 7205,
   "readdedCount": 520,
   "byDistrict": {
     "1": 211,
     "2": 216,
-    "3": 281,
-    "4": 239,
-    "5": 277,
+    "3": 292,
+    "4": 244,
+    "5": 285,
     "6": 155,
     "7": 252,
-    "8": 283,
-    "9": 349,
-    "10": 274,
-    "11": 130,
-    "12": 293,
-    "13": 383,
-    "14": 367,
-    "15": 410,
-    "16": 291,
-    "17": 218,
-    "18": 188,
-    "19": 300,
-    "20": 91,
-    "21": 122,
-    "22": 163,
+    "8": 290,
+    "9": 376,
+    "10": 293,
+    "11": 131,
+    "12": 309,
+    "13": 412,
+    "14": 388,
+    "15": 595,
+    "16": 320,
+    "17": 255,
+    "18": 207,
+    "19": 326,
+    "20": 92,
+    "21": 123,
+    "22": 165,
     "23": 130,
     "24": 130,
     "25": 127,
     "26": 180,
-    "27": 180,
-    "28": 236,
+    "27": 181,
+    "28": 244,
     "29": 276
   },
   "records": [
@@ -4991,6 +4991,83 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 1022890,
+      "name": "Isaacs, James Alvin",
+      "district": 3,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 811956,
+      "name": "Gasca, Jeff Victor",
+      "district": 3,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 716206,
+      "name": "Berghout, Stephanie Lott",
+      "district": 3,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1633726,
+      "name": "Locke, Susan ",
+      "district": 3,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1995122,
+      "name": "Holdeman, Alexandra Richelle",
+      "district": 3,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1826973,
+      "name": "Sanchez, Christopher Allan",
+      "district": 3,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 798511,
+      "name": "Johnson, Drew James",
+      "district": 3,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1790612,
+      "name": "Rojas, Angelica M",
+      "district": 3,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1537004,
+      "name": "Ulrich, Clifford James",
+      "district": 3,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 762472,
+      "name": "Rogers, Heather Michelle",
+      "district": 3,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 705970,
+      "name": "Kerr, Terry Lee",
+      "district": 3,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 2945072,
       "name": "Jones, Tayla Rae",
       "district": 4,
@@ -6662,6 +6739,41 @@
       "district": 4,
       "first_seen": "2026-02-27",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 1489187,
+      "name": "Nielsen, Trenton James",
+      "district": 4,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2798136,
+      "name": "Mccord, Cullen Andre",
+      "district": 4,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2627561,
+      "name": "Nielsen, Jared Mark",
+      "district": 4,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 761868,
+      "name": "Kilbourn, Debbie Lynne",
+      "district": 4,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2816429,
+      "name": "Lubben, Jamilah Dolores",
+      "district": 4,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 744800,
@@ -8601,6 +8713,62 @@
       "district": 5,
       "first_seen": "2026-02-23",
       "last_seen": "2026-03-10"
+    },
+    {
+      "voter_id": 2540920,
+      "name": "Allen, Maya Grace",
+      "district": 5,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 701521,
+      "name": "Parry, Dennis Clyde",
+      "district": 5,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1281075,
+      "name": "Viernow, Jennifer Ann",
+      "district": 5,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2946435,
+      "name": "Rice, Brian Christopher",
+      "district": 5,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 712097,
+      "name": "Mailo, Denise Elizabeth",
+      "district": 5,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 788731,
+      "name": "Williams, Frank Kenneth",
+      "district": 5,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5810537,
+      "name": "Martinez, Jeanette Neomie",
+      "district": 5,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5934869,
+      "name": "Mower, Heidi ",
+      "district": 5,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 1466464,
@@ -13433,6 +13601,55 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 1275094,
+      "name": "Wright, Patrice Peterson",
+      "district": 8,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1257776,
+      "name": "Gregovich, Caroline Daisy",
+      "district": 8,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2537020,
+      "name": "Lucas, Jayden Matthew",
+      "district": 8,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3183405,
+      "name": "Garrison, Andrew William",
+      "district": 8,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3324863,
+      "name": "Maclean, Courtney Claire",
+      "district": 8,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3121735,
+      "name": "Dahlberg, Annette ",
+      "district": 8,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3459506,
+      "name": "Ruiz, Oscar M",
+      "district": 8,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 2537742,
       "name": "Rich, Camille Jeanette",
       "district": 9,
@@ -15876,6 +16093,195 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 3355834,
+      "name": "Gainer, Jessica Lynne",
+      "district": 9,
+      "first_seen": "2026-01-29",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3479803,
+      "name": "Sherner, Wendy M",
+      "district": 9,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1916976,
+      "name": "Gambler, Benjamin ",
+      "district": 9,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3334759,
+      "name": "Martinez, Robert Anthony",
+      "district": 9,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1598779,
+      "name": "Flitton, Alexander G",
+      "district": 9,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2861102,
+      "name": "Moreno, Jeffrey Wayne",
+      "district": 9,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1249375,
+      "name": "Lacey, Nathan Roger",
+      "district": 9,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2806616,
+      "name": "Pickel, Nicholas John",
+      "district": 9,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2054271,
+      "name": "Gluhak, Tea ",
+      "district": 9,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2435753,
+      "name": "Eliason, Paul Joseph",
+      "district": 9,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2542517,
+      "name": "Williams, Heath Monroe",
+      "district": 9,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2983131,
+      "name": "Pellizzari, Sarah Alexis",
+      "district": 9,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2976737,
+      "name": "Tett, Samantha Nicole",
+      "district": 9,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3429144,
+      "name": "Prince, Waylon Mickey",
+      "district": 9,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3439856,
+      "name": "Reimers, Wendy Ann",
+      "district": 9,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2813566,
+      "name": "Curtis, Abigail Jane",
+      "district": 9,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2381494,
+      "name": "Johns, Kaitlyn Connie",
+      "district": 9,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2138316,
+      "name": "Brody, Rylan Dylan",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3524097,
+      "name": "Terry, Susanne ",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6522683,
+      "name": "Blake, Daisy Alexandra",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3573670,
+      "name": "Williams, Jane M",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2435410,
+      "name": "Morgan, Bary Christopher",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1894813,
+      "name": "Neugart, Kenneth Morrell",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2544308,
+      "name": "Murakami, Lily Satoshi",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2299196,
+      "name": "Wagoner, Haley Michele",
+      "district": 9,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6430594,
+      "name": "Allen, John Knight",
+      "district": 9,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3378244,
+      "name": "Nelson, Catherine C",
+      "district": 9,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 1835036,
       "name": "Werner, Shaylee Mickelle",
       "district": 10,
@@ -17794,6 +18200,139 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 2828301,
+      "name": "Vargas, Stephanie ",
+      "district": 10,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3528685,
+      "name": "Thompson, Stacey Mae",
+      "district": 10,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3039021,
+      "name": "Durfee, Audrey Marie",
+      "district": 10,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2039387,
+      "name": "Chavez, Marilyn Stefania",
+      "district": 10,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1626255,
+      "name": "Hernandez, Kelly Mirelle",
+      "district": 10,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3561099,
+      "name": "Weber, Georgia Lee",
+      "district": 10,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2512943,
+      "name": "Cazares, Jonathan ",
+      "district": 10,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6430006,
+      "name": "Hall, Gloria Jean",
+      "district": 10,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3534070,
+      "name": "Torres, James Israel",
+      "district": 10,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3272016,
+      "name": "Jones, Calvin Kent",
+      "district": 10,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3044562,
+      "name": "Best, Susan V M",
+      "district": 10,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3071403,
+      "name": "Buffum, Dori ",
+      "district": 10,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3567535,
+      "name": "White, Karen Sue",
+      "district": 10,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2183881,
+      "name": "Zendejas, Gonzalo ",
+      "district": 10,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2906475,
+      "name": "Munguia Moreno, Melissa ",
+      "district": 10,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3449719,
+      "name": "Robertson, Leann Atkins",
+      "district": 10,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2820855,
+      "name": "Nielson, Tatum Jo",
+      "district": 10,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3354390,
+      "name": "Perea, Anita Vega",
+      "district": 10,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3144407,
+      "name": "Dunn, Peggy Jeanene",
+      "district": 10,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 2934506,
       "name": "Bernardino, Brenda Abigail",
       "district": 11,
@@ -18702,6 +19241,13 @@
       "district": 11,
       "first_seen": "2026-02-20",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 801696,
+      "name": "Bradford, Tamara Lynn",
+      "district": 11,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 2425102,
@@ -20753,6 +21299,118 @@
       "district": 12,
       "first_seen": "2026-02-25",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 3393994,
+      "name": "Olsen, Janet Lea",
+      "district": 12,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2471546,
+      "name": "Cobb, Jerusha Faith",
+      "district": 12,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1779765,
+      "name": "Castillo, Maria Paz",
+      "district": 12,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3166606,
+      "name": "Fisher, Linda Kay",
+      "district": 12,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3537084,
+      "name": "Tryon, Eldon S",
+      "district": 12,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1848884,
+      "name": "Keane, John Joseph",
+      "district": 12,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6101890,
+      "name": "Mosier, David Allen",
+      "district": 12,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2417152,
+      "name": "Stoddard, Christian Lee",
+      "district": 12,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1303170,
+      "name": "Bachilla, Robert A",
+      "district": 12,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3114708,
+      "name": "Craft, Virginia M",
+      "district": 12,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1223006,
+      "name": "Reed, Nicole F",
+      "district": 12,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3115918,
+      "name": "Heap, Yvonne ",
+      "district": 12,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2920311,
+      "name": "Wiltshire, Joe Martin",
+      "district": 12,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3298481,
+      "name": "Lang, Tanisha Elaine",
+      "district": 12,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3038956,
+      "name": "Belka, Janis Alldredge",
+      "district": 12,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3048487,
+      "name": "Bizek, Linda Mann",
+      "district": 12,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 1872267,
@@ -23436,6 +24094,209 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 3187730,
+      "name": "Wilson, Sarah ",
+      "district": 13,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2819918,
+      "name": "Bohlken, Emilia Farra",
+      "district": 13,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3074618,
+      "name": "Burns, Chelsey Marie",
+      "district": 13,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3353444,
+      "name": "Meslik, Peter Wenzel",
+      "district": 13,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3130291,
+      "name": "Decol, Maraiah Jeannette",
+      "district": 13,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2803312,
+      "name": "Andersen, Madison Lynne",
+      "district": 13,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3314909,
+      "name": "Loader, Barbara ",
+      "district": 13,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3127871,
+      "name": "Davis, Steven Ben",
+      "district": 13,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3518438,
+      "name": "Takenaka, Linda ",
+      "district": 13,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2984395,
+      "name": "Robertson, Zane Wystan",
+      "district": 13,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2296382,
+      "name": "Doyle, Erin Elizabeth",
+      "district": 13,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3377872,
+      "name": "Nelsen, Kristina Leigh",
+      "district": 13,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2781468,
+      "name": "Lightfoot, Isabel Kristie",
+      "district": 13,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5919361,
+      "name": "Broadbent, Aimee Jayne",
+      "district": 13,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2860021,
+      "name": "Merson, Julie Elyse",
+      "district": 13,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2548798,
+      "name": "Delliskave, Elizabeth Sondra",
+      "district": 13,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3089880,
+      "name": "Cavazos, Pamela Jensen",
+      "district": 13,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1961760,
+      "name": "Boettcher, Spencer James",
+      "district": 13,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2669521,
+      "name": "Lange, Mitchell Scott",
+      "district": 13,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1711588,
+      "name": "Donnelly, Catherine Marie",
+      "district": 13,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2958265,
+      "name": "Lanier, Sabrina Rose",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3343376,
+      "name": "McDonald, Arron Steven",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1828137,
+      "name": "Drljaca, Angela Maya",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2525715,
+      "name": "Nicastro, Thomas Michael",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3584280,
+      "name": "Wozab, Jennifer ",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1480278,
+      "name": "Lira, Maria Grazzia",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3298994,
+      "name": "Lanier, Judi L",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2095008,
+      "name": "Dodds, David Julius",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2923516,
+      "name": "Garcia-Palomares, Manuel Jose",
+      "district": 13,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 2316081,
       "name": "Steinbach, William Maxwell",
       "district": 14,
@@ -26003,6 +26864,153 @@
       "district": 14,
       "first_seen": "2026-03-03",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 2473590,
+      "name": "Jones, Samuel David",
+      "district": 14,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1752762,
+      "name": "Sayre, Michelle ",
+      "district": 14,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2779477,
+      "name": "Smith, Madeline Claire",
+      "district": 14,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3174507,
+      "name": "Frederickson, Kathy Lee",
+      "district": 14,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1302567,
+      "name": "Douglas, Maren Jasmine",
+      "district": 14,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3524844,
+      "name": "Thatcher, Jennifer Lynn",
+      "district": 14,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1938329,
+      "name": "Metcalf, Marcia Anne",
+      "district": 14,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2375859,
+      "name": "Thompson, Maddox Gabriel",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2671274,
+      "name": "Hale, Susanna Marie",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3195678,
+      "name": "Grace, Paul Nelson Theodore",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2803011,
+      "name": "Wong, Karen Lee",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3059922,
+      "name": "Brady, Tiffany Jill",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2486631,
+      "name": "Gastino, Nicholas Matthew",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2333730,
+      "name": "Laws, Claudia Barondeau",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3440275,
+      "name": "Remund, Paul Grant",
+      "district": 14,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3408257,
+      "name": "Paxton, Whitney ",
+      "district": 14,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3261709,
+      "name": "Jensen, Kathryn ",
+      "district": 14,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3328673,
+      "name": "Mangum, Stephanie Rosse",
+      "district": 14,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2714858,
+      "name": "Newman, Ruth Janelle",
+      "district": 14,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3067463,
+      "name": "Brown, Morris Stephen",
+      "district": 14,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3161197,
+      "name": "Farr, Robert Jay",
+      "district": 14,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 3306297,
@@ -28875,6 +29883,1301 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 2738118,
+      "name": "Houlihan, Telma Greghi",
+      "district": 15,
+      "first_seen": "2026-01-30",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2775831,
+      "name": "Smith, Jared Scott",
+      "district": 15,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3193998,
+      "name": "Goodrich, Lyle Owen",
+      "district": 15,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2491056,
+      "name": "Row, Aries Casey",
+      "district": 15,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2799472,
+      "name": "Rayl, Layla Elizabeth",
+      "district": 15,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3233948,
+      "name": "Hill, Gay ",
+      "district": 15,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3423762,
+      "name": "Pollock, David L",
+      "district": 15,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1490945,
+      "name": "Thompson, Shawntae Rachelle",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3588258,
+      "name": "Young, Carolyn ",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3522993,
+      "name": "Tedesco, Christy Lynn",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3424721,
+      "name": "Porter, Ann B",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3236458,
+      "name": "Slama, Anna Maureen",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3515014,
+      "name": "Suprise, Laraine Tolman",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3310243,
+      "name": "Lewis, Monique Evonne",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2892458,
+      "name": "Shaw, Allen William",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6275794,
+      "name": "Catlett, Vanessa Lee",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3138829,
+      "name": "Newell, Holli Alma",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2696658,
+      "name": "Young, Kaitlin Marie",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2304377,
+      "name": "Thompson, Devin Eric",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3246520,
+      "name": "Huber, Joshua Glenn",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2632172,
+      "name": "Mcdonald, Murron Grace",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2837132,
+      "name": "Petersen, Kristian Jens",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1395405,
+      "name": "Benedict, Julie Alasia",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1682860,
+      "name": "Lisonbee, Jennifer Lynne",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1814046,
+      "name": "Wailes, Robert Collin",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3329585,
+      "name": "Manwaring, Mary Catherine",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3585895,
+      "name": "Montoya, Vicki Cayias",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3151983,
+      "name": "Ellison, Roger Lynn",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1604892,
+      "name": "Burton, Rachel Hope",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 4120214,
+      "name": "Facer, Teresa Kay",
+      "district": 15,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3425180,
+      "name": "Porter, Tina Diana",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3228914,
+      "name": "Hennessy, Michael Richard",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3532187,
+      "name": "Tisor, Judith A",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2491836,
+      "name": "Isafi, Sameem ",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2689244,
+      "name": "Graham, Sheila ",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3508743,
+      "name": "Taliaferro, Kimberly Lynn St Martin",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3355334,
+      "name": "Miera, Patricia Linda",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2865846,
+      "name": "Lin, Sophia ",
+      "district": 15,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1567950,
+      "name": "App, Arielle Elizabeth",
+      "district": 15,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1592724,
+      "name": "Perry, Brittani Ann",
+      "district": 15,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1716489,
+      "name": "Chapman, Ryan Craig",
+      "district": 15,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2929094,
+      "name": "Harris, Rose Sutherland",
+      "district": 15,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2613764,
+      "name": "Paulk, Brayden Leon",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3016238,
+      "name": "Anzures, Melissa M",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2861418,
+      "name": "Chavez, Dominic Anthony",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1731012,
+      "name": "Anderson, Hayden Lewis",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3148548,
+      "name": "Edwards, Christine Elizabeth",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3207751,
+      "name": "Hales, Wendell Archuleta",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2831481,
+      "name": "Beaver, Victoria Jo",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2743486,
+      "name": "Baty, Jade Taylor",
+      "district": 15,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3260930,
+      "name": "Jensen, Donald Robert",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3260982,
+      "name": "Jensen, Eileen ",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1401664,
+      "name": "Johnson, Donald J",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2697011,
+      "name": "Lope-Retuerto, Sara ",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3278950,
+      "name": "Whittington, Angela Norean",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3337863,
+      "name": "Maughan, Denis Glen",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3085208,
+      "name": "Carlton, Alissa Tenay",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2921595,
+      "name": "Padilla Glasgow, Savannah Dominique",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1799532,
+      "name": "Gonzales, Meghan Michele",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3382762,
+      "name": "Nguyen, Nho Thi",
+      "district": 15,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 4407584,
+      "name": "Elliott, Kathryn Shupe",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3203396,
+      "name": "Guldner, John ",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3301775,
+      "name": "Larson, Joshua Michael",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2418033,
+      "name": "Martinez, Eduardo ",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3343753,
+      "name": "Mcdonald, Nikki Lynn",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3270527,
+      "name": "Nelson, Tiffancy ",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1755034,
+      "name": "Sheppard, Toril F",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1632630,
+      "name": "Gonzales, Gabriel James",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3320510,
+      "name": "Ludlow, Paul Aldon",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2984914,
+      "name": "Recupero, Jessica Marie",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3575171,
+      "name": "Williamson, Cary Allen",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1347167,
+      "name": "Brown, Sammy Jean",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3141674,
+      "name": "Drecksel, Launi Kay",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3052150,
+      "name": "Bocage, Amy ",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2601627,
+      "name": "Hammond, Joshua Pierce",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3011390,
+      "name": "Anderson, Deborah Ballard",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2275084,
+      "name": "Cordner, Casey James",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3086614,
+      "name": "Carroll, Theresa A",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2833743,
+      "name": "Ishimwe, Belia ",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2670093,
+      "name": "Lamborn, Samantha Marie",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3014308,
+      "name": "Anderson, Todd C",
+      "district": 15,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1597606,
+      "name": "Khan, Eesha Amber",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3220943,
+      "name": "Harvey, June Lucille",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2312017,
+      "name": "Wilkerson, Trent Donald",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3213166,
+      "name": "Hansen, Harley Osguthorpe",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3017030,
+      "name": "Archibald, Mary Olson",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5015923,
+      "name": "Day, Bryce Michael",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3443241,
+      "name": "Richards, Michelle Anderson",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1445000,
+      "name": "Parry, Alicia Juliet",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1543720,
+      "name": "Eastabrook, Fallon Jade",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2322328,
+      "name": "Archibald, Catherine Louise",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6500255,
+      "name": "Boyer, David E",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2191339,
+      "name": "Cooper, Sally Elizabeth",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3354931,
+      "name": "Mickelson, Jeannie Bakaric",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2290478,
+      "name": "Kennedy, Zackary Allen",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1545177,
+      "name": "Damron, Dillon Duane",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2594082,
+      "name": "Busby, Liana Shea",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3085641,
+      "name": "Carpenter, Deborah T",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3405164,
+      "name": "Parks, Richard Keith",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2241934,
+      "name": "Timms Hunter, Denise Leeanne",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2717717,
+      "name": "Willis, Barbara Louise",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3439833,
+      "name": "Reimann, Richard Carl",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3439842,
+      "name": "Reimann, Veronica Maureen",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3342062,
+      "name": "Niles, Mandy Jo",
+      "district": 15,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2286770,
+      "name": "Breshears, Brandon Ray",
+      "district": 15,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3540441,
+      "name": "Tyler, Sherry J",
+      "district": 15,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3116040,
+      "name": "Crebs, Nathan Patrick",
+      "district": 15,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1790992,
+      "name": "Young, Ryan Patrick",
+      "district": 15,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1685392,
+      "name": "Whittington, Landon Loy",
+      "district": 15,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2138318,
+      "name": "Szczesny, Michael Gregory",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3467032,
+      "name": "Saurer, Richard Francis",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3467031,
+      "name": "Saurer, Judith Ann",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3589917,
+      "name": "Zabriskie, Lee T",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3589918,
+      "name": "Zabriskie, Linda Rae",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3499946,
+      "name": "Spencer, Leah Felt",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3287397,
+      "name": "Kirby, Pamela Carr",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2452129,
+      "name": "Brown, Jordan Matthew",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3263930,
+      "name": "Jerabek, Jeff J",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3044319,
+      "name": "Berumen, Ann ",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5010902,
+      "name": "Jensen, Kay P",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2225705,
+      "name": "Brooks, Casey James",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3423701,
+      "name": "Pullan, Linda Beardall",
+      "district": 15,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3096864,
+      "name": "Christensen, Lynda H",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3123836,
+      "name": "Dansie, Joyce La Vern",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3353500,
+      "name": "Messersmith, Janice Lee",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3321039,
+      "name": "Luker, Andrea Chaston",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3206847,
+      "name": "Hailstone, Marleah ",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3370878,
+      "name": "Mower, Kathleen S",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1610050,
+      "name": "Faigle, Malynda Miles",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3477974,
+      "name": "Shaw, Kristine M",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3486838,
+      "name": "Slaymaker, Kathy Bigler",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2749599,
+      "name": "Kennedy, Lilee Breeze",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2856424,
+      "name": "Queeley, Iantavian Romancia Lynetta",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3128044,
+      "name": "Davis, Vincent Clark",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3046200,
+      "name": "Billings, Jerri Lyn ",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1719483,
+      "name": "Cole, Brad Lee",
+      "district": 15,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2826258,
+      "name": "Clifford, Tristin Alexander",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2662531,
+      "name": "Zavaleta, Marco Antonio",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2024403,
+      "name": "Sewell, Sara Ann",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3589148,
+      "name": "Mcclure, Mira Young",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2270597,
+      "name": "Robinson, Robbie Alan",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3220918,
+      "name": "Harvey, Jennifer Elizabeth",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1476168,
+      "name": "Gonzalez, Celina ",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2524791,
+      "name": "Mcaloney, Annika Nicole Friborg",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3467628,
+      "name": "Saxton, Philip Richard",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1624610,
+      "name": "Sandoval, Nora Italia",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3280149,
+      "name": "Keith, Carolyn Jean",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3386710,
+      "name": "Ninow, Natalie Ann",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3108236,
+      "name": "Ross, Rebecca Conrad",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2732044,
+      "name": "Robinson, Chelsie Leigh",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2642417,
+      "name": "Cassidy, Linda Agnes",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1824277,
+      "name": "Larue, Joan ",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3241874,
+      "name": "Hooker, Geraldine ",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3471268,
+      "name": "Schroeder, Jason Bruce",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1956843,
+      "name": "Young, Alisia M",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1661939,
+      "name": "Ahuna-Curran, Vernalee Iwalani",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3497164,
+      "name": "Sorensen, Julianne Briggs",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1654551,
+      "name": "Young, Scott Jacob",
+      "district": 15,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2626385,
+      "name": "Transon, Timothy Bailey",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3216690,
+      "name": "Hardy, Keith Horace",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3251656,
+      "name": "Hyatt, Vernon Kent",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1746235,
+      "name": "Pagan, Michelle Diane",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2112087,
+      "name": "Hale, Isaiah Sidney",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1785457,
+      "name": "Petric, Steven Blake",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1597791,
+      "name": "Bautner, Tzeitel Marye",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3040201,
+      "name": "Bench, Bonnie Patricia",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3500087,
+      "name": "Spencer, Robert Gordon",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3074931,
+      "name": "Burr, Elena June",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3240944,
+      "name": "Holt, Peggy Lee",
+      "district": 15,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3081059,
+      "name": "Camoin, David Francois",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3377490,
+      "name": "Neilson, Deborah Gail",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3052023,
+      "name": "Boardman, Charlotte Frost",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2892552,
+      "name": "Neilson, Johanna Michelle",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1324273,
+      "name": "Lillywhite, Brynn Tolman",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3331641,
+      "name": "Kirner, Kira Lynne",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3009235,
+      "name": "Ambrose, Lynette Wilcox",
+      "district": 15,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1607594,
+      "name": "Schicker, John Baldur",
+      "district": 15,
+      "first_seen": "2026-03-04",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3492814,
+      "name": "Smith, Russell Lee",
+      "district": 15,
+      "first_seen": "2026-03-04",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3167374,
+      "name": "Fixmer, Larry A",
+      "district": 15,
+      "first_seen": "2026-03-04",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3532983,
+      "name": "Tolman, Gary Lee",
+      "district": 15,
+      "first_seen": "2026-03-04",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3533040,
+      "name": "Tolman, Michelene Dibella",
+      "district": 15,
+      "first_seen": "2026-03-04",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3176768,
+      "name": "Fuhriman, Kim Ray",
+      "district": 15,
+      "first_seen": "2026-03-04",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2503475,
+      "name": "Darbyshire, Patricia Louise",
+      "district": 15,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2348716,
+      "name": "Lawlor, Tomas Cort",
+      "district": 15,
+      "first_seen": "2026-03-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3099458,
+      "name": "Claffey, Scott Wentworth",
+      "district": 15,
+      "first_seen": "2026-03-06",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 3201879,
       "name": "Groo, Brian Christopher",
       "district": 16,
@@ -30912,6 +33215,209 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 1550132,
+      "name": "Garcia, Viola Kathleen",
+      "district": 16,
+      "first_seen": "2026-01-22",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2349592,
+      "name": "Thomas, Jody Ann Boyd",
+      "district": 16,
+      "first_seen": "2026-01-29",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3159002,
+      "name": "Fabert, Brett Russell",
+      "district": 16,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3479605,
+      "name": "Sheppick, Kyle Dean",
+      "district": 16,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2303687,
+      "name": "Lopez, Esai Mario",
+      "district": 16,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3586834,
+      "name": "Yannie, Mary Pearl",
+      "district": 16,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3373945,
+      "name": "Murry, Jeffrey Todd",
+      "district": 16,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2829962,
+      "name": "Brown, Gordon Douglas",
+      "district": 16,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1995667,
+      "name": "Holt, Abbee Marie",
+      "district": 16,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2692681,
+      "name": "Richards, Taylen Jerrett",
+      "district": 16,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3300003,
+      "name": "Larsen, Daniel Hart",
+      "district": 16,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3489298,
+      "name": "Smith, Dennis Jay",
+      "district": 16,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3171568,
+      "name": "Fothergill, Irene ",
+      "district": 16,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2614305,
+      "name": "Newby, Marsha Kaye Patrice",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2674204,
+      "name": "Bond, Braxton Craig",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2035771,
+      "name": "Dalton, Tamra ",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1872293,
+      "name": "Harghel, Silvia ",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3463041,
+      "name": "Saldivar, Larry ",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3062274,
+      "name": "Bridge, Becci Ann",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2047577,
+      "name": "Gledhill, Tyler Robert",
+      "district": 16,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2109016,
+      "name": "Cook, Ronald James",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1494914,
+      "name": "Rivera Perez, Inelise Yolanie",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1758018,
+      "name": "Hickman, Dallas David",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3061287,
+      "name": "Breeze, Melissa Lee",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1234895,
+      "name": "Downing, Mindy Lynn",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1644697,
+      "name": "Miranda, Ana Consuelo",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1907582,
+      "name": "Gomar, Madison ",
+      "district": 16,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3563545,
+      "name": "Wells, Stephen Laine",
+      "district": 16,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3404803,
+      "name": "Parkin, Christina Velvet",
+      "district": 16,
+      "first_seen": "2026-03-02",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 3577404,
       "name": "Wimmer, Mary Susan",
       "district": 17,
@@ -32438,6 +34944,265 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 2869066,
+      "name": "Nethercott, Cynthia Lee",
+      "district": 17,
+      "first_seen": "2026-01-22",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3379451,
+      "name": "Nelson, Lynn Ray",
+      "district": 17,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3379691,
+      "name": "Nelson, Nancy Louise",
+      "district": 17,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2431020,
+      "name": "Mickler, Wendy Hamilton",
+      "district": 17,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3426655,
+      "name": "Powell, Lee Alma",
+      "district": 17,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3028624,
+      "name": "Barber, Kathleen Marie",
+      "district": 17,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1485107,
+      "name": "Flowers, Naomi Eva",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3329700,
+      "name": "Jones, Cathy Jo",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2333558,
+      "name": "Morris, Kimberly Ann",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3218724,
+      "name": "Harris, Georgia B",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3218730,
+      "name": "Harris, Gregory Alan",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3530667,
+      "name": "Tibbitts, Lana Lynn",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3530669,
+      "name": "Tibbitts, Lorenzo Edwin",
+      "district": 17,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3458934,
+      "name": "Rudick Kimball, Jewel Christine",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3517187,
+      "name": "Swofford, Scott Harry",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1519090,
+      "name": "Johnson, Andrea Silva",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3494502,
+      "name": "Snell, Wesley Howe",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3496113,
+      "name": "Solomon, Verla ",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3464103,
+      "name": "Sanchez, Chris Joe",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3161028,
+      "name": "Farnworth, Linda L",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2367344,
+      "name": "Milner, Lucas Franklin",
+      "district": 17,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3196227,
+      "name": "Dean, Treece R",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2598514,
+      "name": "Alves, Saige Liberty",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3426411,
+      "name": "Powell, Christina Marie",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3016933,
+      "name": "Archer, Shauna Rene",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2403980,
+      "name": "Buckner, Michael Dean",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3387546,
+      "name": "Noorda, Jane ",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3297577,
+      "name": "Lamoureux, Amberlyn J",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3150670,
+      "name": "Eley, Shirley Rose",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3544842,
+      "name": "Vanleuven, Edmond Wayne",
+      "district": 17,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1836371,
+      "name": "Langkilde, Janelle Irene",
+      "district": 17,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3428613,
+      "name": "Price, Patricia Lloyd",
+      "district": 17,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3544850,
+      "name": "Vanleuven, Lucrecia C",
+      "district": 17,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3316432,
+      "name": "Longenecker, Elwood Neil",
+      "district": 17,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3055552,
+      "name": "Boswell, Danette ",
+      "district": 17,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5562922,
+      "name": "Warner, Shelleen ",
+      "district": 17,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3237194,
+      "name": "Crane, Brittani Averett",
+      "district": 17,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 3011090,
       "name": "Anderson, Cindy Phillipps",
       "district": 18,
@@ -33752,6 +36517,139 @@
       "district": 18,
       "first_seen": "2026-02-23",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 3269819,
+      "name": "Johnson, Richard Warren",
+      "district": 18,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1542870,
+      "name": "Bolton, Daniel Patrick",
+      "district": 18,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2436903,
+      "name": "Nimer, Marcia ",
+      "district": 18,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3208692,
+      "name": "Hall, Shellie Beth",
+      "district": 18,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2832716,
+      "name": "Lloyd, Tsolmonchimeg Tsogbayar",
+      "district": 18,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2743455,
+      "name": "Brewer, Sophie ",
+      "district": 18,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3586343,
+      "name": "Wylie, Robert Allan",
+      "district": 18,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1660000,
+      "name": "Merrill, Carol Nicole",
+      "district": 18,
+      "first_seen": "2026-02-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3435452,
+      "name": "Rasmussen, Lonn Lee",
+      "district": 18,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3435545,
+      "name": "Rasmussen, Michelle Nerdin",
+      "district": 18,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6065856,
+      "name": "Bogert, Kristine Marie",
+      "district": 18,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1500538,
+      "name": "Boggs, Taelor Fay",
+      "district": 18,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3197022,
+      "name": "Graves, Damon R",
+      "district": 18,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2058688,
+      "name": "Echevarria Sanchez, Carmen Gloria",
+      "district": 18,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3429904,
+      "name": "Pruhs, Keith Richard",
+      "district": 18,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3482345,
+      "name": "Sidwell, Lain C",
+      "district": 18,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3238315,
+      "name": "Sanders, Jericca Ruby",
+      "district": 18,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1586965,
+      "name": "Si, Vincent ",
+      "district": 18,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1261581,
+      "name": "Pearson, Mindy Judd",
+      "district": 18,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 3251433,
@@ -35854,6 +38752,188 @@
       "last_seen": "2026-03-11"
     },
     {
+      "voter_id": 1713239,
+      "name": "Watson, Amanda Jean",
+      "district": 19,
+      "first_seen": "2026-01-29",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2320062,
+      "name": "Beatty, Stacy ",
+      "district": 19,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3532946,
+      "name": "Tolman, Brent Steven",
+      "district": 19,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3207264,
+      "name": "Hale, Emily Ann",
+      "district": 19,
+      "first_seen": "2026-02-12",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3472476,
+      "name": "Scott, Andrea Lee",
+      "district": 19,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2809308,
+      "name": "Hanks, Melody Anne",
+      "district": 19,
+      "first_seen": "2026-02-13",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1562109,
+      "name": "Desilets, Justin Alec",
+      "district": 19,
+      "first_seen": "2026-02-18",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2966740,
+      "name": "Nelson, Jacob Michael",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1363045,
+      "name": "Corbitt, Amber ",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1717309,
+      "name": "Corbitt, Nicholas Todd",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1701191,
+      "name": "Pyper, Lucas Sinclair",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3201036,
+      "name": "Griffiths, John Kent",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1253198,
+      "name": "Law, Michael Devon",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3481447,
+      "name": "Showalter, Eric White",
+      "district": 19,
+      "first_seen": "2026-02-19",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3231537,
+      "name": "Hesterman, Mary Ashley",
+      "district": 19,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3472437,
+      "name": "Scothern, Aralee ",
+      "district": 19,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3448256,
+      "name": "Bolton, Amy Roberts",
+      "district": 19,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1269287,
+      "name": "Herd, Jordan Diane",
+      "district": 19,
+      "first_seen": "2026-02-20",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2516074,
+      "name": "Summerhays, Taegan Jonathan",
+      "district": 19,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3278016,
+      "name": "Karpinski, Lorri Rae",
+      "district": 19,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3140056,
+      "name": "Douglas, John Raymond",
+      "district": 19,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3116406,
+      "name": "Crim, Mark Edward",
+      "district": 19,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1610001,
+      "name": "Burton, Sherry Lynn",
+      "district": 19,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3348424,
+      "name": "McNulty, Kelly ",
+      "district": 19,
+      "first_seen": "2026-02-23",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 3453341,
+      "name": "Rogers, Natalie Kay",
+      "district": 19,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5009095,
+      "name": "Douglas, Darcy Laree",
+      "district": 19,
+      "first_seen": "2026-02-27",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 5014471,
       "name": "Jenson, Sarah K Edson",
       "district": 20,
@@ -36489,6 +39569,13 @@
       "district": 20,
       "first_seen": "2026-02-24",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 2420339,
+      "name": "Mabey, Jeffrey Dean",
+      "district": 20,
+      "first_seen": "2026-01-22",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 6466109,
@@ -37343,6 +40430,13 @@
       "district": 21,
       "first_seen": "2026-02-18",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 6514552,
+      "name": "Fong, Dana Watrous",
+      "district": 21,
+      "first_seen": "2026-02-26",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 2013156,
@@ -38484,6 +41578,20 @@
       "district": 22,
       "first_seen": "2026-01-22",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 1554294,
+      "name": "Craig, Ryan Wilson",
+      "district": 22,
+      "first_seen": "2026-01-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 6461927,
+      "name": "Craig, Elizabeth Anne",
+      "district": 22,
+      "first_seen": "2026-01-16",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 2975236,
@@ -43715,6 +46823,13 @@
       "last_seen": "2026-03-10"
     },
     {
+      "voter_id": 2067754,
+      "name": "Tolbert, Cheryl Lynn",
+      "district": 27,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
       "voter_id": 2573022,
       "name": "Tolman, Bodie P",
       "district": 28,
@@ -45365,6 +48480,62 @@
       "district": 28,
       "first_seen": "2026-02-05",
       "last_seen": "2026-03-11"
+    },
+    {
+      "voter_id": 1401446,
+      "name": "Green, Angela Jolynn",
+      "district": 28,
+      "first_seen": "2026-01-16",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1953764,
+      "name": "Kitras, Dorene Western",
+      "district": 28,
+      "first_seen": "2026-01-29",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 5224247,
+      "name": "Ivie, Yvette Myree",
+      "district": 28,
+      "first_seen": "2026-01-29",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1869600,
+      "name": "Jackson, Jeri Marie",
+      "district": 28,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2346235,
+      "name": "Claffey, Carrie Lynn",
+      "district": 28,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2321810,
+      "name": "Hulet, Karly K",
+      "district": 28,
+      "first_seen": "2026-02-05",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 1754562,
+      "name": "Dabb, Pauline Marie",
+      "district": 28,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
+    },
+    {
+      "voter_id": 2346304,
+      "name": "Centera, Mary Louise",
+      "district": 28,
+      "first_seen": "2026-02-06",
+      "last_seen": "2026-03-12"
     },
     {
       "voter_id": 1446960,

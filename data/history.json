@@ -1,14 +1,14 @@
 {
-  "generated": "2026-03-12T20:18:44Z",
-  "snapshotCount": 27,
+  "generated": "2026-03-13T15:53:54Z",
+  "snapshotCount": 28,
   "firstSnapshot": "2026-01-16",
-  "lastSnapshot": "2026-03-12",
+  "lastSnapshot": "2026-03-13",
   "daysToDeadline": 0,
-  "dailyVelocity": 5.0,
-  "statewideRejectionRate": 0.0451,
+  "dailyVelocity": 0.0,
+  "statewideRejectionRate": 0.0483,
   "projections": {
-    "statewideRaw": 165186.0,
-    "statewideAdjusted": 158501.0,
+    "statewideRaw": 164731.0,
+    "statewideAdjusted": 157637.0,
     "byDistrict": {
       "1": {
         "raw": 6717.0,
@@ -23,22 +23,22 @@
         "pctOfThreshold": 1.1298
       },
       "3": {
-        "raw": 5698.0,
-        "rejectionAdjusted": 5419.4,
+        "raw": 5687.0,
+        "rejectionAdjusted": 5398.1,
         "threshold": 4737,
-        "pctOfThreshold": 1.1441
+        "pctOfThreshold": 1.1396
       },
       "4": {
-        "raw": 5881.0,
-        "rejectionAdjusted": 5643.4,
+        "raw": 5876.0,
+        "rejectionAdjusted": 5633.9,
         "threshold": 5099,
-        "pctOfThreshold": 1.1068
+        "pctOfThreshold": 1.1049
       },
       "5": {
-        "raw": 4848.0,
-        "rejectionAdjusted": 4574.6,
+        "raw": 4840.0,
+        "rejectionAdjusted": 4559.3,
         "threshold": 4115,
-        "pctOfThreshold": 1.1117
+        "pctOfThreshold": 1.108
       },
       "6": {
         "raw": 5568.0,
@@ -53,94 +53,94 @@
         "pctOfThreshold": 1.1508
       },
       "8": {
-        "raw": 5582.0,
-        "rejectionAdjusted": 5302.9,
+        "raw": 5575.0,
+        "rejectionAdjusted": 5289.6,
         "threshold": 4910,
-        "pctOfThreshold": 1.08
+        "pctOfThreshold": 1.0773
       },
       "9": {
-        "raw": 3135.0,
-        "rejectionAdjusted": 2791.1,
+        "raw": 3093.6,
+        "rejectionAdjusted": 2727.9,
         "threshold": 4805,
-        "pctOfThreshold": 0.5809
+        "pctOfThreshold": 0.5677
       },
       "10": {
-        "raw": 3628.1,
-        "rejectionAdjusted": 3357.8,
+        "raw": 3583.9,
+        "rejectionAdjusted": 3298.3,
         "threshold": 2975,
-        "pctOfThreshold": 1.1287
+        "pctOfThreshold": 1.1087
       },
       "11": {
-        "raw": 5846.0,
-        "rejectionAdjusted": 5716.2,
+        "raw": 5845.0,
+        "rejectionAdjusted": 5714.1,
         "threshold": 4890,
-        "pctOfThreshold": 1.169
+        "pctOfThreshold": 1.1685
       },
       "12": {
-        "raw": 3778.5,
-        "rejectionAdjusted": 3489.1,
+        "raw": 3754.0,
+        "rejectionAdjusted": 3450.7,
         "threshold": 3248,
-        "pctOfThreshold": 1.0742
+        "pctOfThreshold": 1.0624
       },
       "13": {
-        "raw": 3495.9,
-        "rejectionAdjusted": 3118.4,
+        "raw": 3460.0,
+        "rejectionAdjusted": 3057.9,
         "threshold": 4088,
-        "pctOfThreshold": 0.7628
+        "pctOfThreshold": 0.748
       },
       "14": {
-        "raw": 3807.3,
-        "rejectionAdjusted": 3446.0,
+        "raw": 3786.0,
+        "rejectionAdjusted": 3406.3,
         "threshold": 5680,
-        "pctOfThreshold": 0.6067
+        "pctOfThreshold": 0.5997
       },
       "15": {
-        "raw": 5161.9,
-        "rejectionAdjusted": 4759.3,
+        "raw": 5044.4,
+        "rejectionAdjusted": 4473.4,
         "threshold": 4596,
-        "pctOfThreshold": 1.0355
+        "pctOfThreshold": 0.9733
       },
       "16": {
-        "raw": 5196.0,
-        "rejectionAdjusted": 4907.1,
+        "raw": 5167.0,
+        "rejectionAdjusted": 4851.3,
         "threshold": 4347,
-        "pctOfThreshold": 1.1288
+        "pctOfThreshold": 1.116
       },
       "17": {
-        "raw": 6053.0,
-        "rejectionAdjusted": 5836.3,
+        "raw": 6016.0,
+        "rejectionAdjusted": 5764.5,
         "threshold": 5368,
-        "pctOfThreshold": 1.0872
+        "pctOfThreshold": 1.0739
       },
       "18": {
-        "raw": 6121.0,
-        "rejectionAdjusted": 5934.3,
+        "raw": 6102.0,
+        "rejectionAdjusted": 5897.0,
         "threshold": 5093,
-        "pctOfThreshold": 1.1652
+        "pctOfThreshold": 1.1579
       },
       "19": {
-        "raw": 6833.0,
-        "rejectionAdjusted": 6535.8,
+        "raw": 6807.0,
+        "rejectionAdjusted": 6485.0,
         "threshold": 5715,
-        "pctOfThreshold": 1.1436
+        "pctOfThreshold": 1.1347
       },
       "20": {
-        "raw": 6073.0,
-        "rejectionAdjusted": 5981.9,
+        "raw": 6072.0,
+        "rejectionAdjusted": 5980.3,
         "threshold": 5292,
-        "pctOfThreshold": 1.1304
+        "pctOfThreshold": 1.1301
       },
       "21": {
-        "raw": 7664.0,
-        "rejectionAdjusted": 7542.1,
+        "raw": 7663.0,
+        "rejectionAdjusted": 7540.4,
         "threshold": 5684,
-        "pctOfThreshold": 1.3269
+        "pctOfThreshold": 1.3266
       },
       "22": {
-        "raw": 6587.0,
-        "rejectionAdjusted": 6424.3,
+        "raw": 6585.0,
+        "rejectionAdjusted": 6420.4,
         "threshold": 5411,
-        "pctOfThreshold": 1.1873
+        "pctOfThreshold": 1.1865
       },
       "23": {
         "raw": 5702.0,
@@ -167,88 +167,88 @@
         "pctOfThreshold": 1.2274
       },
       "27": {
-        "raw": 8134.5,
-        "rejectionAdjusted": 7955.5,
+        "raw": 8132.0,
+        "rejectionAdjusted": 7951.5,
         "threshold": 5696,
-        "pctOfThreshold": 1.3967
+        "pctOfThreshold": 1.396
       },
       "28": {
-        "raw": 7003.6,
-        "rejectionAdjusted": 6769.7,
+        "raw": 6989.1,
+        "rejectionAdjusted": 6747.9,
         "threshold": 5437,
-        "pctOfThreshold": 1.2451
+        "pctOfThreshold": 1.2411
       },
       "29": {
-        "raw": 7073.6,
-        "rejectionAdjusted": 6803.4,
+        "raw": 7066.9,
+        "rejectionAdjusted": 6797.0,
         "threshold": 5382,
-        "pctOfThreshold": 1.2641
+        "pctOfThreshold": 1.2629
       }
     }
   },
   "rejectionRates": {
     "1": 0.0313,
     "2": 0.0391,
-    "3": 0.0489,
-    "4": 0.0404,
-    "5": 0.0564,
+    "3": 0.0508,
+    "4": 0.0412,
+    "5": 0.058,
     "6": 0.0277,
     "7": 0.0391,
-    "8": 0.05,
-    "9": 0.1097,
-    "10": 0.0745,
-    "11": 0.0222,
-    "12": 0.0766,
-    "13": 0.108,
-    "14": 0.0949,
-    "15": 0.078,
-    "16": 0.0556,
-    "17": 0.0358,
-    "18": 0.0305,
-    "19": 0.0435,
-    "20": 0.015,
-    "21": 0.0159,
-    "22": 0.0247,
+    "8": 0.0512,
+    "9": 0.1182,
+    "10": 0.0797,
+    "11": 0.0224,
+    "12": 0.0808,
+    "13": 0.1162,
+    "14": 0.1003,
+    "15": 0.1132,
+    "16": 0.0611,
+    "17": 0.0418,
+    "18": 0.0336,
+    "19": 0.0473,
+    "20": 0.0151,
+    "21": 0.016,
+    "22": 0.025,
     "23": 0.0227,
     "24": 0.0255,
     "25": 0.0207,
     "26": 0.0275,
-    "27": 0.022,
-    "28": 0.0334,
+    "27": 0.0222,
+    "28": 0.0345,
     "29": 0.0382
   },
   "postDeadlineRemovalRates": {
     "1": 0.0273,
     "2": 0.0275,
-    "3": 0.0386,
-    "4": 0.0304,
-    "5": 0.046,
+    "3": 0.0405,
+    "4": 0.0312,
+    "5": 0.0476,
     "6": 0.0278,
     "7": 0.0452,
-    "8": 0.0403,
-    "9": 0.0947,
-    "10": 0.0674,
-    "11": 0.0159,
-    "12": 0.0586,
-    "13": 0.0827,
-    "14": 0.0796,
-    "15": 0.0674,
-    "16": 0.0397,
-    "17": 0.0287,
-    "18": 0.0283,
-    "19": 0.0377,
-    "20": 0.0138,
-    "21": 0.0128,
-    "22": 0.0222,
+    "8": 0.0415,
+    "9": 0.1031,
+    "10": 0.0726,
+    "11": 0.0161,
+    "12": 0.0627,
+    "13": 0.0908,
+    "14": 0.085,
+    "15": 0.1026,
+    "16": 0.0453,
+    "17": 0.0348,
+    "18": 0.0314,
+    "19": 0.0415,
+    "20": 0.014,
+    "21": 0.0129,
+    "22": 0.0226,
     "23": 0.0177,
     "24": 0.0208,
     "25": 0.0156,
     "26": 0.0197,
-    "27": 0.0162,
-    "28": 0.0287,
+    "27": 0.0163,
+    "28": 0.0298,
     "29": 0.0382
   },
-  "statewidePostDeadlineRate": 0.0376,
+  "statewidePostDeadlineRate": 0.0408,
   "peakVerified": {
     "1": 6738,
     "2": 5521,
@@ -282,6 +282,15 @@
   },
   "postDeadlineDataAvailable": true,
   "anomalies": [
+    {
+      "date": "2026-03-13",
+      "district": 15,
+      "prevCount": 5135,
+      "curCount": 4950,
+      "drop": 185,
+      "dropPct": 0.036,
+      "prevDate": "2026-03-12"
+    },
     {
       "date": "2026-01-30",
       "district": 6,
@@ -3820,6 +3829,136 @@
       },
       "totalDelta": 5,
       "totalRemovals": 647
+    },
+    {
+      "date": "2026-03-13",
+      "total": 164608,
+      "districts": {
+        "1": 6717,
+        "2": 5511,
+        "3": 5687,
+        "4": 5876,
+        "5": 4840,
+        "6": 5568,
+        "7": 6340,
+        "8": 5575,
+        "9": 3089,
+        "10": 3582,
+        "11": 5845,
+        "12": 3754,
+        "13": 3460,
+        "14": 3786,
+        "15": 4950,
+        "16": 5167,
+        "17": 6016,
+        "18": 6102,
+        "19": 6807,
+        "20": 6072,
+        "21": 7663,
+        "22": 6585,
+        "23": 5702,
+        "24": 5080,
+        "25": 6133,
+        "26": 6535,
+        "27": 8132,
+        "28": 6983,
+        "29": 7051
+      },
+      "deltas": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 0,
+        "18": 0,
+        "19": 0,
+        "20": 0,
+        "21": 0,
+        "22": 0,
+        "23": 0,
+        "24": 0,
+        "25": 0,
+        "26": 0,
+        "27": 0,
+        "28": 0,
+        "29": 0
+      },
+      "removals": {
+        "1": 0,
+        "2": 0,
+        "3": 11,
+        "4": 5,
+        "5": 8,
+        "6": 0,
+        "7": 0,
+        "8": 7,
+        "9": 27,
+        "10": 19,
+        "11": 1,
+        "12": 16,
+        "13": 29,
+        "14": 21,
+        "15": 185,
+        "16": 29,
+        "17": 37,
+        "18": 19,
+        "19": 26,
+        "20": 1,
+        "21": 1,
+        "22": 2,
+        "23": 0,
+        "24": 0,
+        "25": 0,
+        "26": 0,
+        "27": 1,
+        "28": 8,
+        "29": 0
+      },
+      "net": {
+        "1": 0,
+        "2": 0,
+        "3": -11,
+        "4": -5,
+        "5": -8,
+        "6": 0,
+        "7": 0,
+        "8": -7,
+        "9": -27,
+        "10": -19,
+        "11": -1,
+        "12": -16,
+        "13": -29,
+        "14": -21,
+        "15": -185,
+        "16": -29,
+        "17": -37,
+        "18": -19,
+        "19": -26,
+        "20": -1,
+        "21": -1,
+        "22": -2,
+        "23": 0,
+        "24": 0,
+        "25": 0,
+        "26": 0,
+        "27": -1,
+        "28": -8,
+        "29": 0
+      },
+      "totalDelta": 0,
+      "totalRemovals": 453
     }
   ]
 }
