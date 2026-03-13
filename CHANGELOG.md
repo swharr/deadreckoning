@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-03-13
+
+### Privacy-safe removal artifacts
+`data/removals.json` no longer publishes raw voter IDs or names. The replay pipeline now emits aggregate-only removal statistics, including totals by district and last-seen date, so committed artifacts remain useful for analysis without exposing raw identity data.
+
+### Data pipeline checks and failure handling
+The fetch pipeline now fails loudly when scrape/process work breaks instead of silently presenting stale data as a clean run. It also runs Python regression tests and the frontend quality pass before opening a data PR, and a new `checks.yml` workflow runs the same validation on pushes and pull requests.
+
+### Model reproducibility and exported probabilities
+`scripts/process.py` now anchors time-sensitive calculations to the snapshot `asOfDate` rather than the machine's current date, making repeated runs of the same snapshot reproducible. The app now exports `overall.pBallotQualified` and `overall.probabilityScope` so the UI can distinguish the exact district-rule probability from the current joint ballot estimate.
+
+### Calibration and regression coverage
+Added Python regression tests for model helpers and generated artifacts, plus a `scripts/backtest.py` harness that replays historical snapshots and writes calibration metrics to `data/calibration.json`.
+
 ## 2026-02-28
 
 ### Clerk Verification Window countdown

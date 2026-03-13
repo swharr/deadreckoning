@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-replay.py — Build data/history.json from all xlsx snapshots in data/snapshots/.
+replay.py — Build history/removal aggregates from xlsx snapshots.
 
 Each snapshot filename must be YYYY-MM-DD.xlsx (the date the LG published it).
 
@@ -12,12 +12,14 @@ Outputs data/history.json with:
 
 Usage:
     .venv/bin/python scripts/replay.py
+    .venv/bin/python scripts/replay.py --snapshots-dir tmp/snaps --history-out tmp/history.json --removals-out tmp/removals.json
 """
 
+import argparse
 import json
 import sys
 from collections import defaultdict
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pathlib import Path
 
 from openpyxl import load_workbook
@@ -39,20 +41,22 @@ CLERK_DEADLINE = date(2026, 3, 9)
 SUBMISSION_DEADLINE = date(2026, 2, 15)  # last day petitioners could submit new sigs
 
 
-def parse_xlsx_voters(path: Path) -> tuple[dict[int, int], dict[int, set[int]], dict[int, str]]:
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def parse_xlsx_voters(path: Path) -> tuple[dict[int, int], dict[int, set[int]]]:
     """
     Read xlsx, return:
       - counts:      {district: verified_count}
       - voter_ids:   {district: set(voter_id)}
-      - voter_names: {voter_id: name}  (for removal audit)
-    Reads voter ID (col A), name (col C), district (col D).
+    Reads voter ID (col A) and district (col D).
     """
     print(f"  Parsing {path.name} ...", end=" ", flush=True)
     wb = load_workbook(path, read_only=True, data_only=True)
     ws = wb.active
     counts: dict[int, int] = defaultdict(int)
     voter_ids: dict[int, set[int]] = defaultdict(set)
-    voter_names: dict[int, str] = {}
     skipped = 0
     total = 0
     for row in ws.iter_rows(min_row=2, values_only=True):
@@ -70,7 +74,6 @@ def parse_xlsx_voters(path: Path) -> tuple[dict[int, int], dict[int, set[int]], 
             continue
         counts[district] += 1
         voter_ids[district].add(vid)
-        voter_names[vid] = str(row[2]) if row[2] else ''
         total += 1
     wb.close()
     # Fill in zeros for any missing districts
@@ -80,12 +83,12 @@ def parse_xlsx_voters(path: Path) -> tuple[dict[int, int], dict[int, set[int]], 
         if d not in voter_ids:
             voter_ids[d] = set()
     print(f"{total:,} rows")
-    return dict(counts), dict(voter_ids), voter_names
+    return dict(counts), dict(voter_ids)
 
 
 def parse_xlsx_counts(path: Path) -> dict[int, int]:
     """Compatibility wrapper — returns only counts."""
-    counts, _, _ = parse_xlsx_voters(path)
+    counts, _ = parse_xlsx_voters(path)
     return counts
 
 
@@ -215,18 +218,28 @@ def compute_rejection_rate(history_by_district: dict[int, list[tuple[date, int]]
 
 
 def main():
-    if not SNAPSHOTS_DIR.exists():
-        print(f"ERROR: {SNAPSHOTS_DIR} does not exist", file=sys.stderr)
+    parser = argparse.ArgumentParser(description="Build history/removal aggregates from snapshot xlsx files.")
+    parser.add_argument("--snapshots-dir", type=Path, default=SNAPSHOTS_DIR, help="Directory containing YYYY-MM-DD.xlsx snapshots")
+    parser.add_argument("--history-out", type=Path, default=HISTORY_PATH, help="Output path for history JSON")
+    parser.add_argument("--removals-out", type=Path, default=REMOVALS_PATH, help="Output path for aggregate removals JSON")
+    args = parser.parse_args()
+
+    snapshots_dir = args.snapshots_dir
+    history_out = args.history_out
+    removals_out = args.removals_out
+
+    if not snapshots_dir.exists():
+        print(f"ERROR: {snapshots_dir} does not exist", file=sys.stderr)
         sys.exit(1)
 
     # Find all YYYY-MM-DD.xlsx files
     files = sorted(
-        [f for f in SNAPSHOTS_DIR.glob("*.xlsx") if len(f.stem) == 10],
+        [f for f in snapshots_dir.glob("*.xlsx") if len(f.stem) == 10],
         key=lambda f: f.stem
     )
 
     if not files:
-        print(f"No YYYY-MM-DD.xlsx files found in {SNAPSHOTS_DIR}", file=sys.stderr)
+        print(f"No YYYY-MM-DD.xlsx files found in {snapshots_dir}", file=sys.stderr)
         sys.exit(1)
 
     print(f"Found {len(files)} snapshot(s):\n")
@@ -236,13 +249,10 @@ def main():
 
     # voter_id_sets[i][district] = set of voter IDs in snapshot i for that district
     voter_id_sets: list[dict[int, set[int]]] = []
-    # name_lookup: voter_id -> name (last known)
-    name_lookup: dict[int, str] = {}
 
     for f in files:
         snap_date = date.fromisoformat(f.stem)
-        counts, vid_sets, names = parse_xlsx_voters(f)
-        name_lookup.update(names)
+        counts, vid_sets = parse_xlsx_voters(f)
         statewide = sum(counts.values())
         snapshots.append({
             "date": f.stem,
@@ -276,18 +286,12 @@ def main():
         latest_all_ids.update(ids)
 
     # Removed = ever seen but not in latest
-    removed_records = []
     removed_by_district: dict[int, int] = defaultdict(int)
+    removed_by_last_seen: dict[str, int] = defaultdict(int)
     for vid, info in ever_seen.items():
         if vid not in latest_all_ids:
-            removed_records.append({
-                "voter_id": vid,
-                "name": name_lookup.get(vid, ""),
-                "district": info["district"],
-                "first_seen": info["first_seen"],
-                "last_seen": info["last_seen"],
-            })
             removed_by_district[info["district"]] += 1
+            removed_by_last_seen[info["last_seen"]] += 1
 
     # IDs temporarily removed then re-added
     readded_count = 0
@@ -306,22 +310,23 @@ def main():
                 later_all.update(ids)
         readded_count += len(gone_now & later_all)
 
-    total_removed = len(removed_records)
+    total_removed = sum(removed_by_district.values())
     print(f"  Total voter IDs ever removed (not in latest): {total_removed:,}")
     print(f"  Temporarily removed then re-added: {readded_count:,}")
     print(f"  Net permanent removals: {total_removed:,}")
 
-    # Write removals.json
+    # Write privacy-safe removals summary
     removals_output = {
-        "generated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated": utc_now_iso(),
         "totalRemoved": total_removed,
         "readdedCount": readded_count,
         "byDistrict": {str(d): removed_by_district.get(d, 0) for d in sorted(THRESHOLDS.keys())},
-        "records": sorted(removed_records, key=lambda r: (r["district"], r["last_seen"])),
+        "byLastSeenDate": {d: removed_by_last_seen[d] for d in sorted(removed_by_last_seen.keys())},
     }
-    with open(REMOVALS_PATH, "w") as f:
+    removals_out.parent.mkdir(parents=True, exist_ok=True)
+    with open(removals_out, "w") as f:
         json.dump(removals_output, f, indent=2)
-    print(f"  Wrote {REMOVALS_PATH}")
+    print(f"  Wrote {removals_out}")
 
     # True per-district removal counts for rejection rate calculation
     # Use voter-ID-based counts instead of net count drops
@@ -388,6 +393,7 @@ def main():
         print("Computing post-submission-deadline removal rates (voter-ID-based)...")
         # Use voter ID diffing for post-deadline intervals only
         post_deadline_rates = {}
+        post_deadline_removed_counts = {}
         for d in THRESHOLDS:
             peak = peak_verified.get(str(d), 0)
             # Sum removals only from post-deadline intervals
@@ -399,6 +405,7 @@ def main():
                 prev_ids = voter_id_sets[i-1].get(d, set())
                 curr_ids = voter_id_sets[i].get(d, set())
                 post_removed += len(prev_ids - curr_ids)
+            post_deadline_removed_counts[d] = post_removed
             post_deadline_rates[d] = round(post_removed / peak, 4) if peak > 0 else 0.0
         statewide_post_deadline_rate = round(
             sum(post_deadline_rates.values()) / len(post_deadline_rates), 4
@@ -409,6 +416,7 @@ def main():
     else:
         print("No post-deadline snapshots yet — post-deadline removal rates unavailable.")
         post_deadline_rates = {d: 0.0 for d in THRESHOLDS}
+        post_deadline_removed_counts = {d: 0 for d in THRESHOLDS}
         statewide_post_deadline_rate = 0.0
 
     # Rejection rates per district — use true voter-ID-based removal counts
@@ -457,7 +465,7 @@ def main():
     days_left = days_to_deadline(date.fromisoformat(last_snap["date"]))
 
     output = {
-        "generated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated": utc_now_iso(),
         "snapshotCount": len(snapshots),
         "firstSnapshot": snapshots[0]["date"],
         "lastSnapshot": last_snap["date"],
@@ -471,6 +479,7 @@ def main():
         },
         "rejectionRates": {str(d): rejection_rates[d] for d in sorted(THRESHOLDS.keys())},
         "postDeadlineRemovalRates": {str(d): post_deadline_rates[d] for d in sorted(THRESHOLDS.keys())},
+        "postDeadlineRemovalCounts": {str(d): post_deadline_removed_counts[d] for d in sorted(THRESHOLDS.keys())},
         "statewidePostDeadlineRate": statewide_post_deadline_rate,
         "peakVerified": peak_verified,
         "postDeadlineDataAvailable": post_deadline_in_history,
@@ -478,11 +487,11 @@ def main():
         "snapshots": snapshots,
     }
 
-    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(HISTORY_PATH, "w") as f:
+    history_out.parent.mkdir(parents=True, exist_ok=True)
+    with open(history_out, "w") as f:
         json.dump(output, f, indent=2)
 
-    print(f"\nWrote {HISTORY_PATH}")
+    print(f"\nWrote {history_out}")
     print(f"\n--- Summary ---")
     print(f"Snapshots: {snapshots[0]['date']} → {last_snap['date']}")
     print(f"Statewide verified (latest): {last_snap['total']:,}")

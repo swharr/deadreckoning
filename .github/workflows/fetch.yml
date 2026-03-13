@@ -64,6 +64,10 @@ jobs:
           python scripts/replay.py
           python scripts/process.py
 
+      - name: Run Python regression tests
+        if: steps.check.outputs.data_changed == 'true'
+        run: python3 -m unittest discover -s tests -p "test_*.py"
+
       - name: Run quality checks
         if: steps.check.outputs.data_changed == 'true'
         run: npm run check

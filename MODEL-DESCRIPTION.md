@@ -87,24 +87,25 @@ Two adjustments are then applied to the base probability:
 
 **Trajectory multiplier:** Districts that were accelerating strongly just before the February 15 deadline are more likely to have signatures still in the LG posting pipeline. The base probability is boosted proportionally to the pre-deadline velocity (sigs/day in the last pre-deadline interval), decaying to zero over 10 days post-deadline.
 
-**Removal rate penalty:** If the Bayesian-blended removal rate exceeds 3%, the base probability is nudged downward, reflecting that this district is under heavier-than-average clerk scrutiny.
+**Removal rate penalty:** If the posterior removal-rate estimate exceeds 3%, the base probability is nudged downward, reflecting that this district is under heavier-than-average clerk scrutiny.
 
 ---
 
 ## Bayesian removal rate prior
 
-The model does not use raw observed post-deadline removal rates directly — early post-deadline data is too sparse to be credible. Instead, it blends the observed rate with an empirical prior:
+The model does not use the raw observed post-deadline removal rate directly. Early clerk-review data is sparse, so tiny sample sizes can produce misleading 0% or 10% readings. Instead, the model uses a simple Beta-style pseudo-count prior:
 
-**Prior: 1.65% statewide removal rate**, derived from county clerk removal-request data published by county clerks as of February 12, 2026: 2,325 documented removal requests out of approximately 141,000 verified signatures.
+- **Prior mean:** 1.65% statewide removal rate
+- **Prior strength:** 2,000 pseudo-signatures
 
-The blend transitions from prior-dominated (day 0 post-deadline) to observation-dominated (day 22, the end of the clerk review window):
+For each district, the posterior estimate is:
 
 ```
-effective_rate = (days_elapsed / 22) × observed_rate
-              + (1 - days_elapsed / 22) × 0.0165
+posterior_rate = (prior_mean * prior_strength + observed_removed) /
+                 (prior_strength + peak_verified)
 ```
 
-This prevents the model from treating 0% removal (observed when there are only 1–2 post-deadline snapshots) as reliable signal, while still updating as clerk review data accumulates.
+`peak_verified` is used as the district's exposure term, so credibility now grows with actual observed scale instead of just elapsed calendar days. This keeps the estimate stable when clerk removals are still sparse while allowing larger districts with more evidence to move away from the prior sooner.
 
 ---
 
@@ -114,7 +115,7 @@ After the February 15 submission deadline, the Lt. Governor's office continued p
 
 The model handles this with a **14-day lag window** (extended from an initial 7-day estimate based on the observed data). During this window, each district's effective verified count is blended between the actual LG count and the pre-deadline linear projection, weighted by how much of the window remains.
 
-Additionally, the model checks empirically whether the LG lag has resolved: if net statewide additions after the deadline drop below 0.1% of the pre-deadline total, the lag weight is zeroed out regardless of the calendar window. If the fixed window expires but the data still shows substantial post-deadline gains, a floor lag weight of 0.10 is maintained.
+Additionally, the model checks empirically whether the LG lag has resolved. The old version used only a statewide switch; the current version first looks for district-level post-deadline gains relative to that district's last pre-deadline count, then falls back to the statewide signal if the district evidence is too thin. If the fixed window expires but the data still shows meaningful lag, a small floor lag weight is maintained.
 
 Once ≥ 2 post-deadline snapshots are available for a district, the model switches from lag-blended projections to **observed post-deadline velocity** — the actual sigs/day rate seen in post-deadline intervals. This velocity is projected forward to March 9 as the district's effective count, clipped to the pre-deadline projection as an upper bound.
 
@@ -154,11 +155,10 @@ For each of the 29 districts, the survival model receives:
 | `effective_verified` | Blended count: observed post-deadline velocity projection, or lag-blended growth projection, or raw verified |
 | `post_deadline_velocity` | Observed sigs/day rate in post-deadline intervals (when ≥2 available) |
 | `pre_deadline_slope` | Sigs/day rate in last pre-deadline interval (for trajectory multiplier) |
-| `post_deadline_rate` | Observed removal rate since February 15, Bayesian-blended with 1.65% prior |
+| `post_deadline_removed` | Count of voter-ID removals observed after February 15 for this district |
 | `rejection_rate` | Full-history removal rate; bumped +1pp for anomaly-flagged districts |
 | `peak_verified` | Highest count ever recorded for this district |
 | `days_remaining` | Days until March 9 clerk deadline |
-| `days_post_deadline` | Days elapsed since February 15 (controls prior credibility) |
 
 ---
 
@@ -170,7 +170,12 @@ Each district's probability is first computed independently. The model then appl
 
 This is the exported `overall.pDistrictRule` value in `public/data.json`. For backwards compatibility the same value is also written to `overall.pQualify`.
 
-The statewide signature threshold is modeled separately in `overall.statewideProjection.pReachTarget`. The current app surfaces both numbers, but it does **not** yet publish a single fully joint `P(ballot qualification)` field that couples the district rule and statewide target in one dependence model.
+The app now also exports `overall.pBallotQualified`, which combines the district rule with the statewide signature threshold:
+
+- if the statewide threshold is already met, `pBallotQualified = pDistrictRule`
+- otherwise, `pBallotQualified = pDistrictRule × pReachTarget`
+
+That second case is explicitly labeled as an **independence approximation** in the JSON/UI via `overall.probabilityScope`. It is more honest than showing only the district-rule probability, but it is still not a full dependence model.
 
 ### 1. Exact DP distribution
 
@@ -237,9 +242,9 @@ The current implementation uses **two** axes, multiplied together:
 How much evidence the model has accumulated.
 
 - **Pre-deadline:** `min(snapshot_count / 22, 1.0)` — where 22 is the estimated number of business-day snapshots from the campaign start through the February 15 submission deadline.
-- **Post-deadline:** Blends snapshot maturity (60%) with clerk-window progress (40%) — `days_elapsed / 22` through the March 9 clerk deadline. As more daily updates arrive during clerk review, this component rises from 0% toward 100%.
+- **Post-deadline:** Blends snapshot maturity (60%) with clerk-window progress (40%) through the March 9 clerk deadline. As more daily updates arrive during clerk review, this component rises from 0% toward 100%.
 
-Early in the clerk review window, data maturity is typically the primary drag on the overall score, because the Bayesian removal rate prior still dominates observed clerk actions.
+Early in the clerk review window, data maturity is typically the primary drag on the overall score, because the pseudo-count removal prior still dominates observed clerk actions.
 
 ### 2. Model sharpness
 
@@ -290,7 +295,7 @@ The model runs automatically each time new LG data is posted — typically once 
 - Verified signature counts increase (new batch posted by county clerks or LG posting backlog resolves)
 - Verified counts decrease (clerk removals recorded in the LG file)
 - Post-deadline velocity data accumulates (each new snapshot updates the per-district sigs/day rate and projection)
-- The Bayesian removal rate prior fades (observed post-deadline data becomes more credible each day)
+- The posterior removal-rate estimate updates as more district-specific removal evidence arrives
 - The LG lag blend advances (closer to March 9, the model weights post-deadline observations more heavily)
 
 **These changes are the model reacting to new evidence.** No numbers are manually adjusted.
@@ -303,23 +308,11 @@ The complete source code for the model is available at [github.com/swharr/deadre
 
 On February 26, 2026, a pipeline bug in `scripts/process.py` was fixed so anomaly-based rejection-rate adjustments (the +1 percentage point penalty for districts flagged by historical packet-level anomalies, capped at 5%) are applied **before** district probabilities are calculated instead of after. Previously, the anomaly bump only changed the exported `rejectionRate` shown in the UI/JSON and did not affect `prob`, `pDistrictRule` / `pQualify`, or the DP distribution, which made the anomaly logic effectively cosmetic. This change makes the model internally consistent with the methodology, so anomaly risk now influences probability outputs as intended. Re-running the model on the February 25, 2026 snapshot produced small but real probability shifts (for example, the district-rule probability changed from `0.8149` to `0.8233`) without any source-data change.
 
----
+On March 13, 2026, the pipeline was updated in three ways:
 
-## Name lookup — privacy model
-
-The signature lookup tool allows users to check whether their name appears on the verified petition list. It is designed so that no name or query ever leaves the user's device.
-
-**How it works:**
-
-1. At build time, `process.py` constructs a per-district **bloom filter** for each of the 29 Senate districts. Each filter is an 8KB (65,536-bit) probabilistic set.
-2. Each signer's name is normalized (`LASTNAME,FIRSTNAME`) and combined with their district number to form a district-scoped key: `LASTNAME,FIRSTNAME,D{n}`. This scoping ensures that a match in District 3's filter cannot occur when querying District 22's filter.
-3. Keys are hashed using SHA-256 with double hashing (`h_i(x) = (h1 + i·h2) mod m`, 7 hash functions) and the corresponding bits are set in the filter.
-4. The full set of 29 filters is serialized as base64 and stored in `public/lookup.json` (~310KB, compared to ~1.9MB for a plain hash set).
-5. In the browser, the user's name and district are hashed identically using the Web Crypto API (`crypto.subtle.digest`). The resulting bit positions are checked against the downloaded filter — entirely client-side.
-
-**False positives:** Bloom filters can return false positives (saying a name is present when it isn't). At 8KB per district and ~3,000–8,000 entries, the false-positive rate is approximately 0.3%. False negatives (saying a name is absent when it's actually there) are impossible by design.
-
-**Privacy:** The lookup file contains only hashed bit positions — no names, no addresses, no identifying information. SHA-256 is a one-way function; the filter cannot be reverse-engineered to recover signer names. No analytics, logging, or server request is made when a lookup is performed.
+- `scripts/replay.py` now emits aggregate-only `data/removals.json` output and no longer writes raw voter names or voter IDs into committed artifacts.
+- `scripts/process.py` now anchors deadline math to the snapshot's `asOfDate`, making repeated processing runs reproducible.
+- The app now exports `overall.pBallotQualified` in addition to `overall.pDistrictRule`, with an explicit `probabilityScope` field indicating whether the ballot number is exact for the current state or an independence approximation.
 
 ---
 

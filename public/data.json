@@ -2,7 +2,7 @@
   "meta": {
     "lastUpdated": "2026-03-13",
     "lastUpdatedISO": "2026-03-13T12:00:00Z",
-    "processedAt": "2026-03-13T20:09:46Z",
+    "processedAt": "2026-03-13T20:23:39Z",
     "asOfDate": "2026-03-13",
     "sourceFile": "latest.xlsx",
     "totalVerified": 164608,
@@ -82,9 +82,10 @@
     }
   },
   "overall": {
-    "pDistrictRule": 0.7086,
-    "pQualify": 0.7086,
-    "expectedDistricts": 25.7,
+    "pBallotQualified": 0.7088,
+    "pDistrictRule": 0.7088,
+    "pQualify": 0.7088,
+    "expectedDistricts": 25.71,
     "pExact": [
       0.0,
       0.0,
@@ -109,16 +110,17 @@
       0.0,
       8e-06,
       0.000183,
-      0.002972,
-      0.033653,
-      0.232663,
-      0.716366,
-      0.014101,
-      5.4e-05,
+      0.00297,
+      0.033631,
+      0.232518,
+      0.716014,
+      0.014619,
+      5.7e-05,
       0.0
     ],
     "projectedStatewideRaw": 164731.0,
     "projectedStatewideAdjusted": 164608.0,
+    "pBallotQualifiedGrowth": 0.97,
     "pDistrictRuleGrowth": 0.97,
     "pQualifyGrowth": 0.97,
     "expectedDistrictsGrowth": 26.17,
@@ -166,12 +168,12 @@
       "pReachTarget": 1.0,
       "onTrack": true
     },
-    "probabilityScope": "district_rule_only",
-    "confidence": 0.8861,
+    "probabilityScope": "joint_exact_current_state",
+    "confidence": 0.886,
     "confidenceLabel": "Very High",
     "confidenceComponents": {
       "dataMaturity": 1.0,
-      "modelSharpness": 0.8861
+      "modelSharpness": 0.886
     }
   },
   "districts": [
@@ -572,7 +574,7 @@
       "peakVerified": 3545,
       "rejectionRate": 0.1162,
       "postDeadlineRate": 0.0908,
-      "prob": 0.0149,
+      "prob": 0.0156,
       "growthProb": 0.1264,
       "prevProb": 0.0171,
       "probDelta": 0.0,

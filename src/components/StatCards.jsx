@@ -133,10 +133,11 @@ function ConfidenceMeter({ value, label, components }) {
 
 export default function StatCards({ overall, meta, districts, modelView }) {
   const isGrowthView = modelView === 'growth'
-  // Switch between survival (primary) and growth shadow numbers
+  const probabilityScope = overall?.probabilityScope ?? 'district_rule_only'
+  // Switch between primary and growth shadow numbers
   const pQualify = isGrowthView
-    ? (overall?.pDistrictRuleGrowth ?? overall?.pQualifyGrowth ?? overall?.pDistrictRule ?? overall?.pQualify ?? 0)
-    : (overall?.pDistrictRule ?? overall?.pQualify ?? 0)
+    ? (overall?.pBallotQualifiedGrowth ?? overall?.pDistrictRuleGrowth ?? overall?.pQualifyGrowth ?? overall?.pBallotQualified ?? overall?.pDistrictRule ?? overall?.pQualify ?? 0)
+    : (overall?.pBallotQualified ?? overall?.pDistrictRule ?? overall?.pQualify ?? 0)
   const expectedDist = isGrowthView
     ? (overall?.expectedDistrictsGrowth ?? overall?.expectedDistricts ?? 0)
     : (overall?.expectedDistricts ?? 0)
@@ -171,13 +172,18 @@ export default function StatCards({ overall, meta, districts, modelView }) {
       flexWrap: 'wrap',
       gap: 16,
     }}>
-      {/* Card 1: District rule probability */}
+      {/* Card 1: Ballot probability */}
       <div style={{ ...cardStyle, borderTop: `3px solid ${probColor}` }}>
-        <div style={labelStyle}>District Rule Probability</div>
+        <div style={labelStyle}>Ballot Probability</div>
         <div style={bigNum(probColor)}>{animatedPct}%</div>
         <div style={subStyle}>
-          P(≥26 districts qualify)
-          {!isGrowthView && <span style={{ color: '#556688', marginLeft: 4 }}>· statewide target tracked separately</span>}
+          P(statewide target and district rule)
+          {!isGrowthView && probabilityScope === 'joint_exact_current_state' && (
+            <span style={{ color: '#556688', marginLeft: 4 }}>· statewide target already met</span>
+          )}
+          {!isGrowthView && probabilityScope === 'joint_independence_approx' && (
+            <span style={{ color: '#556688', marginLeft: 4 }}>· statewide side uses an independence approximation</span>
+          )}
           {isGrowthView && <span style={{ color: '#4caf50', marginLeft: 4 }}>· growth view</span>}
         </div>
         {confidence !== null && confidenceLabel && (

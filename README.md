@@ -1,6 +1,6 @@
 # deadreckoning — Utah Prop 4 Petition Tracker
 
-A real-time dashboard tracking the Utah "Repeal of the Independent Redistricting Commission and Standards Act" ballot initiative petition. It fetches the official signer spreadsheet from the Utah Lt. Governor's website daily, counts verified signatures by Senate district, computes per-district and overall ballot-qualification probabilities using exact dynamic programming, and serves an interactive dashboard at [deadreckoning.t8rsk8s.io](https://deadreckoning.t8rsk8s.io). No database, no servers — everything runs through GitHub Actions and Azure Static Web Apps.
+A real-time dashboard tracking the Utah "Repeal of the Independent Redistricting Commission and Standards Act" ballot initiative petition. It fetches the official signer spreadsheet from the Utah Lt. Governor's website daily, counts verified signatures by Senate district, computes per-district probabilities plus an exact district-rule distribution and combined ballot estimate, and serves an interactive dashboard at [deadreckoning.t8rsk8s.io](https://deadreckoning.t8rsk8s.io). No database, no servers — everything runs through GitHub Actions and Azure Static Web Apps.
 
 ---
 
@@ -15,11 +15,14 @@ pip install -r requirements.txt
 # Fetch the latest xlsx from the LG website
 python scripts/scraper.py
 
+# Rebuild derived history/removal artifacts
+python scripts/replay.py
+
 # Process it into public/data.json
 python scripts/process.py
 
-# Or process a specific file
-python scripts/process.py --file data/manual/myfile.xlsx
+# Run calibration/backtest metrics
+python scripts/backtest.py
 
 # Debug the scraper (dumps raw page HTML to stdout)
 python scripts/scraper.py --debug
@@ -38,6 +41,10 @@ npm run dev
 # Production build
 npm run build
 # → dist/
+
+# Full local verification pass
+npm run check
+python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
 ---
@@ -49,8 +56,9 @@ When the LG website is down or you have a newer file before the scheduled scrape
 1. Drop the `.xlsx` file into `data/manual/`
 2. Commit and push — the `push: paths: data/manual/**` trigger fires automatically
 3. The workflow runs `scraper.py`, which detects the manual file (newer than `data/latest.xlsx`), moves it to `data/snapshots/`, and copies it to `data/latest.xlsx`
-4. `process.py` runs next and writes `public/data.json`
-5. The build-and-deploy job deploys the updated dashboard
+4. `replay.py` rebuilds aggregate history/removal artifacts and `process.py` writes `public/data.json`
+5. The check workflow runs Python tests, lint, frontend tests, and a production build before deploy
+6. The build-and-deploy job deploys the updated dashboard
 
 You can also trigger manually any time from the GitHub Actions tab → **Fetch and Process Petition Data** → **Run workflow**.
 
@@ -75,7 +83,30 @@ You can also trigger manually any time from the GitHub Actions tab → **Fetch a
 Full Azure docs: https://learn.microsoft.com/en-us/azure/static-web-apps/get-started-portal
 
 ---
-## 4. Updating the Probability Model
+## 4. Data Pipeline and Model Commands
+
+The Python side is split into three stages:
+
+- `scripts/scraper.py` fetches or promotes the latest xlsx snapshot
+- `scripts/replay.py` rebuilds `data/history.json` and the aggregate-only `data/removals.json`
+- `scripts/process.py` turns the latest snapshot plus history into `public/data.json`
+
+Useful commands:
+
+```bash
+# Rebuild history/removal aggregates from all snapshots
+python3 scripts/replay.py
+
+# Regenerate public/data.json from the current latest snapshot
+python3 scripts/process.py
+
+# Produce a calibration report by replaying historical snapshots
+python3 scripts/backtest.py
+```
+
+`data/removals.json` is intentionally aggregate-only. It should not contain raw voter names or voter IDs.
+
+## 5. Updating the Probability Model
 
 The model lives in `scripts/process.py`. Key tunable constants at the top of the file:
 
@@ -84,14 +115,19 @@ The model lives in `scripts/process.py`. Key tunable constants at the top of the
 - **`CORRELATION_PENALTY_SCALE`** — currently `0.030` (3%). Scales the inter-district correlation deflator applied to `p_qualify`.
 - **`LG_LAG_DAYS`** — currently `14`. The number of calendar days over which the LG posting lag weight decays. Empirically calibrated from Feb 16–20 data showing 25.8% post-deadline gain rate.
 
-After editing:
+After editing model logic:
 
 ```bash
-# Rebuild history from all snapshots (if adding new ones)
-.venv/bin/python scripts/replay.py
+# Rebuild history from all snapshots
+python3 scripts/replay.py
 
 # Regenerate data.json
-.venv/bin/python scripts/process.py
+python3 scripts/process.py
+
+# Run regression and calibration checks
+python3 -m unittest discover -s tests -p "test_*.py"
+npm run check
+python3 scripts/backtest.py
 
 # Check output
 python3 -c "import json; d=json.load(open('public/data.json')); print(d['overall']['pDistrictRule'], d['overall']['expectedDistricts'])"
@@ -103,7 +139,19 @@ See `MODEL-DESCRIPTION.md` for a full description of all model components.
 
 ---
 
-## 6. Key Dates
+## 6. Release Hygiene
+
+When a change alters pipeline behavior, model methodology, developer workflow, or user-facing output:
+
+- update `README.md` if local commands, workflows, or artifact expectations changed
+- update `MODEL-DESCRIPTION.md` if model logic or exported probability semantics changed
+- add a dated entry to `CHANGELOG.md` before pushing
+
+This repo moves fast enough that code-only changes drift from documentation quickly if these files are not updated in the same commit.
+
+---
+
+## 7. Key Dates
 
 | Date | Event |
 |------|-------|
@@ -115,16 +163,20 @@ See `MODEL-DESCRIPTION.md` for a full description of all model components.
 
 ---
 
-## 7. Repo Structure
+## 8. Repo Structure
 
 ```
 /
 ├── scripts/
 │   ├── scraper.py        ← fetches xlsx from vote.utah.gov
-│   └── process.py        ← parses xlsx → public/data.json
+│   ├── replay.py         ← rebuilds history/removal aggregates from snapshots
+│   ├── process.py        ← parses xlsx → public/data.json
+│   └── backtest.py       ← replays historical snapshots for calibration metrics
 ├── data/
 │   ├── manual/           ← drop xlsx here for manual processing
-│   └── snapshots/        ← daily auto-archived snapshots (gitignored)
+│   ├── snapshots/        ← daily auto-archived snapshots (gitignored)
+│   ├── history.json      ← derived historical deltas and rates
+│   └── removals.json     ← aggregate-only removal stats (no raw PII)
 ├── public/
 │   └── data.json         ← THE output; React reads this; committed to repo
 ├── src/
@@ -137,8 +189,12 @@ See `MODEL-DESCRIPTION.md` for a full description of all model components.
 │   └── lib/
 │       └── probability.js
 ├── .github/workflows/
+│   ├── checks.yml        ← lint, tests, build, and Python regression checks
 │   ├── fetch.yml         ← daily data pipeline (scrape → replay → process → deploy)
 │   └── deploy.yml        ← frontend-only deploy on non-data pushes to main
+├── tests/
+│   ├── test_process_helpers.py
+│   └── test_generated_artifacts.py
 ├── staticwebapp.config.json
 ├── index.html
 ├── vite.config.js

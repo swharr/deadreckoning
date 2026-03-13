@@ -61,27 +61,27 @@ MIN_CREDIBLE_SNAPSHOTS = 8
 # History loader
 # ---------------------------------------------------------------------------
 
-def load_history() -> dict | None:
-    """Load data/history.json if present, else return None."""
-    if not HISTORY_PATH.exists():
+def load_history(path: Path) -> dict | None:
+    """Load history JSON if present, else return None."""
+    if not path.exists():
         return None
     try:
-        with open(HISTORY_PATH) as f:
+        with open(path) as f:
             return json.load(f)
     except Exception as e:
-        print(f"Warning: could not load history.json: {e}")
+        print(f"Warning: could not load history JSON from {path}: {e}")
         return None
 
 
-def load_removals() -> dict | None:
-    """Load data/removals.json if present, else return None."""
-    if not REMOVALS_PATH.exists():
+def load_removals(path: Path) -> dict | None:
+    """Load removals JSON if present, else return None."""
+    if not path.exists():
         return None
     try:
-        with open(REMOVALS_PATH) as f:
+        with open(path) as f:
             return json.load(f)
     except Exception as e:
-        print(f"Warning: could not load removals.json: {e}")
+        print(f"Warning: could not load removals JSON from {path}: {e}")
         return None
 
 
@@ -167,33 +167,32 @@ def compute_district_prob(
 
 
 def bayesian_removal_rate(
-    observed_rate: float,
-    days_post_deadline: int,
-    clerk_window_days: int = 22,  # Feb 15 → Mar 9
+    observed_removed: int,
+    exposure: int,
+    prior_mean: float = 0.0165,
+    prior_strength: int = 2000,
 ) -> float:
     """
-    Blend observed post-deadline removal rate with an empirical prior.
+    Posterior mean removal rate under a Beta-Binomial prior.
 
-    Prior: 1.65% total removal over the full clerk window, derived from
-    county clerk removal-request data reported by KSL/SLTrib (Feb 12, 2026):
-    2,325 removal requests / ~141k verified = ~1.65% statewide.
-
-    As more post-deadline snapshots accumulate, the observed rate gains
-    credibility and the prior fades. Full credibility after clerk_window_days.
+    `prior_strength` is the equivalent number of pseudo-signatures the prior
+    contributes. This fades naturally as real district exposure grows, instead
+    of using elapsed days as a stand-in for evidence.
     """
-    REMOVAL_PRIOR = 0.0165  # empirical prior: ~1.65% statewide removal rate
-    credibility = min(1.0, days_post_deadline / clerk_window_days)
-    return credibility * observed_rate + (1.0 - credibility) * REMOVAL_PRIOR
+    if exposure <= 0:
+        return prior_mean
+    alpha = prior_mean * prior_strength
+    beta = (1.0 - prior_mean) * prior_strength
+    return (alpha + max(observed_removed, 0)) / (alpha + beta + exposure)
 
 
 def compute_district_prob_survival(
     verified: float,
     threshold: int,
     peak_verified: int,           # highest count ever seen for this district
-    post_deadline_removal_rate: float,  # removals / peak since submission deadline
+    post_deadline_removed: int,         # removals since submission deadline
     observed_removal_rate: float,       # full-history removal rate (background)
     days_remaining: int,
-    days_post_deadline: int = 0,  # days elapsed since submission deadline
     pre_deadline_slope: float = 0.0,  # sigs/day velocity just before deadline
     snapshot_count: int = 16,  # number of historical snapshots available
 ) -> float:
@@ -203,9 +202,9 @@ def compute_district_prob_survival(
     No new signatures can be added. The question is purely:
     will enough of the current verified signatures survive clerk review?
 
-    Uses a Bayesian blend of observed post-deadline removal rate with an
+    Uses a Bayesian blend of observed post-deadline removals with an
     empirical prior (1.65%) calibrated from county clerk removal-request
-    data (KSL/SLTrib, Feb 12, 2026). Prior fades as more data accumulates.
+    data (KSL/SLTrib, Feb 12, 2026). Prior fades as district exposure grows.
 
     For below-threshold districts: also applies a trajectory multiplier —
     districts that were accelerating strongly just before the deadline are
@@ -213,8 +212,8 @@ def compute_district_prob_survival(
 
     Returns a value in [0.0, 1.0].
     """
-    # Effective removal rate: Bayesian blend of observed + prior
-    effective_rate = bayesian_removal_rate(post_deadline_removal_rate, days_post_deadline)
+    # Effective removal rate: Bayesian blend of observed removals + prior
+    effective_rate = bayesian_removal_rate(post_deadline_removed, peak_verified)
 
     if verified >= threshold:
         # Already met — P = 1.0 only if we think removals won't push below threshold
@@ -255,9 +254,10 @@ def compute_district_prob_survival(
         # it may have unposted signatures still in the LG pipeline. Boost raw
         # proportional to the slope, capped at 1.5×. Only applies early post-deadline
         # while the LG lag window is still plausible (within 10 days of deadline).
-        if pre_deadline_slope > 0 and days_post_deadline <= 10:
+        if pre_deadline_slope > 0 and days_remaining >= 0:
             # Normalize slope: 50 sigs/day = meaningful surge for any district
-            trajectory_bonus = min(0.5, pre_deadline_slope / 50.0) * (1.0 - days_post_deadline / 10.0)
+            early_window = max(min(days_remaining, 10), 0)
+            trajectory_bonus = min(0.5, pre_deadline_slope / 50.0) * (early_window / 10.0)
             raw = raw * (1.0 + trajectory_bonus)
 
         # Downward nudge if effective removal rate is meaningfully above prior
@@ -514,9 +514,15 @@ def resolve_as_of_date(history: dict | None, xlsx_path: Path, fallback_date: dat
 def main():
     parser = argparse.ArgumentParser(description="Process petition xlsx → public/data.json")
     parser.add_argument("--file", help="Path to xlsx file (default: data/latest.xlsx)")
+    parser.add_argument("--history", help="Path to history JSON (default: data/history.json)")
+    parser.add_argument("--removals", help="Path to removals JSON (default: data/removals.json)")
+    parser.add_argument("--output", help="Path to output JSON (default: public/data.json)")
     args = parser.parse_args()
 
     xlsx_path = Path(args.file) if args.file else LATEST_PATH
+    history_path = Path(args.history) if args.history else HISTORY_PATH
+    removals_path = Path(args.removals) if args.removals else REMOVALS_PATH
+    output_path = Path(args.output) if args.output else DATA_JSON_PATH
     if not xlsx_path.exists():
         print(f"ERROR: File not found: {xlsx_path}", file=sys.stderr)
         sys.exit(1)
@@ -524,7 +530,7 @@ def main():
     source_file = xlsx_path.name
 
     # --- Load history ---
-    history = load_history()
+    history = load_history(history_path)
     if history:
         print(f"Loaded history.json: {history['snapshotCount']} snapshots, "
               f"{history['firstSnapshot']} → {history['lastSnapshot']}")
@@ -532,7 +538,7 @@ def main():
         print("No history.json found — using intra-file date bucketing only.")
 
     # --- Load removals audit ---
-    removals = load_removals()
+    removals = load_removals(removals_path)
     if removals:
         print(f"Loaded removals.json: {removals['totalRemoved']:,} voter IDs removed across history")
 
@@ -541,12 +547,12 @@ def main():
 
     # --- Load previous data.json for deltas ---
     prev_data: dict = {}
-    if DATA_JSON_PATH.exists():
+    if output_path.exists():
         try:
-            with open(DATA_JSON_PATH) as f:
+            with open(output_path) as f:
                 prev_data = json.load(f)
         except Exception as e:
-            print(f"Warning: could not load previous data.json: {e}")
+            print(f"Warning: could not load previous output JSON from {output_path}: {e}")
 
     prev_district_map: dict[int, dict] = {}
     if "districts" in prev_data:
@@ -579,6 +585,7 @@ def main():
     district_history: dict[int, list[dict]] = {}
     rejection_rates: dict[int, float] = {}
     post_deadline_rates: dict[int, float] = {}
+    post_deadline_removed_counts: dict[int, int] = {}
     peak_verified_map: dict[int, int] = {}
     projections: dict[int, dict] = {}
     daily_velocity = 0.0
@@ -592,6 +599,7 @@ def main():
             ]
         rejection_rates = {int(k): v for k, v in history.get("rejectionRates", {}).items()}
         post_deadline_rates = {int(k): v for k, v in history.get("postDeadlineRemovalRates", {}).items()}
+        post_deadline_removed_counts = {int(k): v for k, v in history.get("postDeadlineRemovalCounts", {}).items()}
         peak_verified_map = {int(k): v for k, v in history.get("peakVerified", {}).items()}
         projections = history.get("projections", {}).get("byDistrict", {})
         daily_velocity = history.get("dailyVelocity", 0.0)
@@ -654,6 +662,7 @@ def main():
         # --- Rejection rates ---
         rejection_rate = rejection_rates.get(d_num, 0.0)
         post_deadline_rate = post_deadline_rates.get(d_num, 0.0)
+        post_deadline_removed = post_deadline_removed_counts.get(d_num, 0)
         peak_verified = peak_verified_map.get(d_num, verified)
 
         # --- Probability (mode-dependent) ---
@@ -681,18 +690,35 @@ def main():
             if history and str(d_num) in projections:
                 growth_proj_raw = projections[str(d_num)]["raw"]
 
-            # Empirical LG lag estimate: observe net gains in post-deadline snapshots.
-            # Any net additions after Feb 15 are pre-deadline sigs that LG hadn't posted yet.
-            # If post-deadline gains are substantial (>0.5% of last pre-deadline count),
-            # the lag window is still active; otherwise it has likely resolved.
-            empirical_lag_active = True
-            if history and "snapshots" in history:
+            # District-specific lag estimate: use this district's own post-deadline gains
+            # relative to its last pre-deadline count before falling back to a statewide signal.
+            empirical_lag_active = False
+            if d_num in district_history:
+                pre_snaps = [
+                    s for s in district_history[d_num]
+                    if date.fromisoformat(s["date"]) <= SUBMISSION_DEADLINE
+                ]
+                post_snaps = [
+                    s for s in district_history[d_num]
+                    if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE
+                ]
+                if pre_snaps and post_snaps:
+                    last_pre_count = pre_snaps[-1]["count"]
+                    initial_post_gain = max(0, post_snaps[0]["count"] - last_pre_count)
+                    subsequent_post_gain = sum(
+                        max(0, post_snaps[i]["count"] - post_snaps[i - 1]["count"])
+                        for i in range(1, len(post_snaps))
+                    )
+                    total_post_gain = initial_post_gain + subsequent_post_gain
+                    if last_pre_count > 0:
+                        empirical_lag_active = (total_post_gain / last_pre_count) >= 0.002
+
+            if not empirical_lag_active and history and "snapshots" in history:
                 post_snaps = [
                     s for s in history["snapshots"]
                     if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE
                 ]
                 if len(post_snaps) >= 2:
-                    # Total net additions (statewide) across post-deadline snapshots
                     post_gains = sum(
                         max(0, post_snaps[i]["total"] - post_snaps[i - 1]["total"])
                         for i in range(1, len(post_snaps))
@@ -703,17 +729,12 @@ def main():
                         None
                     )
                     if last_pre_snap and last_pre_snap["total"] > 0:
-                        gain_rate = post_gains / last_pre_snap["total"]
-                        # If post-deadline gains are tiny (<0.1%), lag has likely resolved
-                        empirical_lag_active = gain_rate >= 0.001
+                        empirical_lag_active = (post_gains / last_pre_snap["total"]) >= 0.001
 
-            # Empirical override: if post-deadline gains are still substantial (>5% of
-            # pre-deadline total), the LG backlog is clearly not resolved — extend lag weight.
-            # Conversely, if gains are tiny, lag has resolved and we trust LG counts fully.
             if not empirical_lag_active:
                 lag_weight = 0.0
             elif lag_weight == 0.0 and empirical_lag_active:
-                # Fixed window expired but data shows lag is still active — give a small floor
+                # Fixed window expired but this district still shows lag — keep a small floor
                 lag_weight = 0.10
 
             # Per-district post-deadline velocity: sigs/day added or removed since Feb 15.
@@ -769,9 +790,6 @@ def main():
             else:
                 effective_verified = float(verified)
 
-            # Days elapsed since submission deadline (for Bayesian prior credibility)
-            days_post_deadline = max(0, (as_of_date - SUBMISSION_DEADLINE).days)
-
             # Pre-deadline slope: sigs/day rate in the last pre-deadline interval
             # Used to boost survival odds for districts that were surging just before cutoff
             pre_deadline_slope = 0.0
@@ -794,10 +812,9 @@ def main():
                 verified=effective_verified,
                 threshold=threshold,
                 peak_verified=peak_verified,
-                post_deadline_removal_rate=post_deadline_rate,
+                post_deadline_removed=post_deadline_removed,
                 observed_removal_rate=rejection_rate,
                 days_remaining=days_to_deadline,
-                days_post_deadline=days_post_deadline,
                 pre_deadline_slope=pre_deadline_slope,
                 snapshot_count=snapshot_count,
             )
@@ -820,7 +837,7 @@ def main():
 
             # Also compute a pure growth prob shadow (ignores survival mode, for toggle)
             # Projection: expected final count after remaining removals
-            effective_rate = post_deadline_rate if post_deadline_rate > 0 else rejection_rate
+            effective_rate = bayesian_removal_rate(post_deadline_removed, peak_verified) if peak_verified > 0 else rejection_rate
             clerk_window_days = 20
             days_fraction = min(days_to_deadline / clerk_window_days, 1.0)
             projected_total = effective_verified - (peak_verified * effective_rate * days_fraction)
@@ -1059,6 +1076,15 @@ def main():
 
     on_track = projected_crossing_date is not None or total_verified >= statewide_target
 
+    if total_verified >= statewide_target:
+        p_ballot_qualified = p_qual
+        p_ballot_qualified_growth = p_qual_growth
+        probability_scope = "joint_exact_current_state"
+    else:
+        p_ballot_qualified = p_qual * p_reach_target
+        p_ballot_qualified_growth = p_qual_growth * p_reach_target
+        probability_scope = "joint_independence_approx"
+
     statewide_projection = {
         "target": statewide_target,
         "current": total_verified,
@@ -1150,18 +1176,20 @@ def main():
             "withdrawnByDistrict": removals["byDistrict"] if removals else {},
         },
         "overall": {
+            "pBallotQualified": round(min(1.0, max(0.0, p_ballot_qualified)), 4),
             "pDistrictRule": round(p_qual, 4),
             "pQualify": round(p_qual, 4),
             "expectedDistricts": round(exp_districts, 2),
             "pExact": p_exact,
             "projectedStatewideRaw": round(statewide_proj_raw, 0),
             "projectedStatewideAdjusted": round(statewide_proj_adj, 0),
+            "pBallotQualifiedGrowth": round(min(1.0, max(0.0, p_ballot_qualified_growth)), 4),
             "pDistrictRuleGrowth": round(p_qual_growth, 4),
             "pQualifyGrowth": round(p_qual_growth, 4),
             "expectedDistrictsGrowth": round(exp_districts_growth, 2),
             "pExactGrowth": p_exact_growth,
             "statewideProjection": statewide_projection,
-            "probabilityScope": "district_rule_only",
+            "probabilityScope": probability_scope,
             "confidence": confidence,
             "confidenceLabel": confidence_label,
             "confidenceComponents": {
@@ -1190,11 +1218,11 @@ def main():
     }
 
     # --- Write outputs ---
-    PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(DATA_JSON_PATH, "w") as f:
+    with open(output_path, "w") as f:
         json.dump(output, f, indent=2)
-    print(f"Wrote {DATA_JSON_PATH}")
+    print(f"Wrote {output_path}")
 
     confirmed = sum(1 for d in districts_out if d["verified"] >= d["threshold"])
     print(
