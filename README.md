@@ -58,7 +58,7 @@ When the LG website is down or you have a newer file before the scheduled scrape
 3. The workflow runs `scraper.py`, which detects the manual file (newer than `data/latest.xlsx`), moves it to `data/snapshots/`, and copies it to `data/latest.xlsx`
 4. `replay.py` rebuilds aggregate history/removal artifacts and `process.py` writes `public/data.json`
 5. The check workflow runs Python tests, lint, frontend tests, and a production build before deploy
-6. The build-and-deploy job deploys the updated dashboard
+6. The merge/push to `main` automatically triggers `deploy.yml` and deploys the updated dashboard
 
 You can also trigger manually any time from the GitHub Actions tab → **Fetch and Process Petition Data** → **Run workflow**.
 

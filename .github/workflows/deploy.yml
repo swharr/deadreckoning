@@ -11,7 +11,11 @@ on:
     paths-ignore:
       - 'instructions/**'    # gitignored; should never reach CI
       - '*.md'               # docs-only changes don't need a deploy
-  workflow_dispatch:             # manual trigger + called by data pipeline after PR merge
+  workflow_dispatch:             # manual trigger when an explicit redeploy is needed
+
+concurrency:
+  group: build-and-deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:

@@ -8,6 +8,9 @@
 ### Data pipeline checks and failure handling
 The fetch pipeline now fails loudly when scrape/process work breaks instead of silently presenting stale data as a clean run. It also runs Python regression tests and the frontend quality pass before opening a data PR, and a new `checks.yml` workflow runs the same validation on pushes and pull requests.
 
+### Deploy deduplication
+Removed the redundant deploy dispatch from `fetch.yml` and added workflow concurrency to `deploy.yml`. Deploys now come from the `push` to `main`, and overlapping deploy attempts for the same branch are canceled cleanly before they race in Azure.
+
 ### Model reproducibility and exported probabilities
 `scripts/process.py` now anchors time-sensitive calculations to the snapshot `asOfDate` rather than the machine's current date, making repeated runs of the same snapshot reproducible. The app now exports `overall.pBallotQualified` and `overall.probabilityScope` so the UI can distinguish the exact district-rule probability from the current joint ballot estimate.
 

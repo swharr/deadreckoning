@@ -97,12 +97,6 @@ jobs:
             --head "$BRANCH"
           gh pr merge "$BRANCH" --squash --delete-branch
 
-      - name: Trigger deploy
-        if: steps.check.outputs.data_changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run deploy.yml
-
       - name: Summarize pipeline result
         if: always()
         run: |
@@ -111,4 +105,5 @@ jobs:
             echo
             echo "- Job status: ${{ job.status }}"
             echo "- Data changed: ${{ steps.check.outputs.data_changed || 'unknown' }}"
+            echo "- Deploy behavior: merge to main triggers deploy.yml automatically"
           } >> "$GITHUB_STEP_SUMMARY"
