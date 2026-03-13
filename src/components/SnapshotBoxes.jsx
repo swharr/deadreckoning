@@ -113,7 +113,7 @@ function GainsCard({ gains, districts }) {
 // ---------------------------------------------------------------------------
 // Signature Flow card — net new vs removals
 // ---------------------------------------------------------------------------
-function SignatureFlowCard({ snapshot }) {
+function SignatureFlowCard({ snapshot, districts }) {
   const flow = snapshot?.signatureFlow || {}
   const intervalNet = flow.intervalNet ?? 0
   const intervalRemovals = flow.intervalRemovals ?? 0
@@ -204,6 +204,133 @@ function SignatureFlowCard({ snapshot }) {
           ))}
         </div>
       )}
+
+      {/* Districts at risk — confirmed but thin margin, sorted by tightest buffer */}
+      {(() => {
+        const allDists = districts || []
+        // Confirmed districts sorted by surplus ascending (tightest first)
+        const atRisk = allDists
+          .filter(d => d.verified >= d.threshold)
+          .map(d => ({
+            ...d,
+            surplus: d.verified - d.threshold,
+            removalRate: d.postDeadlineRate || d.rejectionRate || 0,
+          }))
+          .sort((a, b) => a.surplus - b.surplus)
+          .slice(0, 5)
+
+        // Also show districts that have already fallen below threshold
+        const belowThreshold = allDists
+          .filter(d => d.verified < d.threshold)
+          .map(d => ({
+            ...d,
+            deficit: d.threshold - d.verified,
+          }))
+          .sort((a, b) => a.deficit - b.deficit)
+
+        if (atRisk.length === 0 && belowThreshold.length === 0) return null
+
+        // Find the widest surplus for the mini bar scale
+        const maxSurplus = atRisk.length > 0 ? Math.max(...atRisk.map(d => d.surplus), 1) : 1
+
+        return (
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #1e2a4a' }}>
+            <div style={{ fontSize: 11, color: '#556688', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 'bold', marginBottom: 8 }}>
+              Districts at risk
+            </div>
+
+            {belowThreshold.length > 0 && (
+              <div style={{ marginBottom: atRisk.length > 0 ? 10 : 0 }}>
+                {belowThreshold.map(d => (
+                  <div key={d.d} style={{ padding: '6px 0', borderBottom: '1px solid #131c33' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#ef5350', fontSize: 13, fontWeight: 'bold' }}>
+                        D{d.d}
+                        <span style={{
+                          marginLeft: 6,
+                          fontSize: 9,
+                          background: '#3d1a1a',
+                          color: '#ef5350',
+                          border: '1px solid #6a2d2d',
+                          borderRadius: 3,
+                          padding: '1px 5px',
+                          fontWeight: 'bold',
+                          letterSpacing: '0.05em',
+                          verticalAlign: 'middle',
+                        }}>BELOW</span>
+                      </span>
+                      <span style={{ fontSize: 12, color: '#ef5350', fontWeight: 'bold' }}>
+                        -{d.deficit.toLocaleString()} short
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 11, color: '#556688', marginTop: 2 }}>
+                      {d.verified.toLocaleString()} / {d.threshold.toLocaleString()} needed
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {atRisk.map(d => {
+              const barPct = Math.min((d.surplus / maxSurplus) * 100, 100)
+              const barColor = d.surplus < 200 ? '#ef5350'
+                : d.surplus < 500 ? '#ff7043'
+                : d.surplus < 1000 ? '#ffca28'
+                : '#4caf50'
+              return (
+                <div key={d.d} style={{ padding: '6px 0', borderBottom: '1px solid #131c33' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#c8d8f0', fontSize: 13 }}>
+                      D{d.d}
+                      {d.surplus < 200 && (
+                        <span style={{
+                          marginLeft: 6,
+                          fontSize: 9,
+                          background: '#3d1a1a',
+                          color: '#ff7043',
+                          border: '1px solid #6a2d2d',
+                          borderRadius: 3,
+                          padding: '1px 5px',
+                          fontWeight: 'bold',
+                          letterSpacing: '0.05em',
+                          verticalAlign: 'middle',
+                        }}>THIN</span>
+                      )}
+                    </span>
+                    <span style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
+                      {d.delta !== 0 && (
+                        <span style={{ fontSize: 11, color: d.delta < 0 ? '#ef5350' : '#4caf50' }}>
+                          {d.delta > 0 ? '+' : ''}{d.delta}
+                        </span>
+                      )}
+                      <span style={{ fontSize: 13, fontWeight: 'bold', color: barColor }}>
+                        +{d.surplus.toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                  {/* Surplus buffer bar */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                    <div style={{ flex: 1, height: 3, background: '#1a2040', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${barPct}%`,
+                        height: '100%',
+                        background: barColor,
+                        borderRadius: 2,
+                        transition: 'width 0.3s ease',
+                      }} />
+                    </div>
+                    {d.removalRate > 0 && (
+                      <span style={{ fontSize: 10, color: '#556688', whiteSpace: 'nowrap' }}>
+                        {(d.removalRate * 100).toFixed(1)}% rej
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()}
     </div>
   )
 }
@@ -1087,6 +1214,7 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
         />
         <SignatureFlowCard
           snapshot={snapshot}
+          districts={districts}
         />
         <ConfirmedDistrictsCard
           districts={districts}
