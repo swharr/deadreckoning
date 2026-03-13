@@ -20,6 +20,9 @@ Added Python regression tests for model helpers and generated artifacts, plus a 
 ### Reprocessing preserves day-over-day snapshot changes
 Processing the same daily xlsx more than once now still derives district count deltas, gains, losses, and newly-met/newly-failed status from `history.json` instead of flattening those fields to zero. That keeps the dashboard's "today vs. yesterday" view intact on repeat runs and redeploys.
 
+### District rows show current-interval removals
+District-facing UI now surfaces per-district removal counts alongside the net change where that data exists for the current interval. That makes post-deadline drops easier to interpret without cross-referencing the separate signature-flow summary card.
+
 ## 2026-02-28
 
 ### Clerk Verification Window countdown

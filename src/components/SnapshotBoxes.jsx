@@ -572,6 +572,7 @@ function ConfirmedDistrictsCard({ districts }) {
         confirmed.map(d => {
           const surplus = d.verified - d.threshold
           const delta = d.delta || 0
+          const intervalRemoved = d.intervalRemoved || 0
           const atRisk = surplus < 200  // thin margin
           return (
             <div key={d.d} style={{
@@ -598,8 +599,15 @@ function ConfirmedDistrictsCard({ districts }) {
                 )}
               </span>
               <span style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
-                <span style={{ fontSize: 12, color: delta < 0 ? '#ff7043' : delta > 0 ? '#4caf50' : '#556688' }}>
-                  {delta > 0 ? '+' : ''}{delta}
+                <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: 12, color: delta < 0 ? '#ff7043' : delta > 0 ? '#4caf50' : '#556688' }}>
+                    {delta > 0 ? '+' : ''}{delta}
+                  </span>
+                  {intervalRemoved > 0 && (
+                    <span style={{ fontSize: 10, color: '#ff7043' }}>
+                      -{intervalRemoved.toLocaleString()} removed
+                    </span>
+                  )}
                 </span>
                 <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{surplus.toLocaleString()}</span>
               </span>

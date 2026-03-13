@@ -118,12 +118,40 @@ function ProbCell({ prob, tier }) {
   )
 }
 
-function DeltaCell({ delta }) {
+function DeltaCell({ delta, intervalRemoved }) {
   if (delta > 0) {
-    return <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{delta.toLocaleString()}</span>
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{delta.toLocaleString()}</span>
+        {intervalRemoved > 0 && (
+          <span style={{ color: '#f44336', fontSize: 11 }}>
+            -{intervalRemoved.toLocaleString()} removed
+          </span>
+        )}
+      </div>
+    )
   }
   if (delta < 0) {
-    return <span style={{ color: '#f44336', fontWeight: 'bold' }}>{delta.toLocaleString()}</span>
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ color: '#f44336', fontWeight: 'bold' }}>{delta.toLocaleString()}</span>
+        {intervalRemoved > 0 && (
+          <span style={{ color: '#f44336', fontSize: 11 }}>
+            -{intervalRemoved.toLocaleString()} removed
+          </span>
+        )}
+      </div>
+    )
+  }
+  if (intervalRemoved > 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ color: '#334466' }}>—</span>
+        <span style={{ color: '#f44336', fontSize: 11 }}>
+          -{intervalRemoved.toLocaleString()} removed
+        </span>
+      </div>
+    )
   }
   return <span style={{ color: '#334466' }}>—</span>
 }
@@ -340,7 +368,7 @@ export default function DistrictTable({ districts }) {
                     />
                   </td>
                   <td style={tdStyle}>
-                    <DeltaCell delta={d.delta} />
+                    <DeltaCell delta={d.delta} intervalRemoved={d.intervalRemoved ?? 0} />
                   </td>
                   <td style={tdStyle}>
                     <span style={{

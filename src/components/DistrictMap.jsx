@@ -384,6 +384,14 @@ export default function DistrictMap({ districts = [] }) {
                   </span>
                 </div>
               )}
+              {hd.intervalRemoved > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#445577' }}>Removed</span>
+                  <span style={{ color: '#f44336', fontWeight: 'bold' }}>
+                    -{hd.intervalRemoved.toLocaleString()}
+                  </span>
+                </div>
+              )}
               {hd.trend && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#445577' }}>Trend</span>

@@ -991,6 +991,13 @@ def main():
         alltime_removals = 0
         interval_district_removals = []
 
+    interval_removed_by_district = {
+        item["d"]: item["removed"]
+        for item in interval_district_removals
+    }
+    for district in districts_out:
+        district["intervalRemoved"] = interval_removed_by_district.get(district["d"], 0)
+
     # --- Statewide trajectory ---
     statewide_proj_raw = sum(d["projectedRaw"] for d in districts_out)
     statewide_proj_adj = sum(d["projectedTotal"] for d in districts_out)
