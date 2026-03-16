@@ -68,6 +68,10 @@ jobs:
         if: steps.check.outputs.data_changed == 'true'
         run: python3 -m unittest discover -s tests -p "test_*.py"
 
+      - name: Install Node dependencies
+        if: steps.check.outputs.data_changed == 'true'
+        run: npm ci
+
       - name: Run quality checks
         if: steps.check.outputs.data_changed == 'true'
         run: npm run check
