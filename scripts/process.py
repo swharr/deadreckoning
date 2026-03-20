@@ -56,6 +56,11 @@ WEEKLY_BUCKETS = 10
 # wider uncertainty when data is sparse. ~2 weeks at current snapshot cadence.
 MIN_CREDIBLE_SNAPSHOTS = 8
 
+# Correlation penalty: districts are not independent. Shared risks create
+# inter-district correlation ~0.10-0.15, causing the independence DP to
+# underestimate tail risk. This deflator grows with p_qual_raw.
+CORRELATION_PENALTY_SCALE = 0.030  # max penalty at p_qual = 1.0
+
 
 # ---------------------------------------------------------------------------
 # History loader
@@ -275,6 +280,135 @@ def compute_district_prob_survival(
         raw = 0.5 + (raw - 0.5) * credibility
 
     return round(max(0.0, min(0.99, raw)), 4)
+
+
+def compute_survival_blend(
+    verified: int,
+    threshold: int,
+    d_num: int,
+    as_of_date: date,
+    district_snapshots: list[dict],
+    statewide_snapshots: list[dict],
+    peak_verified: int,
+    post_deadline_removed: int,
+    rejection_rate: float,
+    growth_proj_raw: float | None,
+    days_to_deadline: int,
+    snapshot_count: int,
+) -> float:
+    """
+    Compute blended survival/growth probability for a single district.
+
+    Replicates the full survival-mode blending logic from main():
+    LG lag weight, empirical lag detection, effective_verified,
+    pre-deadline slope, growth/survival blend.
+
+    Used by both main() and compute_probability_timeline().
+    """
+    LG_LAG_DAYS = 14
+    days_elapsed = max(0, (as_of_date - SUBMISSION_DEADLINE).days)
+    lag_weight = max(0.0, 1.0 - days_elapsed / LG_LAG_DAYS)
+
+    # Empirical lag detection — district-level
+    empirical_lag_active = False
+    pre_snaps = [s for s in district_snapshots if date.fromisoformat(s["date"]) <= SUBMISSION_DEADLINE]
+    post_snaps = [s for s in district_snapshots if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE]
+
+    if pre_snaps and post_snaps:
+        last_pre_count = pre_snaps[-1]["count"]
+        initial_post_gain = max(0, post_snaps[0]["count"] - last_pre_count)
+        subsequent_post_gain = sum(
+            max(0, post_snaps[i]["count"] - post_snaps[i - 1]["count"])
+            for i in range(1, len(post_snaps))
+        )
+        total_post_gain = initial_post_gain + subsequent_post_gain
+        if last_pre_count > 0:
+            empirical_lag_active = (total_post_gain / last_pre_count) >= 0.002
+
+    # Empirical lag — statewide fallback
+    if not empirical_lag_active and statewide_snapshots:
+        sw_post = [s for s in statewide_snapshots if date.fromisoformat(s["date"]) > SUBMISSION_DEADLINE]
+        if len(sw_post) >= 2:
+            post_gains = sum(
+                max(0, sw_post[i]["total"] - sw_post[i - 1]["total"])
+                for i in range(1, len(sw_post))
+            )
+            last_pre_sw = next(
+                (s for s in reversed(statewide_snapshots)
+                 if date.fromisoformat(s["date"]) <= SUBMISSION_DEADLINE),
+                None
+            )
+            if last_pre_sw and last_pre_sw["total"] > 0:
+                empirical_lag_active = (post_gains / last_pre_sw["total"]) >= 0.001
+
+    if not empirical_lag_active:
+        lag_weight = 0.0
+    elif lag_weight == 0.0 and empirical_lag_active:
+        lag_weight = 0.10
+
+    # Post-deadline velocity
+    post_deadline_velocity = 0.0
+    post_deadline_projected = float(verified)
+    if post_snaps and len(post_snaps) >= 2:
+        total_net = post_snaps[-1]["count"] - post_snaps[0]["count"]
+        total_days = max(1, (date.fromisoformat(post_snaps[-1]["date"]) - date.fromisoformat(post_snaps[0]["date"])).days)
+        post_deadline_velocity = total_net / total_days
+        post_deadline_projected = verified + post_deadline_velocity * days_to_deadline
+        if post_deadline_velocity < 0:
+            post_deadline_projected = max(float(verified), post_deadline_projected)
+    elif post_snaps and len(post_snaps) == 1 and pre_snaps:
+        span_days = max(1, (date.fromisoformat(post_snaps[0]["date"]) - date.fromisoformat(pre_snaps[-1]["date"])).days)
+        post_deadline_velocity = (post_snaps[0]["count"] - pre_snaps[-1]["count"]) / span_days
+        post_deadline_projected = verified + post_deadline_velocity * days_to_deadline
+
+    # Effective verified
+    if len(post_snaps) >= 2:
+        upper_bound = growth_proj_raw if growth_proj_raw else post_deadline_projected
+        effective_verified = min(post_deadline_projected, upper_bound)
+        effective_verified = max(float(verified), effective_verified)
+    elif growth_proj_raw and lag_weight > 0:
+        effective_verified = verified + lag_weight * max(0, growth_proj_raw - verified)
+    else:
+        effective_verified = float(verified)
+
+    # Pre-deadline slope
+    pre_deadline_slope = 0.0
+    if len(pre_snaps) >= 2:
+        last_pre = pre_snaps[-1]
+        prev_pre = pre_snaps[-2]
+        interval_days = max(1, (date.fromisoformat(last_pre["date"]) - date.fromisoformat(prev_pre["date"])).days)
+        pre_deadline_slope = max(0.0, (last_pre["count"] - prev_pre["count"]) / interval_days)
+
+    # Survival probability
+    survival_prob = compute_district_prob_survival(
+        verified=effective_verified,
+        threshold=threshold,
+        peak_verified=peak_verified,
+        post_deadline_removed=post_deadline_removed,
+        observed_removal_rate=rejection_rate,
+        days_remaining=days_to_deadline,
+        pre_deadline_slope=pre_deadline_slope,
+        snapshot_count=snapshot_count,
+    )
+
+    # Growth probability for blend
+    trend = compute_trend_from_history(district_snapshots) if len(district_snapshots) >= 3 else "STABLE"
+    final_week_sigs = 0
+    if len(district_snapshots) >= 2:
+        final_week_sigs = max(0, district_snapshots[-1]["count"] - district_snapshots[-2]["count"])
+
+    growth_prob_for_blend = compute_district_prob(
+        verified=verified,
+        threshold=threshold,
+        trend=trend,
+        final_week_sigs=final_week_sigs,
+        projected_adj=growth_proj_raw if growth_proj_raw else float(verified),
+        rejection_rate=rejection_rate,
+        snapshot_count=snapshot_count,
+    )
+
+    # Blend
+    return lag_weight * growth_prob_for_blend + (1.0 - lag_weight) * survival_prob
 
 
 def compute_distribution(probs: list[float]) -> list[float]:
@@ -809,33 +943,26 @@ def main():
                     )
                     pre_deadline_slope = max(0.0, (last_pre["count"] - prev_pre["count"]) / interval_days)
 
-            # Pure survival prob from the current (possibly lag-blended) count
-            survival_prob = compute_district_prob_survival(
-                verified=effective_verified,
-                threshold=threshold,
-                peak_verified=peak_verified,
-                post_deadline_removed=post_deadline_removed,
-                observed_removal_rate=rejection_rate,
-                days_remaining=days_to_deadline,
-                pre_deadline_slope=pre_deadline_slope,
-                snapshot_count=snapshot_count,
-            )
-
-            # Growth prob: what would the growth model say about this district?
-            # Used to blend during the lag window — if trajectory was strong, honor it.
-            growth_prob_for_blend = compute_district_prob(
+            # Blended survival/growth probability via shared helper
+            # (display fields like effective_verified, projected_total stay inline)
+            statewide_snaps = [
+                {"date": s["date"], "total": s["total"]}
+                for s in (history["snapshots"] if history and "snapshots" in history else [])
+            ]
+            prob = compute_survival_blend(
                 verified=verified,
                 threshold=threshold,
-                trend=trend,
-                final_week_sigs=final_week_sigs,
-                projected_adj=growth_proj_raw if growth_proj_raw else float(verified),
+                d_num=d_num,
+                as_of_date=as_of_date,
+                district_snapshots=district_history.get(d_num, []),
+                statewide_snapshots=statewide_snaps,
+                peak_verified=peak_verified,
+                post_deadline_removed=post_deadline_removed,
                 rejection_rate=rejection_rate,
+                growth_proj_raw=growth_proj_raw,
+                days_to_deadline=days_to_deadline,
                 snapshot_count=snapshot_count,
             )
-
-            # Blend: early post-deadline leans on growth signal;
-            # as lag expires, survival signal takes over entirely.
-            prob = lag_weight * growth_prob_for_blend + (1.0 - lag_weight) * survival_prob
 
             # Also compute a pure growth prob shadow (ignores survival mode, for toggle)
             # Projection: expected final count after remaining removals
@@ -920,15 +1047,7 @@ def main():
     p_exact = [round(dp[k], 6) for k in range(TOTAL_DISTRICTS + 1)]
 
     # --- Correlation penalty: districts are not independent ---
-    # Shared risks (statewide fraud wave, clerk ruling, organizing surge) create
-    # inter-district correlation ~0.10-0.15. This causes the independence DP to
-    # underestimate tail risk (p_qualify is too high). We apply a conservative
-    # deflator that grows with p_qual_raw — the higher the raw probability, the
-    # more a correlated downside matters. Penalty calibrated to ~2-3 pp at p=0.95.
-    # Source: Utah county removal-request data (Feb 12) showed concentrated
-    # fraud risk in specific districts (Utah Co., SL Co.), consistent with
-    # correlated district-level exposure.
-    CORRELATION_PENALTY_SCALE = 0.030  # max penalty at p_qual = 1.0
+    # Penalty calibrated to ~2-3 pp at p=0.95. See module-level constant.
     correlation_penalty = CORRELATION_PENALTY_SCALE * p_qual_raw
     p_qual = max(0.0, p_qual_raw - correlation_penalty)
 
