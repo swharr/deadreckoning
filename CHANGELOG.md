@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-03-22
+
+### Probability Over Time chart
+Added a "Probability Over Time" chart between StatCards and VelocityTracker showing how the overall ballot qualification probability has evolved across all 29 historical snapshots (Jan 16 – Mar 16). Features a dot-emphasis line style, a Feb 15 model switch annotation with hover explainer describing the growth-to-survival transition, and day-over-day probability deltas for the post-deadline survival phase. The pipeline backfills probabilities for every snapshot using cumulative state replay with the same model logic as the live computation.
+
 ## 2026-03-13
 
 ### Privacy-safe removal artifacts
