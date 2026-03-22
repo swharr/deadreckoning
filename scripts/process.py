@@ -812,6 +812,11 @@ def main():
     else:
         print("No history.json found — using intra-file date bucketing only.")
 
+    # --- Probability timeline ---
+    probability_timeline = []
+    if history:
+        probability_timeline = compute_probability_timeline(history)
+
     # --- Load removals audit ---
     removals = load_removals(removals_path)
     if removals:
@@ -1466,6 +1471,7 @@ def main():
                 "modelSharpness": round(model_sharpness, 4),
             },
         },
+        "probabilityTimeline": probability_timeline,
         "districts": districts_out,
         "snapshot": {
             "biggestGains": biggest_gains,
