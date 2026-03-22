@@ -411,6 +411,147 @@ def compute_survival_blend(
     return lag_weight * growth_prob_for_blend + (1.0 - lag_weight) * survival_prob
 
 
+def compute_probability_timeline(history: dict) -> list[dict]:
+    """
+    Compute overall qualification probability at each historical snapshot.
+
+    Iterates chronologically through history["snapshots"], maintaining
+    cumulative state (peak verified, post-deadline removals, etc.) and
+    computing the blended probability at each point in time.
+
+    Returns a list of {date, pQualify, modelMode, delta} dicts.
+    """
+    snapshots = history.get("snapshots", [])
+    if not snapshots:
+        return []
+
+    projections = history.get("projections", {}).get("byDistrict", {})
+    timeline = []
+
+    # Running state
+    peak_verified = {}  # d_num -> highest count seen so far
+    prev_counts = {}    # d_num -> previous snapshot count
+    post_deadline_removed = {}  # d_num -> cumulative removals since deadline
+
+    prev_survival_pq = None  # for delta computation
+    first_survival_seen = False
+
+    for snap_idx, snap in enumerate(snapshots):
+        snap_date = date.fromisoformat(snap["date"])
+        districts = snap.get("districts", {})
+        post_deadline = snap_date > SUBMISSION_DEADLINE
+        days_to_deadline = max((CLERK_DEADLINE - snap_date).days, 0)
+
+        # Build district probabilities for this snapshot
+        district_probs = []
+
+        for d_num in sorted(THRESHOLDS.keys()):
+            threshold = THRESHOLDS[d_num]
+            verified = districts.get(str(d_num), 0)
+
+            # Update running state
+            if verified > peak_verified.get(d_num, 0):
+                peak_verified[d_num] = verified
+
+            # Track post-deadline removals (count decreases after deadline)
+            if post_deadline and d_num in prev_counts:
+                decrease = max(0, prev_counts.get(d_num, 0) - verified)
+                post_deadline_removed[d_num] = post_deadline_removed.get(d_num, 0) + decrease
+
+            # Build this district's snapshot history up to current point
+            d_history = [
+                {"date": snapshots[i]["date"],
+                 "count": snapshots[i].get("districts", {}).get(str(d_num), 0)}
+                for i in range(snap_idx + 1)
+            ]
+
+            if post_deadline:
+                # Growth projection from history (if available)
+                growth_proj_raw = None
+                if str(d_num) in projections:
+                    growth_proj_raw = projections[str(d_num)].get("raw")
+
+                pk = peak_verified.get(d_num, verified)
+                pd_removed = post_deadline_removed.get(d_num, 0)
+                # Use history's Bayesian-smoothed rejection rates when available
+                # (matches what main() uses), fall back to raw ratio
+                hist_rejection_rates = {
+                    int(k): v for k, v in history.get("rejectionRates", {}).items()
+                }
+                rejection_rate = hist_rejection_rates.get(d_num, 0.0)
+                if rejection_rate == 0.0 and pk > 0 and pd_removed > 0:
+                    rejection_rate = pd_removed / pk
+
+                # Statewide snapshots up to this point
+                sw_snaps = [
+                    {"date": snapshots[i]["date"], "total": snapshots[i].get("total", 0)}
+                    for i in range(snap_idx + 1)
+                ]
+
+                prob = compute_survival_blend(
+                    verified=verified,
+                    threshold=threshold,
+                    d_num=d_num,
+                    as_of_date=snap_date,
+                    district_snapshots=d_history,
+                    statewide_snapshots=sw_snaps,
+                    peak_verified=pk,
+                    post_deadline_removed=pd_removed,
+                    rejection_rate=rejection_rate,
+                    growth_proj_raw=growth_proj_raw,
+                    days_to_deadline=days_to_deadline,
+                    snapshot_count=snap_idx + 1,
+                )
+            else:
+                # Growth mode — simplified
+                trend = compute_trend_from_history(d_history) if len(d_history) >= 3 else "STABLE"
+                final_week_sigs = 0
+                if len(d_history) >= 2:
+                    final_week_sigs = max(0, d_history[-1]["count"] - d_history[-2]["count"])
+
+                prob = compute_district_prob(
+                    verified=verified,
+                    threshold=threshold,
+                    trend=trend,
+                    final_week_sigs=final_week_sigs,
+                    projected_adj=float(verified),  # conservative — no projection
+                    rejection_rate=0.0,
+                    snapshot_count=snap_idx + 1,
+                )
+
+            district_probs.append(prob)
+
+            # Update prev_counts for next iteration
+            prev_counts[d_num] = verified
+
+        # DP distribution + correlation penalty
+        dp = compute_distribution(district_probs)
+        pq_raw = p_qualify(dp)
+        pq = max(0.0, pq_raw - CORRELATION_PENALTY_SCALE * pq_raw)
+        pq = round(pq, 4)
+
+        # Delta computation
+        model_mode = "survival" if post_deadline else "growth"
+        delta = None
+
+        if model_mode == "survival":
+            if not first_survival_seen:
+                first_survival_seen = True
+                prev_survival_pq = pq
+            else:
+                delta = round(pq - prev_survival_pq, 4)
+                prev_survival_pq = pq
+
+        timeline.append({
+            "date": snap["date"],
+            "pQualify": pq,
+            "modelMode": model_mode,
+            "delta": delta,
+        })
+
+    return timeline
+
+
 def compute_distribution(probs: list[float]) -> list[float]:
     """Exact DP: returns dp[k] = P(exactly k districts meet threshold)."""
     n = len(probs)
