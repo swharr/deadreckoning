@@ -21,6 +21,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
+  test: {
+    environment: 'jsdom',
+  },
   define: {
     __BUILD_SHA__: JSON.stringify(sha),
     __BUILD_BRANCH__: JSON.stringify(branch),
