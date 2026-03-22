@@ -6,6 +6,7 @@ import DistrictTable from './components/DistrictTable.jsx'
 import DistrictMap from './components/DistrictMap.jsx'
 import VelocityTracker from './components/VelocityTracker.jsx'
 import MonteCarloPanel from './components/MonteCarloPanel.jsx'
+import ProbabilityTimeline from './components/ProbabilityTimeline.jsx'
 import { THRESHOLDS } from './lib/probability.js'
 import './telemetry.js'
 
@@ -540,6 +541,12 @@ export default function App() {
             <div style={STYLES.section}>
               <StatCards overall={data.overall} meta={data.meta} districts={data.districts} modelView={modelView} snapshot={data.snapshot} />
             </div>
+
+            {data.probabilityTimeline && data.probabilityTimeline.length > 0 && (
+              <div style={STYLES.section}>
+                <ProbabilityTimeline timeline={data.probabilityTimeline} />
+              </div>
+            )}
 
             <div style={STYLES.section} ref={velocityRef}>
               <VelocityTracker districts={data.districts} meta={data.meta} defaultExpanded={velocityExpanded} />
