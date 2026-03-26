@@ -2,7 +2,7 @@
   "meta": {
     "lastUpdated": "2026-03-26",
     "lastUpdatedISO": "2026-03-26T12:00:00Z",
-    "processedAt": "2026-03-26T16:01:28Z",
+    "processedAt": "2026-03-26T16:08:14Z",
     "asOfDate": "2026-03-26",
     "sourceFile": "latest.xlsx",
     "totalVerified": 162974,
@@ -92,9 +92,9 @@
     }
   },
   "overall": {
-    "pBallotQualified": 0.0884,
-    "pDistrictRule": 0.0884,
-    "pQualify": 0.0884,
+    "pBallotQualified": 0.0,
+    "pDistrictRule": 0.0,
+    "pQualify": 0.0,
     "expectedDistricts": 24.75,
     "pExact": [
       0.0,
@@ -130,9 +130,9 @@
     ],
     "projectedStatewideRaw": 164298.0,
     "projectedStatewideAdjusted": 162974.0,
-    "pBallotQualifiedGrowth": 0.9346,
-    "pDistrictRuleGrowth": 0.9346,
-    "pQualifyGrowth": 0.9346,
+    "pBallotQualifiedGrowth": 0.0,
+    "pDistrictRuleGrowth": 0.0,
+    "pQualifyGrowth": 0.0,
     "expectedDistrictsGrowth": 26.12,
     "pExactGrowth": [
       0.0,
@@ -178,7 +178,14 @@
       "pReachTarget": 1.0,
       "onTrack": true
     },
-    "probabilityScope": "joint_exact_current_state",
+    "probabilityScope": "failed_to_qualify",
+    "qualificationStatus": {
+      "status": "FAILED",
+      "label": "Failed to Qualify for the Ballot",
+      "reasons": [
+        "only 25 of 26 required districts meet threshold"
+      ]
+    },
     "confidence": 0.8598,
     "confidenceLabel": "Very High",
     "confidenceComponents": {

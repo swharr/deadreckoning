@@ -1359,6 +1359,44 @@ def main():
         p_ballot_qualified_growth = p_qual_growth * p_reach_target
         probability_scope = "joint_independence_approx"
 
+    # --- Failed to qualify: post-deadline, counts can only shrink ---
+    # If statewide total has dropped below 140,748 OR fewer than 26 districts
+    # currently meet their threshold, qualification is mathematically impossible.
+    confirmed_districts = sum(
+        1 for d in districts_out if d["verified"] >= d["threshold"]
+    )
+    if post_deadline and (
+        total_verified < statewide_target
+        or confirmed_districts < DISTRICTS_REQUIRED
+    ):
+        p_ballot_qualified = 0.0
+        p_ballot_qualified_growth = 0.0
+        p_qual = 0.0
+        p_qual_growth = 0.0
+        probability_scope = "failed_to_qualify"
+        fail_reasons = []
+        if total_verified < statewide_target:
+            fail_reasons.append(
+                f"statewide count ({total_verified:,}) below "
+                f"threshold ({statewide_target:,})"
+            )
+        if confirmed_districts < DISTRICTS_REQUIRED:
+            fail_reasons.append(
+                f"only {confirmed_districts} of {DISTRICTS_REQUIRED} "
+                f"required districts meet threshold"
+            )
+        qualification_status = {
+            "status": "FAILED",
+            "label": "Failed to Qualify for the Ballot",
+            "reasons": fail_reasons,
+        }
+    else:
+        qualification_status = {
+            "status": "ACTIVE",
+            "label": "Active — Awaiting Final Certification",
+            "reasons": [],
+        }
+
     statewide_projection = {
         "target": statewide_target,
         "current": total_verified,
@@ -1464,6 +1502,7 @@ def main():
             "pExactGrowth": p_exact_growth,
             "statewideProjection": statewide_projection,
             "probabilityScope": probability_scope,
+            "qualificationStatus": qualification_status,
             "confidence": confidence,
             "confidenceLabel": confidence_label,
             "confidenceComponents": {
