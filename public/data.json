@@ -1,13 +1,13 @@
 {
   "meta": {
-    "lastUpdated": "2026-04-10",
-    "lastUpdatedISO": "2026-04-10T12:00:00Z",
-    "processedAt": "2026-04-10T16:59:17Z",
-    "asOfDate": "2026-04-10",
+    "lastUpdated": "2026-04-13",
+    "lastUpdatedISO": "2026-04-13T12:00:00Z",
+    "processedAt": "2026-04-13T17:11:20Z",
+    "asOfDate": "2026-04-13",
     "sourceFile": "latest.xlsx",
-    "totalVerified": 162097,
+    "totalVerified": 162085,
     "daysToDeadline": 0,
-    "dailyVelocity": 1.0,
+    "dailyVelocity": 0.0,
     "statewideRejectionRate": 0.0657,
     "modelMode": "survival",
     "postDeadline": true,
@@ -16,8 +16,8 @@
     "qualificationThreshold": 140748,
     "districtsRequired": 26,
     "totalDistricts": 29,
-    "snapshotCount": 49,
-    "historyRange": "2026-01-16 \u2192 2026-04-10",
+    "snapshotCount": 50,
+    "historyRange": "2026-01-16 \u2192 2026-04-13",
     "snapshotDates": [
       "2026-01-16",
       "2026-01-22",
@@ -67,9 +67,10 @@
       "2026-04-07",
       "2026-04-08",
       "2026-04-09",
-      "2026-04-10"
+      "2026-04-10",
+      "2026-04-13"
     ],
-    "totalWithdrawn": 9721,
+    "totalWithdrawn": 9733,
     "withdrawnByDistrict": {
       "1": 225,
       "2": 228,
@@ -78,7 +79,7 @@
       "5": 330,
       "6": 226,
       "7": 345,
-      "8": 706,
+      "8": 717,
       "9": 398,
       "10": 319,
       "11": 137,
@@ -99,7 +100,7 @@
       "26": 193,
       "27": 187,
       "28": 248,
-      "29": 290
+      "29": 291
     }
   },
   "overall": {
@@ -129,22 +130,22 @@
       0.0,
       1.1e-05,
       0.000229,
-      0.00341,
-      0.034302,
-      0.204637,
-      0.555651,
-      0.184452,
-      0.017032,
-      0.000275,
+      0.003413,
+      0.034334,
+      0.204811,
+      0.555998,
+      0.184026,
+      0.016906,
+      0.000271,
       1e-06,
       0.0
     ],
-    "projectedStatewideRaw": 164246.0,
-    "projectedStatewideAdjusted": 162097.0,
+    "projectedStatewideRaw": 163895.0,
+    "projectedStatewideAdjusted": 162085.0,
     "pBallotQualifiedGrowth": 0.0,
     "pDistrictRuleGrowth": 0.0,
     "pQualifyGrowth": 0.0,
-    "expectedDistrictsGrowth": 26.07,
+    "expectedDistrictsGrowth": 26.06,
     "pExactGrowth": [
       0.0,
       0.0,
@@ -170,21 +171,21 @@
       0.0,
       0.0,
       0.0,
-      0.00072,
-      0.079127,
-      0.775234,
-      0.139624,
-      0.005239,
-      5.5e-05
+      0.000789,
+      0.08586,
+      0.770826,
+      0.137364,
+      0.005107,
+      5.3e-05
     ],
     "statewideProjection": {
       "target": 140748,
-      "current": 162097,
-      "pctComplete": 1.1517,
+      "current": 162085,
+      "pctComplete": 1.1516,
       "remaining": 0,
-      "netDailyVelocity": -20.0,
-      "projectedFinalCount": 162957.0,
-      "projectedCrossingDate": "2026-04-10",
+      "netDailyVelocity": -12.0,
+      "projectedFinalCount": 162809.0,
+      "projectedCrossingDate": "2026-04-13",
       "daysToProjectedCrossing": 0,
       "pReachTarget": 1.0,
       "onTrack": true
@@ -197,11 +198,11 @@
         "only 24 of 26 required districts meet threshold"
       ]
     },
-    "confidence": 0.8416,
+    "confidence": 0.8417,
     "confidenceLabel": "High",
     "confidenceComponents": {
       "dataMaturity": 1.0,
-      "modelSharpness": 0.8416
+      "modelSharpness": 0.8417
     }
   },
   "probabilityTimeline": [
@@ -273,51 +274,51 @@
     },
     {
       "date": "2026-02-19",
-      "pQualify": 0.0056,
+      "pQualify": 0.0055,
       "modelMode": "survival",
-      "delta": 0.0054
+      "delta": 0.0053
     },
     {
       "date": "2026-02-20",
-      "pQualify": 0.1393,
+      "pQualify": 0.1364,
       "modelMode": "survival",
-      "delta": 0.1337
+      "delta": 0.1309
     },
     {
       "date": "2026-02-23",
-      "pQualify": 0.377,
+      "pQualify": 0.3722,
       "modelMode": "survival",
-      "delta": 0.2377
+      "delta": 0.2358
     },
     {
       "date": "2026-02-24",
-      "pQualify": 0.5385,
+      "pQualify": 0.5327,
       "modelMode": "survival",
-      "delta": 0.1615
+      "delta": 0.1605
     },
     {
       "date": "2026-02-25",
-      "pQualify": 0.7154,
+      "pQualify": 0.7099,
       "modelMode": "survival",
-      "delta": 0.1769
+      "delta": 0.1772
     },
     {
       "date": "2026-02-26",
-      "pQualify": 0.765,
+      "pQualify": 0.7629,
       "modelMode": "survival",
-      "delta": 0.0496
+      "delta": 0.053
     },
     {
       "date": "2026-02-27",
-      "pQualify": 0.7766,
+      "pQualify": 0.7765,
       "modelMode": "survival",
-      "delta": 0.0116
+      "delta": 0.0136
     },
     {
       "date": "2026-03-02",
       "pQualify": 0.768,
       "modelMode": "survival",
-      "delta": -0.0086
+      "delta": -0.0085
     },
     {
       "date": "2026-03-03",
@@ -333,15 +334,15 @@
     },
     {
       "date": "2026-03-05",
-      "pQualify": 0.7736,
+      "pQualify": 0.7735,
       "modelMode": "survival",
-      "delta": -0.0001
+      "delta": -0.0002
     },
     {
       "date": "2026-03-06",
       "pQualify": 0.7734,
       "modelMode": "survival",
-      "delta": -0.0002
+      "delta": -0.0001
     },
     {
       "date": "2026-03-09",
@@ -429,73 +430,79 @@
     },
     {
       "date": "2026-03-26",
-      "pQualify": 0.0816,
+      "pQualify": 0.081,
       "modelMode": "survival",
-      "delta": -0.5706
+      "delta": -0.5712
     },
     {
       "date": "2026-03-27",
-      "pQualify": 0.0816,
+      "pQualify": 0.081,
       "modelMode": "survival",
       "delta": 0.0
     },
     {
       "date": "2026-03-30",
-      "pQualify": 0.0815,
+      "pQualify": 0.0809,
       "modelMode": "survival",
       "delta": -0.0001
     },
     {
       "date": "2026-03-31",
-      "pQualify": 0.0813,
+      "pQualify": 0.0807,
       "modelMode": "survival",
       "delta": -0.0002
     },
     {
       "date": "2026-04-01",
-      "pQualify": 0.0812,
+      "pQualify": 0.0806,
       "modelMode": "survival",
       "delta": -0.0001
     },
     {
       "date": "2026-04-02",
-      "pQualify": 0.0753,
+      "pQualify": 0.0747,
       "modelMode": "survival",
       "delta": -0.0059
     },
     {
       "date": "2026-04-03",
-      "pQualify": 0.0744,
+      "pQualify": 0.0738,
       "modelMode": "survival",
       "delta": -0.0009
     },
     {
       "date": "2026-04-06",
-      "pQualify": 0.0741,
+      "pQualify": 0.0736,
       "modelMode": "survival",
-      "delta": -0.0003
+      "delta": -0.0002
     },
     {
       "date": "2026-04-07",
-      "pQualify": 0.0741,
+      "pQualify": 0.0736,
       "modelMode": "survival",
       "delta": 0.0
     },
     {
       "date": "2026-04-08",
-      "pQualify": 0.0154,
+      "pQualify": 0.0152,
       "modelMode": "survival",
-      "delta": -0.0587
+      "delta": -0.0584
     },
     {
       "date": "2026-04-09",
-      "pQualify": 0.0154,
+      "pQualify": 0.0152,
       "modelMode": "survival",
       "delta": 0.0
     },
     {
       "date": "2026-04-10",
-      "pQualify": 0.0154,
+      "pQualify": 0.0152,
+      "modelMode": "survival",
+      "delta": 0.0
+    },
+    {
+      "date": "2026-04-13",
+      "pQualify": 0.0152,
       "modelMode": "survival",
       "delta": 0.0
     }
@@ -509,7 +516,7 @@
       "delta": 0,
       "pctVerified": 1.2797,
       "projectedTotal": 6703.0,
-      "projectedRaw": 6708.3,
+      "projectedRaw": 6708.2,
       "projectedPct": 1.2797,
       "peakVerified": 6738,
       "rejectionRate": 0.0334,
@@ -523,13 +530,13 @@
       "weeklySignatures": [
         0,
         0,
-        0,
         -2,
         0,
         0,
         0,
         0,
         -1,
+        0,
         0
       ],
       "intervalRemoved": 0
@@ -571,11 +578,11 @@
       "d": 3,
       "threshold": 4737,
       "verified": 5642,
-      "prevVerified": 5643,
-      "delta": -1,
+      "prevVerified": 5642,
+      "delta": 0,
       "pctVerified": 1.191,
       "projectedTotal": 5642.0,
-      "projectedRaw": 5670.8,
+      "projectedRaw": 5666.6,
       "projectedPct": 1.191,
       "peakVerified": 5747,
       "rejectionRate": 0.0586,
@@ -587,7 +594,6 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -3,
         0,
         -12,
         0,
@@ -596,9 +602,10 @@
         0,
         0,
         0,
-        -1
+        -1,
+        0
       ],
-      "intervalRemoved": 1
+      "intervalRemoved": 0
     },
     {
       "d": 4,
@@ -608,7 +615,7 @@
       "delta": 0,
       "pctVerified": 1.1449,
       "projectedTotal": 5838.0,
-      "projectedRaw": 5861.7,
+      "projectedRaw": 5857.7,
       "projectedPct": 1.1449,
       "peakVerified": 5920,
       "rejectionRate": 0.0478,
@@ -620,12 +627,12 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -3,
         0,
         -11,
         -2,
         0,
         -1,
+        0,
         0,
         0,
         0,
@@ -641,7 +648,7 @@
       "delta": 0,
       "pctVerified": 1.1655,
       "projectedTotal": 4796.0,
-      "projectedRaw": 4821.7,
+      "projectedRaw": 4816.6,
       "projectedPct": 1.1655,
       "peakVerified": 4911,
       "rejectionRate": 0.0672,
@@ -653,9 +660,9 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -2,
         -1,
         -10,
+        0,
         0,
         0,
         0,
@@ -674,7 +681,7 @@
       "delta": 0,
       "pctVerified": 1.1585,
       "projectedTotal": 5497.0,
-      "projectedRaw": 5520.6,
+      "projectedRaw": 5516.1,
       "projectedPct": 1.1585,
       "peakVerified": 5604,
       "rejectionRate": 0.05,
@@ -686,10 +693,10 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -2,
         0,
         0,
         -5,
+        0,
         0,
         0,
         0,
@@ -707,7 +714,7 @@
       "delta": 0,
       "pctVerified": 1.18,
       "projectedTotal": 6247.0,
-      "projectedRaw": 6286.5,
+      "projectedRaw": 6279.8,
       "projectedPct": 1.18,
       "peakVerified": 6439,
       "rejectionRate": 0.0536,
@@ -720,13 +727,13 @@
       "trend": "STABLE",
       "weeklySignatures": [
         0,
-        0,
         -1,
         -8,
         0,
         0,
         0,
         -2,
+        0,
         0,
         0
       ],
@@ -735,16 +742,16 @@
     {
       "d": 8,
       "threshold": 4910,
-      "verified": 5159,
-      "prevVerified": 5160,
-      "delta": -1,
-      "pctVerified": 1.0507,
-      "projectedTotal": 5159.0,
-      "projectedRaw": 5512.0,
-      "projectedPct": 1.0507,
+      "verified": 5148,
+      "prevVerified": 5159,
+      "delta": -11,
+      "pctVerified": 1.0485,
+      "projectedTotal": 5148.0,
+      "projectedRaw": 5464.2,
+      "projectedPct": 1.0485,
       "peakVerified": 5664,
       "rejectionRate": 0.05,
-      "postDeadlineRate": 0.1158,
+      "postDeadlineRate": 0.1178,
       "prob": 0.91,
       "growthProb": 1.0,
       "prevProb": 0.91,
@@ -752,7 +759,6 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -5,
         -6,
         -12,
         -29,
@@ -761,9 +767,10 @@
         -7,
         -12,
         -5,
-        -1
+        -1,
+        -11
       ],
-      "intervalRemoved": 1
+      "intervalRemoved": 11
     },
     {
       "d": 9,
@@ -773,24 +780,24 @@
       "delta": 0,
       "pctVerified": 0.6383,
       "projectedTotal": 3067.0,
-      "projectedRaw": 3078.6,
+      "projectedRaw": 3076.6,
       "projectedPct": 0.6383,
       "peakVerified": 3180,
       "rejectionRate": 0.1252,
       "postDeadlineRate": 0.116,
       "prob": 0.002,
-      "growthProb": 0.0199,
+      "growthProb": 0.0198,
       "prevProb": 0.002,
       "probDelta": -0.0,
       "tier": "POSSIBLE",
       "trend": "STABLE",
       "weeklySignatures": [
-        0,
         -2,
         -6,
         -1,
         0,
         -1,
+        0,
         0,
         0,
         0,
@@ -806,7 +813,7 @@
       "delta": 0,
       "pctVerified": 1.1953,
       "projectedTotal": 3556.0,
-      "projectedRaw": 3579.1,
+      "projectedRaw": 3574.8,
       "projectedPct": 1.1953,
       "peakVerified": 3678,
       "rejectionRate": 0.05,
@@ -819,10 +826,10 @@
       "trend": "STABLE",
       "weeklySignatures": [
         -2,
-        -2,
         -3,
         -7,
         -1,
+        0,
         0,
         0,
         0,
@@ -839,7 +846,7 @@
       "delta": 0,
       "pctVerified": 1.1941,
       "projectedTotal": 5839.0,
-      "projectedRaw": 5839.0,
+      "projectedRaw": 5839.3,
       "projectedPct": 1.1941,
       "peakVerified": 5849,
       "rejectionRate": 0.0234,
@@ -851,11 +858,11 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
+        -1,
+        -1,
+        -1,
+        -1,
         0,
-        -1,
-        -1,
-        -1,
-        -1,
         0,
         0,
         0,
@@ -872,7 +879,7 @@
       "delta": 0,
       "pctVerified": 0.9988,
       "projectedTotal": 3244.0,
-      "projectedRaw": 3881.6,
+      "projectedRaw": 3765.2,
       "projectedPct": 0.9988,
       "peakVerified": 3825,
       "rejectionRate": 0.05,
@@ -884,7 +891,6 @@
       "tier": "LIKELY",
       "trend": "DECEL",
       "weeklySignatures": [
-        -9,
         -39,
         0,
         -179,
@@ -892,6 +898,7 @@
         -24,
         0,
         -19,
+        0,
         0,
         0
       ],
@@ -905,19 +912,18 @@
       "delta": 0,
       "pctVerified": 0.8341,
       "projectedTotal": 3410.0,
-      "projectedRaw": 3433.7,
+      "projectedRaw": 3429.5,
       "projectedPct": 0.8341,
       "peakVerified": 3545,
       "rejectionRate": 0.1303,
       "postDeadlineRate": 0.1086,
-      "prob": 0.0144,
-      "growthProb": 0.1199,
-      "prevProb": 0.0145,
+      "prob": 0.0143,
+      "growthProb": 0.1189,
+      "prevProb": 0.0144,
       "probDelta": -0.0001,
       "tier": "LIKELY",
       "trend": "STABLE",
       "weeklySignatures": [
-        -2,
         0,
         -2,
         -4,
@@ -925,6 +931,7 @@
         0,
         0,
         -1,
+        0,
         0,
         0
       ],
@@ -938,23 +945,23 @@
       "delta": 0,
       "pctVerified": 0.6607,
       "projectedTotal": 3753.0,
-      "projectedRaw": 3771.1,
+      "projectedRaw": 3767.9,
       "projectedPct": 0.6607,
       "peakVerified": 3869,
       "rejectionRate": 0.1088,
       "postDeadlineRate": 0.0974,
-      "prob": 0.0026,
-      "growthProb": 0.0256,
+      "prob": 0.0025,
+      "growthProb": 0.0253,
       "prevProb": 0.0026,
-      "probDelta": -0.0,
+      "probDelta": -0.0001,
       "tier": "POSSIBLE",
       "trend": "STABLE",
       "weeklySignatures": [
-        0,
         -4,
         -3,
         -4,
         -1,
+        0,
         0,
         0,
         0,
@@ -971,19 +978,18 @@
       "delta": 0,
       "pctVerified": 0.9178,
       "projectedTotal": 4218.0,
-      "projectedRaw": 4742.6,
+      "projectedRaw": 4637.0,
       "projectedPct": 0.9178,
       "peakVerified": 5254,
       "rejectionRate": 0.05,
       "postDeadlineRate": 0.2436,
-      "prob": 0.1139,
-      "growthProb": 0.9143,
-      "prevProb": 0.1143,
-      "probDelta": -0.0004,
+      "prob": 0.1131,
+      "growthProb": 0.9063,
+      "prevProb": 0.1139,
+      "probDelta": -0.0008,
       "tier": "LIKELY",
       "trend": "DECEL",
       "weeklySignatures": [
-        -10,
         -18,
         -9,
         -24,
@@ -992,6 +998,7 @@
         0,
         -14,
         -1,
+        0,
         0
       ],
       "intervalRemoved": 0
@@ -1004,7 +1011,7 @@
       "delta": 0,
       "pctVerified": 1.1829,
       "projectedTotal": 5142.0,
-      "projectedRaw": 5145.8,
+      "projectedRaw": 5145.6,
       "projectedPct": 1.1829,
       "peakVerified": 5235,
       "rejectionRate": 0.0661,
@@ -1017,9 +1024,9 @@
       "trend": "STABLE",
       "weeklySignatures": [
         0,
-        0,
         -2,
         -4,
+        0,
         0,
         0,
         0,
@@ -1037,7 +1044,7 @@
       "delta": 0,
       "pctVerified": 1.0797,
       "projectedTotal": 5796.0,
-      "projectedRaw": 6125.7,
+      "projectedRaw": 6086.3,
       "projectedPct": 1.0797,
       "peakVerified": 6096,
       "rejectionRate": 0.0779,
@@ -1049,7 +1056,6 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -2,
         -5,
         -1,
         -31,
@@ -1057,6 +1063,7 @@
         -33,
         0,
         -49,
+        0,
         0,
         0
       ],
@@ -1070,7 +1077,7 @@
       "delta": 0,
       "pctVerified": 1.1912,
       "projectedTotal": 6067.0,
-      "projectedRaw": 6079.7,
+      "projectedRaw": 6077.9,
       "projectedPct": 1.1912,
       "peakVerified": 6154,
       "rejectionRate": 0.0393,
@@ -1082,10 +1089,10 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -2,
         -1,
         -2,
         -6,
+        0,
         0,
         0,
         0,
@@ -1103,7 +1110,7 @@
       "delta": 0,
       "pctVerified": 1.1846,
       "projectedTotal": 6770.0,
-      "projectedRaw": 6773.8,
+      "projectedRaw": 6773.9,
       "projectedPct": 1.1846,
       "peakVerified": 6892,
       "rejectionRate": 0.0528,
@@ -1115,10 +1122,10 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -2,
         -1,
         -4,
         -2,
+        0,
         0,
         0,
         0,
@@ -1132,11 +1139,11 @@
       "d": 20,
       "threshold": 5292,
       "verified": 6065,
-      "prevVerified": 6067,
-      "delta": -2,
+      "prevVerified": 6065,
+      "delta": 0,
       "pctVerified": 1.1461,
       "projectedTotal": 6065.0,
-      "projectedRaw": 6066.5,
+      "projectedRaw": 6068.7,
       "projectedPct": 1.1461,
       "peakVerified": 6085,
       "rejectionRate": 0.0163,
@@ -1149,7 +1156,6 @@
       "trend": "STABLE",
       "weeklySignatures": [
         0,
-        0,
         -2,
         0,
         0,
@@ -1157,16 +1163,17 @@
         0,
         0,
         0,
-        -2
+        -2,
+        0
       ],
-      "intervalRemoved": 2
+      "intervalRemoved": 0
     },
     {
       "d": 21,
       "threshold": 5684,
       "verified": 7657,
-      "prevVerified": 7658,
-      "delta": -1,
+      "prevVerified": 7657,
+      "delta": 0,
       "pctVerified": 1.3471,
       "projectedTotal": 7657.0,
       "projectedRaw": 7657.0,
@@ -1181,7 +1188,6 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -1,
         0,
         0,
         0,
@@ -1190,9 +1196,10 @@
         0,
         0,
         0,
-        -1
+        -1,
+        0
       ],
-      "intervalRemoved": 1
+      "intervalRemoved": 0
     },
     {
       "d": 22,
@@ -1214,7 +1221,6 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -1,
         0,
         -1,
         0,
@@ -1222,6 +1228,7 @@
         0,
         0,
         -1,
+        0,
         0,
         0
       ],
@@ -1247,9 +1254,9 @@
       "tier": "NEARLY CERTAIN",
       "trend": "STABLE",
       "weeklySignatures": [
-        -1,
         -2,
         -2,
+        0,
         0,
         0,
         0,
@@ -1268,7 +1275,7 @@
       "delta": 0,
       "pctVerified": 1.3137,
       "projectedTotal": 5067.0,
-      "projectedRaw": 5071.0,
+      "projectedRaw": 5071.1,
       "projectedPct": 1.3137,
       "peakVerified": 5094,
       "rejectionRate": 0.0281,
@@ -1281,11 +1288,11 @@
       "trend": "STABLE",
       "weeklySignatures": [
         -1,
-        -1,
         -3,
         0,
         0,
         -2,
+        0,
         0,
         0,
         0,
@@ -1301,7 +1308,7 @@
       "delta": 0,
       "pctVerified": 1.2428,
       "projectedTotal": 6126.0,
-      "projectedRaw": 6127.6,
+      "projectedRaw": 6127.9,
       "projectedPct": 1.2428,
       "peakVerified": 6145,
       "rejectionRate": 0.0218,
@@ -1316,9 +1323,9 @@
         -1,
         -1,
         -1,
-        -1,
         0,
         -1,
+        0,
         0,
         0,
         0,
@@ -1334,7 +1341,7 @@
       "delta": 0,
       "pctVerified": 1.2596,
       "projectedTotal": 6522.0,
-      "projectedRaw": 6544.6,
+      "projectedRaw": 6541.5,
       "projectedPct": 1.2596,
       "peakVerified": 6555,
       "rejectionRate": 0.0294,
@@ -1348,13 +1355,13 @@
       "weeklySignatures": [
         0,
         0,
-        0,
         -10,
         0,
         -2,
         0,
         0,
         -1,
+        0,
         0
       ],
       "intervalRemoved": 0
@@ -1363,11 +1370,11 @@
       "d": 27,
       "threshold": 5696,
       "verified": 8126,
-      "prevVerified": 8127,
-      "delta": -1,
+      "prevVerified": 8126,
+      "delta": 0,
       "pctVerified": 1.4266,
       "projectedTotal": 8126.0,
-      "projectedRaw": 8128.8,
+      "projectedRaw": 8129.3,
       "projectedPct": 1.4266,
       "peakVerified": 8168,
       "rejectionRate": 0.0229,
@@ -1380,7 +1387,6 @@
       "trend": "STABLE",
       "weeklySignatures": [
         0,
-        0,
         -1,
         0,
         0,
@@ -1388,9 +1394,10 @@
         0,
         0,
         0,
-        -1
+        -1,
+        0
       ],
-      "intervalRemoved": 1
+      "intervalRemoved": 0
     },
     {
       "d": 28,
@@ -1400,7 +1407,7 @@
       "delta": 0,
       "pctVerified": 1.2836,
       "projectedTotal": 6979.0,
-      "projectedRaw": 6983.4,
+      "projectedRaw": 6982.6,
       "projectedPct": 1.2836,
       "peakVerified": 7075,
       "rejectionRate": 0.0351,
@@ -1413,9 +1420,9 @@
       "trend": "STABLE",
       "weeklySignatures": [
         0,
+        -1,
+        -1,
         0,
-        -1,
-        -1,
         0,
         0,
         0,
@@ -1428,16 +1435,16 @@
     {
       "d": 29,
       "threshold": 5382,
-      "verified": 7038,
+      "verified": 7037,
       "prevVerified": 7038,
-      "delta": 0,
-      "pctVerified": 1.3077,
-      "projectedTotal": 7038.0,
-      "projectedRaw": 7061.7,
-      "projectedPct": 1.3077,
+      "delta": -1,
+      "pctVerified": 1.3075,
+      "projectedTotal": 7037.0,
+      "projectedRaw": 7060.5,
+      "projectedPct": 1.3075,
       "peakVerified": 7218,
-      "rejectionRate": 0.0402,
-      "postDeadlineRate": 0.0402,
+      "rejectionRate": 0.0403,
+      "postDeadlineRate": 0.0403,
       "prob": 0.991,
       "growthProb": 1.0,
       "prevProb": 0.991,
@@ -1445,7 +1452,6 @@
       "tier": "NEARLY CERTAIN",
       "trend": "DECEL",
       "weeklySignatures": [
-        0,
         -1,
         -1,
         0,
@@ -1454,7 +1460,8 @@
         0,
         -6,
         0,
-        0
+        0,
+        -1
       ],
       "intervalRemoved": 1
     }
@@ -1463,65 +1470,35 @@
     "biggestGains": [],
     "biggestLosses": [
       {
-        "d": 20,
-        "delta": -2,
-        "verified": 6065,
-        "threshold": 5292
-      },
-      {
-        "d": 3,
-        "delta": -1,
-        "verified": 5642,
-        "threshold": 4737
-      },
-      {
         "d": 8,
-        "delta": -1,
-        "verified": 5159,
+        "delta": -11,
+        "verified": 5148,
         "threshold": 4910
       },
       {
-        "d": 21,
+        "d": 29,
         "delta": -1,
-        "verified": 7657,
-        "threshold": 5684
-      },
-      {
-        "d": 27,
-        "delta": -1,
-        "verified": 8126,
-        "threshold": 5696
+        "verified": 7037,
+        "threshold": 5382
       }
     ],
     "newlyMet": [],
     "newlyFailed": [],
-    "overallProbDelta": 0.0168,
-    "expectedDistrictsDelta": -0.01,
+    "overallProbDelta": 0.0167,
+    "expectedDistrictsDelta": 0.0,
     "signatureFlow": {
-      "intervalNet": 1,
-      "intervalRemovals": 7,
-      "intervalGross": 8,
+      "intervalNet": 0,
+      "intervalRemovals": 12,
+      "intervalGross": 12,
       "alltimeAdded": 125769,
-      "alltimeRemovals": 10382,
+      "alltimeRemovals": 10394,
       "districtRemovals": [
         {
-          "d": 20,
-          "removed": 2
-        },
-        {
-          "d": 3,
-          "removed": 1
-        },
-        {
           "d": 8,
-          "removed": 1
+          "removed": 11
         },
         {
-          "d": 21,
-          "removed": 1
-        },
-        {
-          "d": 27,
+          "d": 29,
           "removed": 1
         }
       ]
