@@ -24,6 +24,12 @@ LG_PAGE_URL = (
     "https://vote.utah.gov/repeal-of-the-independent-redistricting-commission-"
     "and-standards-act-direct-initiative-list-of-signers/"
 )
+# Direct xlsx URL — the LG office moved the file here as of April 2026.
+# Used as a fallback if scraping the page doesn't find a download link.
+DIRECT_XLSX_URL = (
+    "https://vote.utah.gov/wp-content/uploads/2026/01/"
+    "Repeal-of-Independent-Redistricting-Commission-and-Standards-Act-Initiative.xlsx"
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
@@ -108,7 +114,18 @@ def scrape_xlsx_url(debug: bool = False) -> str:
         if href.endswith(".xlsx"):
             return href
 
-    print("ERROR: No xlsx download link found on LG page.", file=sys.stderr)
+    # Strategy 3: fall back to known direct xlsx URL
+    print("Page scraping found no xlsx link; trying direct URL.", file=sys.stderr)
+    try:
+        head = requests.head(DIRECT_XLSX_URL, headers=HEADERS, timeout=15,
+                             allow_redirects=True)
+        if head.status_code == 200:
+            return DIRECT_XLSX_URL
+    except requests.RequestException:
+        pass
+
+    print("ERROR: No xlsx download link found on LG page or direct URL.",
+          file=sys.stderr)
     print("Run with --debug to inspect the raw HTML.", file=sys.stderr)
     sys.exit(1)
 
