@@ -20,6 +20,9 @@ data/manual/*.xlsx
 # Internal instructions folder — never push to GitHub
 instructions/
 
+# Session context and TODOs
+todos/
+
 # macOS
 .DS_Store
 

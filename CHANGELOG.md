@@ -1,37 +1,53 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+Format follows [Keep a Changelog](https://keepachangelog.com/).
+
+## [Unreleased]
+
+### Changed
+- Scraper now falls back to direct wp-content xlsx URL after LG office removed download link from petition page (Strategy 3)
+
+### Security
+- vite 7.3.1 → 8.0.9 — arbitrary file read via WebSocket (HIGH), `server.fs.deny` bypass (HIGH), path traversal in `.map` handling (MEDIUM)
+- picomatch 4.0.3 → 4.0.4 — method injection in POSIX character classes (MEDIUM)
+- @vitejs/plugin-react 4.7.0 → 5.2.0 — peer compatibility for Vite 8
+- brace-expansion — zero-step sequence hang (MEDIUM)
+- requests 2.31.0 → 2.33.1 — insecure temp file reuse in `extract_zipped_paths()` (MEDIUM)
+
 ## 2026-03-22
 
-### Probability Over Time chart
-Added a "Probability Over Time" chart between StatCards and VelocityTracker showing how the overall ballot qualification probability has evolved across all 29 historical snapshots (Jan 16 – Mar 16). Features a dot-emphasis line style, a Feb 15 model switch annotation with hover explainer describing the growth-to-survival transition, and day-over-day probability deltas for the post-deadline survival phase. The pipeline backfills probabilities for every snapshot using cumulative state replay with the same model logic as the live computation.
+### Added
+- Probability Over Time chart showing ballot qualification probability across all 29 historical snapshots (Jan 16 – Mar 16), with dot-emphasis line style, Feb 15 model switch annotation with hover explainer, and day-over-day deltas for the post-deadline survival phase
+- Pipeline backfills probabilities for every snapshot using cumulative state replay
 
 ## 2026-03-13
 
-### Privacy-safe removal artifacts
-`data/removals.json` no longer publishes raw voter IDs or names. The replay pipeline now emits aggregate-only removal statistics, including totals by district and last-seen date, so committed artifacts remain useful for analysis without exposing raw identity data.
+### Added
+- Python regression tests for model helpers and generated artifacts
+- `scripts/backtest.py` harness replaying historical snapshots to `data/calibration.json`
+- `checks.yml` workflow for validation on pushes and pull requests
+- District-facing UI surfaces per-district removal counts alongside net change
 
-### Data pipeline checks and failure handling
-The fetch pipeline now fails loudly when scrape/process work breaks instead of silently presenting stale data as a clean run. It also runs Python regression tests and the frontend quality pass before opening a data PR, and a new `checks.yml` workflow runs the same validation on pushes and pull requests.
+### Changed
+- `data/removals.json` emits aggregate-only removal statistics instead of raw voter IDs/names
+- `scripts/process.py` anchors time-sensitive calculations to snapshot `asOfDate` for reproducibility
+- App exports `overall.pBallotQualified` and `overall.probabilityScope` for UI probability scoping
+- Reprocessing the same daily xlsx preserves day-over-day deltas from `history.json` instead of flattening to zero
 
-### Deploy deduplication
-Removed the redundant deploy dispatch from `fetch.yml` and added workflow concurrency to `deploy.yml`. Deploys now come from the `push` to `main`, and overlapping deploy attempts for the same branch are canceled cleanly before they race in Azure.
+### Fixed
+- Fetch pipeline now fails loudly on scrape/process errors instead of silently presenting stale data
+- Removed redundant deploy dispatch from `fetch.yml`; added workflow concurrency to `deploy.yml` to prevent deploy races
 
-### Model reproducibility and exported probabilities
-`scripts/process.py` now anchors time-sensitive calculations to the snapshot `asOfDate` rather than the machine's current date, making repeated runs of the same snapshot reproducible. The app now exports `overall.pBallotQualified` and `overall.probabilityScope` so the UI can distinguish the exact district-rule probability from the current joint ballot estimate.
-
-### Calibration and regression coverage
-Added Python regression tests for model helpers and generated artifacts, plus a `scripts/backtest.py` harness that replays historical snapshots and writes calibration metrics to `data/calibration.json`.
-
-### Reprocessing preserves day-over-day snapshot changes
-Processing the same daily xlsx more than once now still derives district count deltas, gains, losses, and newly-met/newly-failed status from `history.json` instead of flattening those fields to zero. That keeps the dashboard's "today vs. yesterday" view intact on repeat runs and redeploys.
-
-### District rows show current-interval removals
-District-facing UI now surfaces per-district removal counts alongside the net change where that data exists for the current interval. That makes post-deadline drops easier to interpret without cross-referencing the separate signature-flow summary card.
+### Security
+- Removed raw voter identity data from committed artifacts
 
 ## 2026-02-28
 
-### Clerk Verification Window countdown
-Added a countdown section to the **Statewide Threshold** card showing working days remaining until the March 9 clerk verification deadline. Includes a green/red progress bar spanning Feb 15–Mar 9 so you can see at a glance how much of the verification window has elapsed.
+### Added
+- Clerk Verification Window countdown on Statewide Threshold card showing working days until March 9 deadline, with green/red progress bar spanning Feb 15–Mar 9
 
-### District map boundary improvements
-District boundaries on the heatmap are now clearly defined with dark contrasting borders and thicker strokes, eliminating the "green blob" effect where adjacent same-tier districts blended together. District number labels now use proper polygon centroid placement instead of bounding-box center, so labels sit more accurately inside irregularly shaped districts.
+### Fixed
+- District map boundaries now use dark contrasting borders and thicker strokes, eliminating blended "green blob" effect on adjacent same-tier districts
+- District number labels use polygon centroid placement instead of bounding-box center for better accuracy on irregular shapes
