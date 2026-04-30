@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 
 const SUBMISSION_DEADLINE = '2026-02-15'
+const REMOVAL_WINDOW_START = '2026-03-09'
 const MARGIN = { top: 30, right: 20, bottom: 50, left: 55 }
 const CHART_WIDTH = 844
 const CHART_HEIGHT = 280
@@ -86,6 +87,9 @@ export default function ProbabilityTimeline({ timeline }) {
   // Find the boundary between growth and survival phases
   const lastGrowthIdx = points.reduce((acc, p, i) => (p.modelMode === 'growth' ? i : acc), -1)
   const firstSurvivalIdx = points.findIndex(p => p.modelMode === 'survival')
+
+  // Final determination point (modelMode === 'final')
+  const finalPoint = points.find(p => p.modelMode === 'final') || null
 
   // X-axis ticks
   const xTicks = buildXTicks(timeline, minMs, rangeMs)
@@ -243,6 +247,65 @@ export default function ProbabilityTimeline({ timeline }) {
             </g>
           )}
 
+          {/* Signature removal window start vertical guide — Mar 9, 2026 */}
+          {(() => {
+            const ms = new Date(REMOVAL_WINDOW_START + 'T00:00:00').getTime()
+            if (ms < minMs || ms > maxMs) return null
+            const x = xScale(REMOVAL_WINDOW_START, minMs, rangeMs)
+            return (
+              <g>
+                <line
+                  x1={x}
+                  y1={MARGIN.top}
+                  x2={x}
+                  y2={CHART_HEIGHT - MARGIN.bottom}
+                  stroke="#26c6da"
+                  strokeWidth={1.5}
+                  strokeDasharray="6 4"
+                  strokeOpacity={0.8}
+                />
+                <text
+                  x={x}
+                  y={MARGIN.top - 8}
+                  textAnchor="middle"
+                  fill="#26c6da"
+                  fontSize={9}
+                  fontFamily="Georgia, serif"
+                  fontWeight="bold"
+                >
+                  Mar 9 — Removal Window Opens
+                </text>
+              </g>
+            )
+          })()}
+
+          {/* Final determination vertical guide */}
+          {finalPoint !== null && (
+            <g>
+              <line
+                x1={finalPoint.x}
+                y1={MARGIN.top}
+                x2={finalPoint.x}
+                y2={CHART_HEIGHT - MARGIN.bottom}
+                stroke="#f44336"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                strokeOpacity={0.85}
+              />
+              <text
+                x={finalPoint.x - 6}
+                y={MARGIN.top - 8}
+                textAnchor="end"
+                fill="#f44336"
+                fontSize={9}
+                fontFamily="Georgia, serif"
+                fontWeight="bold"
+              >
+                Apr 30 — LG Determination
+              </text>
+            </g>
+          )}
+
           {/* Phase labels below x-axis */}
           {lastGrowthIdx >= 0 && (
             <text
@@ -274,21 +337,79 @@ export default function ProbabilityTimeline({ timeline }) {
           )}
 
           {/* Data dots */}
-          {points.map((pt) => (
-            <circle
-              key={`dot-${pt.idx}`}
-              data-idx={pt.idx}
-              cx={pt.x}
-              cy={pt.y}
-              r={hoveredIdx === pt.idx ? 7 : 5}
-              fill="#4a9eff"
-              stroke="#0d1530"
-              strokeWidth={2}
-              style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
-              onMouseEnter={() => setHoveredIdx(pt.idx)}
-              onMouseLeave={() => setHoveredIdx(null)}
-            />
-          ))}
+          {points.map((pt) => {
+            const isFinal = pt.modelMode === 'final'
+            if (isFinal) {
+              // Distinctive marker for the official final determination
+              return (
+                <g key={`dot-${pt.idx}`}>
+                  {/* Outer halo ring */}
+                  <circle
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={hoveredIdx === pt.idx ? 14 : 12}
+                    fill="none"
+                    stroke="#f44336"
+                    strokeWidth={1.5}
+                    strokeOpacity={0.35}
+                    style={{ transition: 'r 0.15s ease' }}
+                  />
+                  {/* Main filled dot */}
+                  <circle
+                    data-idx={pt.idx}
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={hoveredIdx === pt.idx ? 9 : 7}
+                    fill="#f44336"
+                    stroke="#0d1530"
+                    strokeWidth={2}
+                    style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
+                    onMouseEnter={() => setHoveredIdx(pt.idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                  />
+                  {/* Annotation label above-left of the point */}
+                  <text
+                    x={pt.x - 14}
+                    y={pt.y - 18}
+                    textAnchor="end"
+                    fill="#f44336"
+                    fontSize={10}
+                    fontFamily="Georgia, serif"
+                    fontWeight="bold"
+                    pointerEvents="none"
+                  >
+                    Final: 0.0%
+                  </text>
+                  <text
+                    x={pt.x - 14}
+                    y={pt.y - 6}
+                    textAnchor="end"
+                    fill="#8899bb"
+                    fontSize={9}
+                    fontFamily="Georgia, serif"
+                    pointerEvents="none"
+                  >
+                    Did Not Qualify
+                  </text>
+                </g>
+              )
+            }
+            return (
+              <circle
+                key={`dot-${pt.idx}`}
+                data-idx={pt.idx}
+                cx={pt.x}
+                cy={pt.y}
+                r={hoveredIdx === pt.idx ? 7 : 5}
+                fill="#4a9eff"
+                stroke="#0d1530"
+                strokeWidth={2}
+                style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
+                onMouseEnter={() => setHoveredIdx(pt.idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+              />
+            )
+          })}
         </svg>
 
         {/* Dot hover tooltip — positioned with percentages for responsive scaling */}
@@ -315,8 +436,8 @@ export default function ProbabilityTimeline({ timeline }) {
             <div style={{ fontSize: 14, color: '#fff', marginTop: 2 }}>
               {(hoveredPoint.pQualify * 100).toFixed(1)}%
             </div>
-            <div style={{ fontSize: 10, color: '#8899bb', marginTop: 2 }}>
-              {hoveredPoint.modelMode === 'growth' ? 'Growth Model' : 'Survival Model'}
+            <div style={{ fontSize: 10, color: hoveredPoint.modelMode === 'final' ? '#f44336' : '#8899bb', marginTop: 2 }}>
+              {hoveredPoint.modelMode === 'growth' ? 'Growth Model' : hoveredPoint.modelMode === 'final' ? 'LG Official Determination' : 'Survival Model'}
             </div>
             {(() => {
               const d = deltaDisplay(hoveredPoint.delta)

@@ -7,7 +7,6 @@ import DistrictMap from './components/DistrictMap.jsx'
 import VelocityTracker from './components/VelocityTracker.jsx'
 import MonteCarloPanel from './components/MonteCarloPanel.jsx'
 import ProbabilityTimeline from './components/ProbabilityTimeline.jsx'
-import { THRESHOLDS } from './lib/probability.js'
 import './telemetry.js'
 
 // Injected at build time by vite.config.js
@@ -214,13 +213,25 @@ const globalStyle = `
   }
 `
 
+const ARCHIVE_MODAL_KEY = 'dr.archiveModalDismissed.v1'
+const DETERMINATION_PDF = '/UT-LG-Prop4-Determination-FINAL.pdf'
+
 export default function App() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [modelView, setModelView] = useState('primary') // 'primary' | 'growth'
   const [velocityExpanded, setVelocityExpanded] = useState(false)
+  const [archiveModalOpen, setArchiveModalOpen] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try { return window.localStorage.getItem(ARCHIVE_MODAL_KEY) !== '1' } catch { return true }
+  })
   const velocityRef = useRef(null)
+
+  const dismissArchiveModal = () => {
+    setArchiveModalOpen(false)
+    try { window.localStorage.setItem(ARCHIVE_MODAL_KEY, '1') } catch { /* ignore */ }
+  }
 
   useEffect(() => {
     // Inject global styles once
@@ -246,62 +257,135 @@ export default function App() {
       })
   }, [])
 
-  const confirmedDistricts = data ? (data.districts || []).filter(d => {
-    const threshold = THRESHOLDS[d.d] || d.threshold
-    return d.verified >= threshold
-  }).length : 0
-
-  const progressPct = data ? Math.min((data.meta?.totalVerified || 0) / (data.meta?.qualificationThreshold || 140748) * 100, 100) : 0
-
   return (
     <div style={STYLES.app}>
-      {data && (
-        <div style={{
-          background: '#0d1530',
-          borderBottom: '1px solid #1e2a4a',
-          padding: '8px 16px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: `${progressPct}%`,
-            background: 'linear-gradient(90deg, rgba(74,158,255,0.08) 0%, rgba(74,158,255,0.15) 100%)',
-            transition: 'width 1s ease',
-          }} />
-          <div style={{
-            position: 'relative',
-            maxWidth: 1100,
-            margin: '0 auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            flexWrap: 'wrap',
-            fontSize: 12,
-            color: '#8899bb',
-            fontFamily: 'Georgia, serif',
-            letterSpacing: '0.02em',
-          }}>
-            <span style={{ color: '#e8eaf0', fontWeight: 'bold' }}>
-              {(data.meta?.qualificationThreshold || 140748).toLocaleString()} needed
-            </span>
-            <span style={{ color: '#334466' }}>&bull;</span>
-            <span>
-              <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>{confirmedDistricts}</span> of{' '}
-              <span style={{ fontWeight: 'bold' }}>{data.meta?.totalDistricts || 29}</span> districts
-            </span>
-            <span style={{ color: '#334466' }}>&bull;</span>
-            <span>
-              Clerk verification ends{' '}
-              <span style={{ color: '#4a9eff', fontWeight: 'bold' }}>March 9, 2026</span>
-            </span>
+      {archiveModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="archive-modal-title"
+          onClick={dismissArchiveModal}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(4, 7, 16, 0.82)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#0d1530',
+              border: '1px solid #2a3a60',
+              borderTop: '3px solid #fbbf24',
+              borderRadius: 10,
+              maxWidth: 560,
+              width: '100%',
+              padding: '28px 30px 24px',
+              fontFamily: 'Georgia, serif',
+              color: '#e8eaf0',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.7)',
+            }}
+          >
+            <div style={{
+              fontSize: 11, color: '#fbbf24', letterSpacing: '0.18em',
+              textTransform: 'uppercase', marginBottom: 10,
+            }}>
+              Final Determination
+            </div>
+            <h2 id="archive-modal-title" style={{
+              margin: '0 0 14px', fontSize: 24, lineHeight: 1.2, color: '#ffffff',
+            }}>
+              Prop 4 Repeal did not qualify for the ballot.
+            </h2>
+            <p style={{ margin: '0 0 14px', fontSize: 14, lineHeight: 1.7, color: '#c8d0e0' }}>
+              The Elections Division of the Office of the Utah Lieutenant Governor has officially
+              certified that the Repeal of the Independent Redistricting Commission and Standards
+              Act Initiative did not meet the statutory signature requirements and will not appear
+              on the November 2026 ballot.
+            </p>
+            <p style={{ margin: '0 0 18px', fontSize: 13, lineHeight: 1.6, color: '#8899bb' }}>
+              This site is now in archive mode. The data, analysis, and probability model below
+              are preserved as a historical record of the petition effort.
+            </p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <a
+                href={DETERMINATION_PDF}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: '#fbbf24',
+                  color: '#0a0f1e',
+                  fontWeight: 'bold',
+                  fontSize: 13,
+                  letterSpacing: '0.04em',
+                  padding: '9px 18px',
+                  borderRadius: 6,
+                  textDecoration: 'none',
+                  fontFamily: 'Georgia, serif',
+                }}
+              >
+                Read the Official Determination Letter →
+              </a>
+              <button
+                onClick={dismissArchiveModal}
+                style={{
+                  background: 'transparent',
+                  color: '#8899bb',
+                  border: '1px solid #2a3a60',
+                  fontSize: 13,
+                  letterSpacing: '0.04em',
+                  padding: '8px 16px',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontFamily: 'Georgia, serif',
+                }}
+              >
+                View archived site
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      <div style={{
+        background: '#1a1400',
+        borderBottom: '1px solid #3a2500',
+        padding: '10px 16px',
+      }}>
+        <div style={{
+          maxWidth: 1100,
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          flexWrap: 'wrap',
+          fontSize: 12,
+          color: '#c8a85a',
+          fontFamily: 'Georgia, serif',
+          letterSpacing: '0.02em',
+          lineHeight: 1.5,
+          textAlign: 'center',
+        }}>
+          <span style={{ color: '#fbbf24', fontWeight: 'bold', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            Archived
+          </span>
+          <span style={{ color: '#5a4500' }}>&bull;</span>
+          <span>
+            Certified by the Utah Lt. Governor's Elections Division — petition did not qualify for the November 2026 ballot.
+          </span>
+          <a
+            href={DETERMINATION_PDF}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#fbbf24', fontWeight: 'bold', textDecoration: 'underline' }}
+          >
+            Read the Official Determination Letter
+          </a>
+        </div>
+      </div>
 
       <header style={STYLES.header}>
         <div style={STYLES.headerInner}>
@@ -572,6 +656,26 @@ export default function App() {
       </main>
 
       <footer style={STYLES.footer}>
+        <p style={{
+          margin: '0 0 12px',
+          padding: '12px 16px',
+          background: '#0d0a00',
+          border: '1px solid #3a2500',
+          borderRadius: 6,
+          color: '#c8a85a',
+          fontSize: 12,
+          lineHeight: 1.7,
+          maxWidth: 720,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}>
+          <strong style={{ color: '#fbbf24' }}>This site is now in archive mode</strong> and remains
+          online only as a historical record of the Prop 4 repeal petition effort. No further data
+          updates will be published. Questions or corrections:{' '}
+          <a href="mailto:tater@t8rsk8s.io" style={{ ...STYLES.footerLink, color: '#fbbf24' }}>
+            tater@t8rsk8s.io
+          </a>.
+        </p>
         <p style={{ margin: '0 0 4px' }}>
           Data sourced from{' '}
           <a

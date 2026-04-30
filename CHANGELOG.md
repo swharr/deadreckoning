@@ -6,8 +6,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- Archive modal and persistent archive banner announcing the Utah Lt. Governor's Elections Division final determination that the petition did not qualify for the November 2026 ballot
+- Link to the official determination letter PDF (`public/UT-LG-Prop4-Determination-FINAL.pdf`)
+- Footer archive notice with `tater@t8rsk8s.io` contact for questions
+- Final probability timeline entry for 2026-04-30 (`pQualify: 0.0`, `modelMode: "final"`) with red marker, dashed guide, and "Did Not Qualify" annotation on the Probability Over Time chart
+- Mar 9 teal dashed vertical guide on the Probability Over Time chart marking when the signature removal request window opened (matches the Feb 15 and Apr 30 marker idiom)
+- `snapshot.signatureFlow.alltimeRejected: 60296` field separating clerk-side validation rejections from formal removal requests
+- Final-determination callout linking to the LG letter at the bottom of the Statewide Threshold timeline
+
 ### Changed
+- Statewide Threshold card: title now reads "Signature Threshold Reached" (the 140,748 statewide bar was cleared; the petition failed the 26-of-29 district rule)
+- Ballot Timeline now displays the archive end-state: all four phases hardcoded as completed/determined, with a red ✗ LG's Official Determination row replacing the prior "LG certifies for November ballot" row, plus a 🛑 + "0 days left" indicator on the closed signature removal window
+- Signature Flow "All time" section split into "Rejected (clerk)" and "Removed (signer)" rows with explanatory subtitles; "Removal rate" replaced with combined "Attrition rate" plus per-category breakdown
+- `snapshot.signatureFlow.alltimeRemovals` corrected from `10524` to `10716` (final post-determination value)
+- Site is now in archive mode — preserved as a historical record of the petition effort
+- Daily data pipeline cron disabled in `.github/workflows/fetch.yml`; workflow remains triggerable manually
+- Replaced the live progress banner with an archive banner; removed unused `THRESHOLDS` import and `progressPct`/`confirmedDistricts` calcs
 - Scraper now falls back to direct wp-content xlsx URL after LG office removed download link from petition page (Strategy 3)
+
+### Removed
+- "Removal window open" amber callout from the Statewide Threshold card (window has closed)
+- Date-driven phase logic from the ballot timeline (replaced with hardcoded archive state)
 
 ### Security
 - vite 7.3.1 → 8.0.9 — arbitrary file read via WebSocket (HIGH), `server.fs.deny` bypass (HIGH), path traversal in `.map` handling (MEDIUM)

@@ -4,15 +4,13 @@ name: Data Pipeline
 # After merging the data PR, this workflow dispatches deploy.yml explicitly
 # (GITHUB_TOKEN merges don't trigger on:push workflows).
 #
-# Runs Monday–Friday at 16:05 UTC (9:05am MT).
-# The LG office only publishes new data on business days, so weekend runs are
-# skipped entirely. On any business-day run where the file hasn't changed
-# (same SHA-256 as latest.xlsx), the workflow exits cleanly with a
-# "No change in the Data" message and no downstream steps are executed.
+# ARCHIVE MODE (2026-04-30): The Utah Lt. Governor's Elections Division
+# certified that the petition did not qualify. The site is now archived and
+# the daily cron has been disabled. The workflow can still be triggered
+# manually via workflow_dispatch or by dropping a file in data/manual/ if a
+# late correction or backfill is ever needed.
 
 on:
-  schedule:
-    - cron: '5 16 * * 1-5'    # 9:05am MT, Monday–Friday only
   workflow_dispatch:             # manual trigger from GitHub UI or CLI
   push:
     branches:

@@ -586,9 +586,10 @@
     },
     {
       "date": "2026-04-30",
-      "pQualify": 0.0146,
-      "modelMode": "survival",
-      "delta": 0.0
+      "pQualify": 0.0,
+      "modelMode": "final",
+      "delta": -0.0146,
+      "note": "LG official determination — did not qualify"
     }
   ],
   "districts": [
@@ -1562,7 +1563,8 @@
       "intervalRemovals": 0,
       "intervalGross": 0,
       "alltimeAdded": 125795,
-      "alltimeRemovals": 10543,
+      "alltimeRemovals": 10716,
+      "alltimeRejected": 60296,
       "districtRemovals": []
     },
     "anomalies": [

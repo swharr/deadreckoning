@@ -164,6 +164,7 @@ function SignatureFlowCard({ snapshot, districts }) {
   const intervalGross = flow.intervalGross ?? intervalNet
   const alltimeAdded = flow.alltimeAdded ?? 0
   const alltimeRemovals = flow.alltimeRemovals ?? 0
+  const alltimeRejected = flow.alltimeRejected ?? 0
   const districtRemovals = flow.districtRemovals || []
 
   const flowRow = {
@@ -219,16 +220,33 @@ function SignatureFlowCard({ snapshot, districts }) {
           </span>
         </div>
         <div style={flowRow}>
-          <span style={{ color: '#8899bb', fontSize: 13 }}>Total removed</span>
-          <span style={{ color: alltimeRemovals > 0 ? '#f44336' : '#556688', fontWeight: 'bold', fontSize: 15 }}>
+          <div>
+            <span style={{ color: '#8899bb', fontSize: 13 }}>Rejected (clerk)</span>
+            <div style={{ fontSize: 10, color: '#556688' }}>not registered, address mismatch, unreadable, signature issue</div>
+          </div>
+          <span style={{ color: alltimeRejected > 0 ? '#f44336' : '#556688', fontWeight: 'bold', fontSize: 15 }}>
+            {alltimeRejected > 0 ? `-${alltimeRejected.toLocaleString()}` : '0'}
+          </span>
+        </div>
+        <div style={flowRow}>
+          <div>
+            <span style={{ color: '#8899bb', fontSize: 13 }}>Removed (signer)</span>
+            <div style={{ fontSize: 10, color: '#556688' }}>withdrawal request or duplicate signing</div>
+          </div>
+          <span style={{ color: alltimeRemovals > 0 ? '#ff7043' : '#556688', fontWeight: 'bold', fontSize: 15 }}>
             {alltimeRemovals > 0 ? `-${alltimeRemovals.toLocaleString()}` : '0'}
           </span>
         </div>
-        {alltimeRemovals > 0 && alltimeAdded > 0 && (
+        {(alltimeRejected > 0 || alltimeRemovals > 0) && alltimeAdded > 0 && (
           <div style={{ ...flowRow, borderBottom: 'none' }}>
-            <span style={{ color: '#8899bb', fontSize: 13 }}>Removal rate</span>
+            <div>
+              <span style={{ color: '#8899bb', fontSize: 13 }}>Attrition rate</span>
+              <div style={{ fontSize: 10, color: '#556688' }}>
+                {((alltimeRejected / alltimeAdded) * 100).toFixed(2)}% clerk rejection · {((alltimeRemovals / alltimeAdded) * 100).toFixed(2)}% signer removal
+              </div>
+            </div>
             <span style={{ color: '#ff7043', fontWeight: 'bold', fontSize: 15 }}>
-              {((alltimeRemovals / alltimeAdded) * 100).toFixed(2)}%
+              {(((alltimeRejected + alltimeRemovals) / alltimeAdded) * 100).toFixed(2)}%
             </span>
           </div>
         )}
@@ -760,7 +778,7 @@ function MethodologyPanel({ meta }) {
 // ---------------------------------------------------------------------------
 // Statewide Threshold Projection card
 // ---------------------------------------------------------------------------
-function StatewideProjectionCard({ overall, meta }) {
+function StatewideProjectionCard({ overall }) {
   const proj = overall?.statewideProjection
   if (!proj) return null
 
@@ -779,26 +797,6 @@ function StatewideProjectionCard({ overall, meta }) {
   const pPct = Math.round(pReachTarget * 100)
   const pColor = pPct >= 70 ? '#4caf50' : pPct >= 40 ? '#ffc107' : '#f44336'
   const barPct = Math.min(pctComplete * 100, 100)
-  // Clerk verification window progress (Feb 15 → Mar 9)
-  const windowStart = new Date('2026-02-15T00:00:00')
-  const windowEnd   = new Date('2026-03-09T00:00:00')
-  const today       = new Date()
-  today.setHours(0, 0, 0, 0)
-  const bizDaysBetween = (a, b) => {
-    let count = 0
-    const d = new Date(a)
-    while (d <= b) {
-      const day = d.getDay()
-      if (day !== 0 && day !== 6) count++
-      d.setDate(d.getDate() + 1)
-    }
-    return count
-  }
-  const clamped = today < windowStart ? windowStart : today > windowEnd ? windowEnd : today
-  const remainingBizDays = bizDaysBetween(
-    clamped < windowEnd ? new Date(clamped.getTime() + 86400000) : windowEnd,
-    windowEnd,
-  )
 
   // Format crossing date nicely
   let crossingLabel = null
@@ -813,14 +811,18 @@ function StatewideProjectionCard({ overall, meta }) {
 
       {alreadyMet ? (
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 28, fontWeight: 'bold', color: '#4caf50', lineHeight: 1.2 }}>
-            Target Reached!
+          <div style={{ fontSize: 26, fontWeight: 'bold', color: '#4caf50', lineHeight: 1.2 }}>
+            Signature Threshold Reached
           </div>
           <div style={{ fontSize: 13, color: '#667799', marginTop: 4 }}>
             {current.toLocaleString()} verified of {target.toLocaleString()} needed
           </div>
           <div style={{ fontSize: 13, color: '#4caf50', marginTop: 4 }}>
             +{(current - target).toLocaleString()} above threshold
+          </div>
+          <div style={{ fontSize: 12, color: '#8899bb', marginTop: 8, lineHeight: 1.6 }}>
+            Statewide count cleared the bar, but the petition did not satisfy the
+            26-of-29 district rule.
           </div>
         </div>
       ) : (
@@ -900,60 +902,16 @@ function StatewideProjectionCard({ overall, meta }) {
         </>
       )}
 
-      {/* Ballot Timeline — unified phases */}
+      {/* Ballot Timeline — archive mode: all phases ended, LG determination = failed */}
       {(() => {
-        const submissionEnd = new Date('2026-02-15T00:00:00')
-        const clerkEnd      = new Date('2026-03-09T00:00:00')
-        const removalEnd    = new Date('2026-04-23T00:00:00')
-        const ballotDate    = new Date('2026-04-30T00:00:00')
-        const asOfIso = `${meta?.lastUpdated || '2026-03-09'}T00:00:00`
-        const now = new Date(asOfIso)
-        now.setHours(0, 0, 0, 0)
-
-        // Business-day counter between two dates (inclusive of both)
-        const bizDaysBtwn = (a, b) => {
-          let count = 0
-          const d = new Date(a)
-          while (d <= b) {
-            const day = d.getDay()
-            if (day !== 0 && day !== 6) count++
-            d.setDate(d.getDate() + 1)
-          }
-          return count
-        }
-
-        // Phase statuses
-        const submissionDone = now > submissionEnd
-        const clerkDone      = now > clerkEnd
-        const removalDone    = now > removalEnd
-
-        // Removal window progress
-        const removalTotalBiz   = bizDaysBtwn(clerkEnd, removalEnd)
-        const removalClampedNow = now < clerkEnd ? clerkEnd : now > removalEnd ? removalEnd : now
-        const removalElapsedBiz = bizDaysBtwn(clerkEnd, removalClampedNow)
-        const removalRemainingBiz = removalDone ? 0 : bizDaysBtwn(
-          new Date(Math.max(now.getTime(), clerkEnd.getTime()) + 86400000),
-          removalEnd,
-        )
-        const removalPct = removalTotalBiz > 0 ? Math.min((removalElapsedBiz / removalTotalBiz) * 100, 100) : 0
-
-        // The overall timeline runs Feb 15 → Apr 30
-        const totalSpan = ballotDate.getTime() - submissionEnd.getTime()
-        const clerkPct   = ((clerkEnd.getTime()   - submissionEnd.getTime()) / totalSpan) * 100
-        const removalPctOfTotal = ((removalEnd.getTime() - clerkEnd.getTime()) / totalSpan) * 100
-        const ballotPctOfTotal  = 100 - clerkPct - removalPctOfTotal
-
-        // Where is "now" on the overall bar?
-        const nowPct = Math.min(Math.max(((now.getTime() - submissionEnd.getTime()) / totalSpan) * 100, 0), 100)
-
-        const phaseStyle = (done, active) => ({
+        const phaseStyle = (color) => ({
           fontSize: 12,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '8px 0',
           borderBottom: '1px solid #131c33',
-          color: done ? '#4caf50' : active ? '#e8eaf0' : '#445577',
+          color,
         })
 
         return (
@@ -962,7 +920,7 @@ function StatewideProjectionCard({ overall, meta }) {
               Ballot Timeline
             </div>
 
-            {/* Overall timeline bar */}
+            {/* Overall timeline bar — three completed segments + final determination */}
             <div style={{ position: 'relative', marginBottom: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#445577', marginBottom: 4 }}>
                 <span>Feb 15</span>
@@ -970,119 +928,60 @@ function StatewideProjectionCard({ overall, meta }) {
                 <span>Apr 23</span>
                 <span>Apr 30</span>
               </div>
-              <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
-                {/* Clerk verification segment */}
-                <div style={{
-                  width: `${clerkPct}%`,
-                  background: clerkDone ? '#4caf50' : '#4a9eff',
-                  transition: 'width 0.3s ease',
-                }} />
-                {/* Removal window segment */}
-                <div style={{
-                  width: `${removalPctOfTotal}%`,
-                  background: removalDone ? '#4caf50' : '#1a2040',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}>
-                  {/* Fill within removal segment */}
-                  {!removalDone && clerkDone && (
-                    <div style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      height: '100%',
-                      width: `${removalPct}%`,
-                      background: '#ff7043',
-                      transition: 'width 0.3s ease',
-                    }} />
-                  )}
-                  {removalDone && (
-                    <div style={{ width: '100%', height: '100%', background: '#4caf50' }} />
-                  )}
-                </div>
-                {/* Ballot confirmation segment */}
-                <div style={{
-                  width: `${ballotPctOfTotal}%`,
-                  background: removalDone ? '#4a9eff' : '#0d1530',
-                  borderLeft: '1px solid #1e2a4a',
-                }} />
+              <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ flex: 22, background: '#4caf50' }} />
+                <div style={{ flex: 45, background: '#4caf50', borderLeft: '1px solid #0a2e15' }} />
+                <div style={{ flex: 33, background: '#f44336', borderLeft: '1px solid #0a2e15' }} />
               </div>
-              {/* "Now" marker */}
-              {nowPct > 0 && nowPct < 100 && (
-                <div style={{
-                  position: 'absolute',
-                  left: `${nowPct}%`,
-                  bottom: 0,
-                  transform: 'translateX(-50%)',
-                  width: 2,
-                  height: 8,
-                  background: '#e8eaf0',
-                  borderRadius: 1,
-                }} />
-              )}
             </div>
 
             {/* Phase checklist */}
             <div style={{ marginTop: 10 }}>
-              <div style={phaseStyle(submissionDone, false)}>
-                <span>{submissionDone ? '✓' : '○'} Signature submission</span>
-                <span style={{ fontSize: 11, color: '#556688' }}>Ended Feb 15</span>
+              <div style={phaseStyle('#4caf50')}>
+                <span>✓ Signature submission</span>
+                <span style={{ fontSize: 11, color: '#4caf50' }}>Ended Feb 15</span>
               </div>
-              <div style={phaseStyle(clerkDone, !clerkDone && submissionDone)}>
-                <span>{clerkDone ? '✓' : '◉'} Clerk verification</span>
-                <span style={{ fontSize: 11, color: clerkDone ? '#4caf50' : '#4a9eff' }}>
-                  {clerkDone ? 'Ended Mar 9' : `${remainingBizDays} biz days left`}
+              <div style={phaseStyle('#4caf50')}>
+                <span>✓ Clerk verification</span>
+                <span style={{ fontSize: 11, color: '#4caf50' }}>Ended Mar 9</span>
+              </div>
+              <div style={phaseStyle('#4caf50')}>
+                <span>✓ Signature removal window</span>
+                <span style={{ fontSize: 11, color: '#4caf50', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Ended Apr 23
+                  <span title="Window closed — 0 days left" style={{ fontSize: 13 }}>🛑</span>
+                  <span style={{ color: '#8899bb', fontWeight: 'normal' }}>0 days left</span>
                 </span>
               </div>
-              <div style={phaseStyle(removalDone, !removalDone && clerkDone)}>
-                <span>{removalDone ? '✓' : clerkDone ? '◉' : '○'} Signature removal window</span>
-                <span style={{ fontSize: 11, color: removalDone ? '#4caf50' : clerkDone ? '#ff7043' : '#445577', fontWeight: clerkDone && !removalDone ? 'bold' : 'normal' }}>
-                  {removalDone
-                    ? 'Ended Apr 23'
-                    : clerkDone
-                      ? <>{removalRemainingBiz} <span style={{ fontWeight: 'normal', color: '#8899bb' }}>business days left</span></>
-                      : 'Apr 23'}
-                </span>
-              </div>
-              <div style={{ ...phaseStyle(false, removalDone), borderBottom: 'none' }}>
-                <span>{removalDone ? '◉' : '○'} LG certifies for November ballot</span>
-                <span style={{ fontSize: 11, color: removalDone ? '#4a9eff' : '#445577' }}>Apr 30</span>
+              <div style={{ ...phaseStyle('#f44336'), borderBottom: 'none' }}>
+                <span style={{ fontWeight: 'bold' }}>✗ LG's Official Determination</span>
+                <span style={{ fontSize: 11, color: '#f44336', fontWeight: 'bold' }}>Did Not Qualify · Apr 30</span>
               </div>
             </div>
 
-            {/* Active phase callout */}
-            {clerkDone && !removalDone && (
-              <div style={{
-                marginTop: 10,
-                background: '#1a1000',
-                border: '1px solid #3d2800',
-                borderRadius: 6,
-                padding: '10px 14px',
-                fontSize: 12,
-                color: '#cc8833',
-                lineHeight: 1.6,
-              }}>
-                <strong style={{ color: '#ff7043' }}>Removal window open.</strong>{' '}
-                Signers can remove their names through Apr 23.
-                If the petition stays above {target.toLocaleString()} statewide
-                and meets 26/29 districts, it goes on the ballot Apr 30.
-              </div>
-            )}
-            {!clerkDone && (
-              <div style={{
-                marginTop: 10,
-                background: '#001020',
-                border: '1px solid #1a3050',
-                borderRadius: 6,
-                padding: '10px 14px',
-                fontSize: 12,
-                color: '#6699bb',
-                lineHeight: 1.6,
-              }}>
-                County clerks are validating signatures through <strong style={{ color: '#4a9eff' }}>Mar 9</strong>.
-                Counts may decrease as invalid signatures are removed.
-              </div>
-            )}
+            {/* Final-determination callout */}
+            <div style={{
+              marginTop: 10,
+              background: '#1a0a0a',
+              border: '1px solid #7f1d1d',
+              borderRadius: 6,
+              padding: '10px 14px',
+              fontSize: 12,
+              color: '#fca5a5',
+              lineHeight: 1.6,
+            }}>
+              <strong style={{ color: '#f44336' }}>Petition did not qualify.</strong>{' '}
+              The Lt. Governor's Elections Division certified that the {target.toLocaleString()}-signature
+              statewide bar was cleared but the 26-of-29 district rule was not satisfied.{' '}
+              <a
+                href="/UT-LG-Prop4-Determination-FINAL.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#fbbf24', fontWeight: 'bold' }}
+              >
+                Read the determination letter →
+              </a>
+            </div>
           </div>
         )
       })()}
@@ -1198,7 +1097,6 @@ export default function SnapshotBoxes({ snapshot, meta, districts, overall, mode
         />
         <StatewideProjectionCard
           overall={overall}
-          meta={meta}
         />
         <PredictionCard
           snapshot={snapshot}
